@@ -65,11 +65,9 @@ function love.load()
 
    world = {
       children={
-         {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200}},
-         {type="circle", pos={x=500, y=100, z=0}, data={radius=200}},
+         {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
+         {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
          {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
-
-
       },
    }
 
@@ -139,7 +137,7 @@ end
 function love.draw()
    --love.graphics.print("press <O> to open the library (drop the file on the stage), <S> to save the current stage")
    love.graphics.setColor(255,255,255)
-   love.graphics.print("camera "..camera.x..", "..camera.y.." zoom:"..camera.scale)
+   love.graphics.print("camera "..math.floor(camera.x)..", "..math.floor(camera.y)..","..tonumber(string.format("%.3f", camera.scale)))
    camera:attach()
    for i=1, #world.children do
       for j=1, #world.children[i].triangles do
