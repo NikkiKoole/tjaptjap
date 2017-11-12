@@ -5,37 +5,44 @@ function mode:init()
    self.touches = {}
 end
 
+function mode:pointerpressed(x, y)
+   local wx, wy = camera:worldCoords(x,y)
+   for i, o in ipairs(world.children) do
+      local layer_speed = 1.0 + o.pos.z
+      local cdx = camera.x - camera.x * layer_speed
+      local cdy = camera.y - camera.y * layer_speed
+
+      local hit = false
+      if o.type == "circle" then
+         hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, o.data.radius)
+      end
+      if o.type == "star" then
+         hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, math.max(o.data.r1, o.data.r2))
+      end
+      if o.type=="rect" then
+         hit = utils.pointInRect2(wx, wy, o.pos.x + cdx,   o.pos.y + cdy, o.data.w, o.data.h )
+      end
+
+      if (hit) then
+         self.touches={}
+         Signal.emit("switch-state", "drag-item", world.children[i])
+      end
+   end
+end
+
+
+function mode:mousepressed( x, y, button, istouch )
+   if (not istouch) then
+      self:pointerpressed(x, y)
+   end
+end
+
 function mode:touchpressed( id, x, y, dx, dy, pressure )
    table.insert(self.touches,
                 {id=id, x=x, y=y, dx=dx, dy=dy, pressure=pressure})
 
    if #self.touches == 1 then
-      local wx, wy = camera:worldCoords(x,y)
-
-      for i, o in ipairs(world.children) do
-         local layer_speed = 1.0 + o.pos.z
-         local cdx = camera.x - camera.x * layer_speed
-         local cdy = camera.y - camera.y * layer_speed
-
-         local hit = false
-         if o.type == "circle" then
-            hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, o.data.radius)
-         end
-         if o.type == "star" then
-            hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, math.max(o.data.r1, o.data.r2))
-         end
-         if o.type=="rect" then
-            hit = utils.pointInRect2(wx, wy, o.pos.x + cdx,   o.pos.y + cdy, o.data.w, o.data.h )
-         end
-
-         if (hit) then
-            print("drag item")
-            self.touches={}
-            Signal.emit("switch-state", "drag-item", world.children[i])
-         end
-
-      end
-
+      self:pointerpressed(x, y)
    elseif #self.touches == 2 then
 
       self.initial_distance = utils.distance(self.touches[1].x,
@@ -72,12 +79,12 @@ function mode:touchmoved( id, x, y, dx, dy, pressure )
       self.touches[index].dy = dy
       self.touches[index].pressure = pressure
    end
+
    if #self.touches == 1 then
       local c,s = math.cos(-camera.rot), math.sin(-camera.rot)
       dx,dy = c*dx - s*dy, s*dx + c*dy
       self.lastdelta = {x=dx, y=dy}
       camera:move(-dx / camera.scale, -dy / camera.scale)
-
    elseif #self.touches == 2 then
       self.lastdelta = {x=0, y=0}
 
@@ -152,16 +159,5 @@ function clamp_camera()
    camera.x = x
    camera.y = y
 end
-
-
-
-
-
-
-
---function mode:draw()
-   --print("drawing ", world)
---end
-
 
 return mode

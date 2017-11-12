@@ -1,7 +1,5 @@
 local utils = require "utils"
-
 local mode ={}
-
 
 function rotatePoint(x,y,cx,cy,theta)
    if not theta then return x,y end
@@ -80,12 +78,10 @@ end
 function mode:enter(from,data)
    self.child = data
    mode:updateHandles()
-
 end
 
-function mode:touchpressed( id, x, y, dx, dy, pressure )
-   table.insert(self.touches,
-                {id=id, x=x, y=y, dx=dx, dy=dy, pressure=pressure})
+
+function mode:pointerpressed(x,y,id)
    local found = false
 
    for i=1, #self.handles do
@@ -140,17 +136,13 @@ function mode:touchpressed( id, x, y, dx, dy, pressure )
          self.child.data.steps = self.child.data.steps + 1
          self.child.dirty = true
          mode:updateHandles()
-
       end
-
-
    end
    if o.type == "star" then
       hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, math.max(o.data.r1, o.data.r2))
       if hit then found = true end
       -- some ui crap, note the using of screencoords instead of world coords
       hit = utils.pointInRect(x,y,10,50,200,200)
-      print("pointin rect 10,50,200,200 ?", hit)
       if hit then found = true end
 
       if pointInRect(x,y,10,50,50,50) then
@@ -174,13 +166,26 @@ function mode:touchpressed( id, x, y, dx, dy, pressure )
    end
 
 
-   if found == false then
+   if (found == false) then
       Signal.emit("switch-state", "stage")
    end
 
 end
 
-function mode:touchmoved(id, x, y, dx, dy, pressure)
+function mode:mousepressed( x, y, button, istouch )
+   if (not istouch) then
+      self:pointerpressed(x, y,'mouse')
+   end
+end
+
+
+function mode:touchpressed( id, x, y, dx, dy, pressure )
+   table.insert(self.touches, {id=id, x=x, y=y, dx=dx, dy=dy, pressure=pressure})
+   self:pointerpressed(x,y,id)
+end
+
+
+function mode:pointermoved(x, y, id)
    if #self.dragging then
       for i=1, #self.dragging do
          local it = self.dragging[i]
@@ -209,7 +214,6 @@ function mode:touchmoved(id, x, y, dx, dy, pressure)
                   end
                end
 
-
                self.child.dirty = true
                mode:updateHandles()
             end
@@ -224,7 +228,6 @@ function mode:touchmoved(id, x, y, dx, dy, pressure)
                mode:updateHandles()
             end
             if it.h.type == "rect-radius" then
-               -- there is an issue where if you resize a rounced rectangle the radii could be too big.
                local dx = nx - (self.child.pos.x+self.child.data.w/2)
                local dy = ny - (self.child.pos.y+self.child.data.h/2)
                local w, h = rotatePoint(dx, dy, 0,0, -self.child.rotation)
@@ -257,6 +260,23 @@ function mode:touchmoved(id, x, y, dx, dy, pressure)
          end
       end
    end
+
+end
+
+
+function mode:mousemoved(x,y,dx,dy, istouch)
+   if (not istouch) then
+      self:pointermoved(x,y,'mouse')
+   end
+end
+
+function mode:touchmoved(id, x, y, dx, dy, pressure)
+   self:pointermoved(x,y,id)
+end
+
+function mode:mousereleased()
+
+   self.dragging = {}
 end
 
 

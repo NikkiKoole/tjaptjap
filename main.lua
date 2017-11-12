@@ -1,26 +1,20 @@
 
 --[[
 
-   The editor lets you move around polygons on a stage.
-   You can also add and remove new polygons
-   The individual polygons can be modified too.
+TODO:
 
-   Modes:
-   - stage mode, here you drag around the camera on the stage, alos maybe move around items
-   - item mode, here you edit the individual properties of an item
-
-   an item looks like
-   {type="rect/circle/group/rounded/star/etc", pos={x,y,z}}
-
-
-
+   - make it work with a mouse
+   - do some delta offsetting when starting drag a ui handle
+   - move as much as i can into util file
+   - extract UI code into something a bit more organized
+   - extract code into shape classes
+   - add new shapes
 ]]--
 
 Signal = require 'vendor.signal'
 Gamestate = require "vendor.gamestate"
 Camera = require "vendor.camera"
 local inspect = require "vendor.inspect"
---local bitser = require 'vendor.bitser'
 
 stageMode = require "modes.stage"
 dragMode = require "modes.drag_item"
@@ -30,13 +24,6 @@ local utils = require "utils"
 local shapes = require "shapes"
 poly = require 'poly'
 
-
-
--- function rotatePoint(x,y,cx,cy,theta)
---    local px = math.cos(theta) * (x-cx) - math.sin(theta) * (y-cy) + cx
---    local py = math.sin(theta) * (x-cx) + math.cos(theta) * (y-cy) + cy
---    return px,py
--- end
 
 function rotateShape(cx, cy, shape, theta)
    local result = {}
