@@ -2,7 +2,6 @@
 --[[
 
 TODO:
-   - move as much as i can into util file
    - extract UI code into something a bit more organized
    - extract code into shape classes
    - add new shapes
@@ -22,24 +21,6 @@ local shapes = require "shapes"
 poly = require 'poly'
 
 
-function rotateShape(cx, cy, shape, theta)
-   local result = {}
-
-   local costheta = math.cos(theta)
-   local sintheta = math.sin(theta)
-   local x,y,nx,ny
-
-   for i=1, #shape, 2 do
-      x = shape[i +0]
-      y = shape[i+1]
-      nx = costheta * (x-cx) - sintheta * (y-cy) + cx
-      ny = sintheta * (x-cx) + costheta * (y-cy) + cy
-      result[i+0] = nx
-      result[i+1] = ny
-   end
-
-   return result
-end
 
 
 
@@ -64,7 +45,7 @@ function love.load()
       local c = world.children[i]
       local shape = shapes.makeShape(c)
       if c.rotation then
-         shape = rotateShape(c.pos.x, c.pos.y, shape, c.rotation)
+         shape = shapes.rotateShape(c.pos.x, c.pos.y, shape, c.rotation)
       end
 
       c.triangles = poly.triangulate(shape)
@@ -110,7 +91,7 @@ function love.update(dt)
          local c = world.children[i]
          local shape = shapes.makeShape(c)
          if c.rotation then
-            shape = rotateShape(c.pos.x, c.pos.y, shape, c.rotation)
+            shape = shapes.rotateShape(c.pos.x, c.pos.y, shape, c.rotation)
          end
          c.triangles = poly.triangulate(shape)
       end

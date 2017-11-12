@@ -69,6 +69,13 @@ function mode:touchreleased( id, x, y, dx, dy, pressure )
    table.remove(self.touches, index)
 end
 
+function mode:wheelmoved(x,y)
+   self.lastdelta = {x=0, y=0}
+   local new_center = {x=love.mouse.getX(), y= love.mouse.getY()}
+   local scale_diff = (y/10)
+   zoom(scale_diff, new_center)
+end
+
 function mode:touchmoved( id, x, y, dx, dy, pressure )
    local index = utils.tablefind_id(self.touches, tostring(id))
 
@@ -94,7 +101,7 @@ function mode:touchmoved( id, x, y, dx, dy, pressure )
       local d = utils.distance(self.touches[1].x, self.touches[1].y,
                                self.touches[2].x, self.touches[2].y)
       local scale_diff = (d - self.initial_distance) / self.initial_distance
-      --local mul = d / self.initial_distance
+
       zoom(scale_diff, new_center)
       self.initial_distance = d
 
@@ -127,11 +134,6 @@ function zoom(scaleDiff, center)
 end
 
 
-function clamp(v, min, max)
-   if v < min then return min end
-   if v > max then return max end
-   return v
-end
 
 function clamp_camera()
    -- somehow i need to take screensize more into account.
@@ -145,15 +147,15 @@ function clamp_camera()
    local minzoom = math.max(minzoomX, minzoomY)
 
    if (clamp_style == "fancy") then
-      zoom = clamp(camera.scale, minzoom, math.huge)
+      zoom = utils.clamp(camera.scale, minzoom, math.huge)
       camera.scale = zoom
       offsetX,offsetY = (w/camera.scale)/2, (h/camera.scale)/2
-      x = clamp(camera.x, bounds.tl.x + offsetX, bounds.br.x - offsetX)
-      y = clamp(camera.y, bounds.tl.y + offsetY, bounds.br.y - offsetY)
+      x = utils.clamp(camera.x, bounds.tl.x + offsetX, bounds.br.x - offsetX)
+      y = utils.clamp(camera.y, bounds.tl.y + offsetY, bounds.br.y - offsetY)
    else
       -- less fancy clamping
-      x = clamp(camera.x, bounds.tl.x, bounds.br.x)
-      y = clamp(camera.y, bounds.tl.y, bounds.br.y)
+      x = utils.clamp(camera.x, bounds.tl.x, bounds.br.x)
+      y = utils.clamp(camera.y, bounds.tl.y, bounds.br.y)
    end
 
    camera.x = x

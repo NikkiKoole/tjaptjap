@@ -1,12 +1,6 @@
 local utils = require "utils"
 local mode ={}
 
-function rotatePoint(x,y,cx,cy,theta)
-   if not theta then return x,y end
-   local px = math.cos(theta) * (x-cx) - math.sin(theta) * (y-cy) + cx
-   local py = math.sin(theta) * (x-cx) + math.cos(theta) * (y-cy) + cy
-   return px,py
-end
 
 function mode:update(dt)
 end
@@ -19,9 +13,9 @@ end
 function mode:updateHandles()
    local child = self.child
    if (child.type == "rect") then
-      local rx1,ry1    = rotatePoint(child.pos.x + child.data.w/2, child.pos.y, child.pos.x, child.pos.y, child.rotation)
-      local rx2, ry2 = rotatePoint(child.pos.x + child.data.w/2, child.pos.y + child.data.h/2, child.pos.x, child.pos.y, child.rotation)
-      local rx3, ry3 = rotatePoint(child.pos.x + child.data.w/2 - child.data.radius, child.pos.y - child.data.h/2, child.pos.x, child.pos.y, child.rotation)
+      local rx1,ry1    = utils.rotatePoint(child.pos.x + child.data.w/2, child.pos.y, child.pos.x, child.pos.y, child.rotation)
+      local rx2, ry2 = utils.rotatePoint(child.pos.x + child.data.w/2, child.pos.y + child.data.h/2, child.pos.x, child.pos.y, child.rotation)
+      local rx3, ry3 = utils.rotatePoint(child.pos.x + child.data.w/2 - child.data.radius, child.pos.y - child.data.h/2, child.pos.x, child.pos.y, child.rotation)
 
       self.handles = {
          {
@@ -52,8 +46,8 @@ function mode:updateHandles()
       }
    elseif (child.type == "star") then
       local a = (math.pi*2)/child.data.sides
-      local rx,ry      = rotatePoint(child.pos.x + child.data.r1, child.pos.y, child.pos.x, child.pos.y, child.data.a1)
-      local rx2,ry2    = rotatePoint(child.pos.x + child.data.r2, child.pos.y, child.pos.x, child.pos.y, child.data.a2)
+      local rx,ry      = utils.rotatePoint(child.pos.x + child.data.r1, child.pos.y, child.pos.x, child.pos.y, child.data.a1)
+      local rx2,ry2    = utils.rotatePoint(child.pos.x + child.data.r2, child.pos.y, child.pos.x, child.pos.y, child.data.a2)
 
       self.handles = {
          {
@@ -198,7 +192,7 @@ function mode:pointermoved(x, y, id)
                -- TODO this resize acts in both ways, you would rather want a thing thats stuck to its top left origin
                local dx = nx - self.child.pos.x
                local dy = ny - self.child.pos.y
-               local w, h = rotatePoint(dx*2, dy*2, 0,0, -self.child.rotation)
+               local w, h = utils.rotatePoint(dx*2, dy*2, 0,0, -self.child.rotation)
                self.child.data.w = math.max(math.abs(w), 0)
                self.child.data.h = math.max(math.abs(h), 0)
 
@@ -230,7 +224,7 @@ function mode:pointermoved(x, y, id)
             if it.h.type == "rect-radius" then
                local dx = nx - (self.child.pos.x+self.child.data.w/2)
                local dy = ny - (self.child.pos.y+self.child.data.h/2)
-               local w, h = rotatePoint(dx, dy, 0,0, -self.child.rotation)
+               local w, h = utils.rotatePoint(dx, dy, 0,0, -self.child.rotation)
                local r = w*-1
                r = math.max(0, r)
                r = math.min(self.child.data.w/2, r)

@@ -170,6 +170,27 @@ function makeShape(meta)
    return result
 end
 
+function rotateShape(cx, cy, shape, theta)
+   local result = {}
+
+   local costheta = math.cos(theta)
+   local sintheta = math.sin(theta)
+   local x,y,nx,ny
+
+   for i=1, #shape, 2 do
+      x = shape[i +0]
+      y = shape[i+1]
+      nx = costheta * (x-cx) - sintheta * (y-cy) + cx
+      ny = sintheta * (x-cx) + costheta * (y-cy) + cy
+      result[i+0] = nx
+      result[i+1] = ny
+   end
+
+   return result
+end
+
+
 return {
-   makeShape=makeShape
+   makeShape=makeShape,
+   rotateShape=rotateShape
 }

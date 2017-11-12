@@ -139,6 +139,17 @@ function pointInCircle(x,y, cx, cy, radius)
       return false
    end
 end
+function rotatePoint(x,y,cx,cy,theta)
+   if not theta then return x,y end
+   local px = math.cos(theta) * (x-cx) - math.sin(theta) * (y-cy) + cx
+   local py = math.sin(theta) * (x-cx) + math.cos(theta) * (y-cy) + cy
+   return px,py
+end
+function clamp(v, min, max)
+   if v < min then return min end
+   if v > max then return max end
+   return v
+end
 
 return {
    HSL=HSL,
@@ -150,5 +161,7 @@ return {
    center=center,
    pointInRect=pointInRect,
    pointInRect2=pointInRect2,
-   pointInCircle=pointInCircle
+   pointInCircle=pointInCircle,
+   rotatePoint=rotatePoint,
+   clamp=clamp
 }
