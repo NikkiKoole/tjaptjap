@@ -88,7 +88,7 @@ function mode:pointerpressed(x,y,id)
       local h = self.handles[i]
       local hx,hy =camera:cameraCoords(h.x,h.y)
       if (utils.pointInCircle(x,y, hx,hy, 32*camera.scale)) then
-         table.insert(self.dragging, {touchid=id, h=self.handles[i]})
+         table.insert(self.dragging, {touchid=id, h=self.handles[i], dx=x-hx, dy=y-hy})
          found = true
       end
    end
@@ -190,7 +190,7 @@ function mode:pointermoved(x, y, id)
       for i=1, #self.dragging do
          local it = self.dragging[i]
          if it.touchid == id then
-            local nx, ny = camera:worldCoords(x, y)
+            local nx, ny = camera:worldCoords(x - it.dx, y - it.dy)
             it.h.x = nx
             it.h.y = ny
 
@@ -275,7 +275,6 @@ function mode:touchmoved(id, x, y, dx, dy, pressure)
 end
 
 function mode:mousereleased()
-
    self.dragging = {}
 end
 

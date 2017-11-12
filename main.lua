@@ -2,9 +2,6 @@
 --[[
 
 TODO:
-
-   - make it work with a mouse
-   - do some delta offsetting when starting drag a ui handle
    - move as much as i can into util file
    - extract UI code into something a bit more organized
    - extract code into shape classes
