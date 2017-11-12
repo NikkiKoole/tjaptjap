@@ -1,6 +1,50 @@
 local utils = require "utils"
 local mode ={}
 
+local ui = {
+   circle = {
+      backdrop = {x=10, y=50, w=200, h=200, r=100, g=100, b=0},
+      buttons = {
+         {value='steps', action=function(v) return math.max(2,v-1) end, x=10, y=50,w=40,h=40,r=150,g=150,b=150},
+         {value='steps', action=function(v) return v+1 end, x=110,y=50,w=40,h=40,r=150,g=150,b=150},
+      },
+      values = {
+         {path='steps', x=60, y=50, r=255, g=255, b=255},
+      },
+      strings = {
+         {str="steps", x=160, y=50, r=255, g=255, b=255},
+      }
+   },
+   rect = {
+      backdrop = {x=10, y=50, w=200, h=200, r=100, g=100, b=0},
+      buttons = {
+         {value='steps', action=function(v) return math.max(2,v-1) end,  x=10, y=50,w=40,h=40,r=150,g=150,b=150},
+         {value='steps', action=function(v) return v+1 end, x=110,y=50,w=40,h=40,r=150,g=150,b=150},
+      },
+      values = {
+         {path='steps', x=60, y=50, r=255, g=255, b=255},
+      },
+      strings = {
+         {str="steps", x=160, y=50, r=255, g=255, b=255},
+      }
+
+   },
+   star = {
+      backdrop = {x=10, y=50, w=200, h=200, r=100, g=100, b=0},
+      buttons = {
+         {value='sides', action=function(v) return math.max(2,v-1) end, x=10, y=50,w=40,h=40,r=150,g=150,b=150},
+         {value='sides', action=function(v) return v+1 end, x=110,y=50,w=40,h=40,r=150,g=150,b=150},
+      },
+      values = {
+         {path='sides', x=60, y=50, r=255, g=255, b=255},
+      },
+      strings = {
+         {str="sides", x=160, y=50, r=255, g=255, b=255},
+      }
+   },
+}
+
+
 
 function mode:update(dt)
 end
@@ -94,76 +138,32 @@ function mode:pointerpressed(x,y,id)
    local cdy = camera.y - camera.y * layer_speed
 
    local hit
+   local ui_item = ui[o.type]
+
    if o.type == "rect" then
       hit = utils.pointInRect2(wx, wy, o.pos.x + cdx, o.pos.y + cdy, o.data.w, o.data.h  )
       if hit then found = true end
-            -- some ui crap, note the using of screencoords instead of world coords
-      hit = utils.pointInRect(x,y,10,50,200,200)
-      if hit then found = true end
-
-      if pointInRect(x,y,10,50,50,50) then
-         self.child.data.steps = self.child.data.steps - 1
-         self.child.data.steps = math.max(2, self.child.data.steps)
-         self.child.dirty = true
-         mode:updateHandles()
-      end
-      if pointInRect(x,y,110,50,50,50) then
-         self.child.data.steps = self.child.data.steps + 1
-         self.child.dirty = true
-         mode:updateHandles()
-      end
-   end
-   if o.type == "circle" then
+   elseif o.type == "circle" then
       hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, o.data.radius)
-      if hit then found = true end
-      -- some ui crap, note the using of screencoords instead of world coords
-      hit = utils.pointInRect(x,y,10,50,200,200)
-      if hit then found = true end
-
-      if pointInRect(x,y,10,50,50,50) then
-         self.child.data.steps = self.child.data.steps - 1
-         self.child.data.steps = math.max(2, self.child.data.steps)
-         self.child.dirty = true
-         mode:updateHandles()
-      end
-      if pointInRect(x,y,110,50,50,50) then
-         self.child.data.steps = self.child.data.steps + 1
-         self.child.dirty = true
-         mode:updateHandles()
-      end
-   end
-   if o.type == "star" then
+   elseif o.type == "star" then
       hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, math.max(o.data.r1, o.data.r2))
-      if hit then found = true end
-      -- some ui crap, note the using of screencoords instead of world coords
-      hit = utils.pointInRect(x,y,10,50,200,200)
-      if hit then found = true end
+   end
+   if hit then found = true end
+   hit = utils.pointInRect(x,y,ui_item.backdrop.x,ui_item.backdrop.y,ui_item.backdrop.w,ui_item.backdrop.h)
+   if hit then found = true end
 
-      if pointInRect(x,y,10,50,50,50) then
-         self.child.data.sides = self.child.data.sides - 1
-         self.child.data.sides = math.max(2, self.child.data.sides)
+   for i=1, #ui_item.buttons do
+      local b = ui_item.buttons[i]
+      if (pointInRect(x,y,b.x, b.y, b.w, b.h)) then
+         self.child.data[b.value] = b.action(self.child.data[b.value])
          self.child.dirty = true
          mode:updateHandles()
-
-      end
-      if pointInRect(x,y,110,50,50,50) then
-         self.child.data.sides = self.child.data.sides + 1
-         self.child.dirty = true
-         mode:updateHandles()
-
       end
    end
-   -- if ui
-
-   if (hit) then
-      found = true
-   end
-
 
    if (found == false) then
       Signal.emit("switch-state", "stage")
    end
-
 end
 
 function mode:mousepressed( x, y, button, istouch )
@@ -171,7 +171,6 @@ function mode:mousepressed( x, y, button, istouch )
       self:pointerpressed(x, y,'mouse')
    end
 end
-
 
 function mode:touchpressed( id, x, y, dx, dy, pressure )
    table.insert(self.touches, {id=id, x=x, y=y, dx=dx, dy=dy, pressure=pressure})
@@ -297,46 +296,26 @@ function mode:draw()
    camera:detach()
 
 
+   local ui_item = ui[self.child.type]
+   love.graphics.setColor(ui_item.backdrop.r, ui_item.backdrop.g, ui_item.backdrop.b)
+   love.graphics.rectangle("fill", ui_item.backdrop.x, ui_item.backdrop.y, ui_item.backdrop.w, ui_item.backdrop.h)
 
-   if self.child.type == "star" then
-      -- backdrop
-      love.graphics.setColor(100,100,0)
-      love.graphics.rectangle("fill", 10,50,200,200)
-      -- ui for deciding parts
-      love.graphics.setColor(155,155,155)
-      love.graphics.rectangle("fill", 10,50,40,40)
-      love.graphics.rectangle("fill", 10+100,50,40,40)
-      love.graphics.setColor(255,255,255)
-      love.graphics.print(self.child.data.sides, 50+10, 50  )
-      love.graphics.print("sides", 160, 50)
-   end
-   if self.child.type == "rect" then
-      -- backdrop
-      love.graphics.setColor(100,100,0)
-      love.graphics.rectangle("fill", 10,50,200,200)
-      -- ui for deciding parts
-      love.graphics.setColor(155,155,155)
-      love.graphics.rectangle("fill", 10,50,40,40)
-      love.graphics.rectangle("fill", 10+100,50,40,40)
-      love.graphics.setColor(255,255,255)
-      love.graphics.print(self.child.data.steps, 50+10, 50  )
-      love.graphics.print("steps", 160, 50)
+   for i=1, #ui_item.buttons do
+      local b = ui_item.buttons[i]
+      love.graphics.setColor(b.r,b.g,b.b)
+      love.graphics.rectangle("fill", b.x,b.y,b.w,b.h)
    end
 
-   if self.child.type == "circle" then
-      -- backdrop
-      love.graphics.setColor(100,100,0)
-      love.graphics.rectangle("fill", 10,50,200,200)
-      -- ui for deciding parts
-      love.graphics.setColor(155,155,155)
-      love.graphics.rectangle("fill", 10,50,40,40)
-      love.graphics.rectangle("fill", 10+100,50,40,40)
-      love.graphics.setColor(255,255,255)
-      love.graphics.print(self.child.data.steps, 50+10, 50  )
-      love.graphics.print("steps", 160, 50)
+   for i=1, #ui_item.values do
+      local v = ui_item.values[i]
+      love.graphics.setColor(v.r, v.g, v.b)
+      love.graphics.print(self.child.data[v.path], v.x, v.y  )
    end
-
+   for i=1, #ui_item.strings do
+      local s = ui_item.strings[i]
+      love.graphics.setColor(s.r, s.g, s.b)
+      love.graphics.print(s.str, s.x, s.y  )
+   end
 end
-
 
 return mode

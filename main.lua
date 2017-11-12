@@ -2,8 +2,6 @@
 --[[
 
 TODO:
-   - extract UI code into something a bit more organized
-   - extract code into shape classes
    - add new shapes
 ]]--
 
@@ -12,9 +10,9 @@ Gamestate = require "vendor.gamestate"
 Camera = require "vendor.camera"
 local inspect = require "vendor.inspect"
 
-stageMode = require "modes.stage"
-dragMode = require "modes.drag_item"
-itemMode = require "modes.edit_item"
+StageMode = require "modes.stage"
+DragMode = require "modes.drag_item"
+ItemMode = require "modes.edit_item"
 
 local utils = require "utils"
 local shapes = require "shapes"
@@ -47,21 +45,20 @@ function love.load()
       if c.rotation then
          shape = shapes.rotateShape(c.pos.x, c.pos.y, shape, c.rotation)
       end
-
       c.triangles = poly.triangulate(shape)
    end
 
    camera = Camera(0, 0)
    Gamestate.registerEvents()
-   Gamestate.switch(stageMode)
+   Gamestate.switch(StageMode)
 
    Signal.register('switch-state',
                    function(state, data)
-                      local realState = nil
-                      if state == "stage" then realState=stageMode end
-                      if state == "drag-item" then realState=dragMode end
-                      if state == "edit-item" then realState=itemMode end
-                      Gamestate.switch(realState, data)
+                      local State = nil
+                      if state == "stage" then State = StageMode end
+                      if state == "drag-item" then State = DragMode end
+                      if state == "edit-item" then State = ItemMode end
+                      Gamestate.switch(State, data)
                    end)
 end
 

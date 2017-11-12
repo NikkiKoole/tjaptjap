@@ -22,6 +22,7 @@ function mode:touchmoved( id, x, y, dx, dy, pressure )
 end
 
 function mode:pointerreleased()
+
    local current_time = love.timer.getTime()
    if (current_time - self.start_time) > 0.2 then
       Signal.emit("switch-state", "stage")
