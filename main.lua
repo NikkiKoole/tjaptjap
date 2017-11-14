@@ -1,8 +1,5 @@
-
 --[[
 
-TODO:
-   - add new shapes
 ]]--
 
 Signal = require 'vendor.signal'
@@ -44,6 +41,7 @@ function love.load()
          shape = shapes.rotateShape(c.pos.x, c.pos.y, shape, c.rotation)
       end
       c.triangles = poly.triangulate(shape)
+      print("triangle count for "..c.type.." = "..#c.triangles)
    end
 
    camera = Camera(0, 0)

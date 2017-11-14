@@ -11,8 +11,8 @@ function mode:pointerpressed(x, y)
       local layer_speed = 1.0 + o.pos.z
       local cdx = camera.x - camera.x * layer_speed
       local cdy = camera.y - camera.y * layer_speed
-
       local hit = false
+
       if o.type == "circle" then
          hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, o.data.radius)
       end
@@ -22,6 +22,18 @@ function mode:pointerpressed(x, y)
       if o.type=="rect" then
          hit = utils.pointInRect2(wx, wy, o.pos.x + cdx,   o.pos.y + cdy, o.data.w, o.data.h )
       end
+      if o.type=="polygon" then
+         -- TODO atm this just checks and assumes 1 triangle, you want todo this check for multiple/all triangles in a polygon
+         -- TODO OPTIMIZE make the pointInTriangle work on the triangle data i already have
+
+         local t1 = {x=o.triangles[1][1], y=o.triangles[1][2]}
+         local t2 = {x=o.triangles[1][3], y=o.triangles[1][4]}
+         local t3 = {x=o.triangles[1][5], y=o.triangles[1][6]}
+         hit = utils.pointInTriangle({x=wx,y=wy}, t1, t2, t3)
+
+         print(hit)
+      end
+
 
       if (hit) then
          self.touches={}

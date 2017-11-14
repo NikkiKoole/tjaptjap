@@ -116,6 +116,25 @@ function center(x, x1)
    return x1 + dx/2
 end
 
+
+
+
+function signT(p1, p2, p3)
+   return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y)
+end
+function pointInTriangle(p, t1, t2, t3)
+   local b1, b2, b3
+   b1 = signT(p, t1, t2) < 0.0
+   b2 = signT(p, t2, t3) < 0.0
+   b3 = signT(p, t3, t1) < 0.0
+
+   return ((b1 == b2) and (b2 == b3))
+end
+
+
+
+
+
 function pointInRect(x,y, rx, ry, rw, rh)
    if x < rx or y < ry then return false end
    if x > rx+rw or y > ry+rh then return false end
@@ -167,6 +186,7 @@ return {
    center=center,
    pointInRect=pointInRect,
    pointInRect2=pointInRect2,
+   pointInTriangle=pointInTriangle,
    pointInCircle=pointInCircle,
    rotatePoint=rotatePoint,
    clamp=clamp

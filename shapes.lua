@@ -154,17 +154,12 @@ end
 
 function makeCustomPolygon(x,y, points)
    local result = {}
-   print("getting here!", #points)
    for i=1, #points do
-
       local p = points[i]
-      assert(p.x and p.y)
-      print(p.x, p.y)
+      --assert(p.x and p.y)
       table.insert(result, x + p.x)
-      table.insert(result, x + p.y)
-
+      table.insert(result, y + p.y)
    end
-
    return result
 end
 
@@ -179,7 +174,6 @@ function makeShape(meta)
    elseif meta.type == "star" then
       result = makeStarPolygon(meta.pos.x, meta.pos.y, meta.data.sides, meta.data.r1, meta.data.r2, meta.data.a1, meta.data.a2)
    elseif meta.type == "polygon" then
-      print(#meta.data.points)
       result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points)
    else
       love.errhand("Unknown shape type: "..meta.type)
