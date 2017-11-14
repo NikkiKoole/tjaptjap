@@ -98,8 +98,8 @@ end
 function tablefind_id(tab, id)
     for index, value in pairs(tab) do
        if tostring(value.id) == id then
-            return index
-        end
+          return index
+       end
     end
     return -1
 end
@@ -110,15 +110,18 @@ function distance(x, y, x1, y1)
    local dist = math.sqrt(dx * dx + dy * dy)
    return dist
 end
+
 function center(x, x1)
    local dx = x - x1
    return x1 + dx/2
 end
+
 function pointInRect(x,y, rx, ry, rw, rh)
    if x < rx or y < ry then return false end
    if x > rx+rw or y > ry+rh then return false end
    return true
 end
+
 function pointInRect2(x,y, cx, cy, rw, rh)
    local w2 = math.abs(rw)/2
    local h2 = math.abs(rh)/2
@@ -126,6 +129,7 @@ function pointInRect2(x,y, cx, cy, rw, rh)
    if x > cx+w2 or y > cy+h2 then return false end
    return true
 end
+
 function angle(x1,y1, x2, y2)
    local dx = x2 - x1
    local dy = y2 - y1
@@ -139,12 +143,14 @@ function pointInCircle(x,y, cx, cy, radius)
       return false
    end
 end
+
 function rotatePoint(x,y,cx,cy,theta)
    if not theta then return x,y end
    local px = math.cos(theta) * (x-cx) - math.sin(theta) * (y-cy) + cx
    local py = math.sin(theta) * (x-cx) + math.cos(theta) * (y-cy) + cy
    return px,py
 end
+
 function clamp(v, min, max)
    if v < min then return min end
    if v > max then return max end

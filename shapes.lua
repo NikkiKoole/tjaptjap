@@ -151,21 +151,40 @@ function makeStarPolygon(cx, cy, sides, r1, r2, a1, a2)
 end
 
 
+
+function makeCustomPolygon(x,y, points)
+   local result = {}
+   print("getting here!", #points)
+   for i=1, #points do
+
+      local p = points[i]
+      assert(p.x and p.y)
+      print(p.x, p.y)
+      table.insert(result, x + p.x)
+      table.insert(result, x + p.y)
+
+   end
+
+   return result
+end
+
+
 function makeShape(meta)
    local result = {}
---   print(meta.type, meta.pos, meta.data)
+
    if meta.type == "rect" then
-
       result = makeRoundedRect(meta.pos.x, meta.pos.y, meta.data.w, meta.data.h, meta.data.radius or 0, meta.data.steps or 8)
-   end
-   if meta.type == "circle" then
+   elseif meta.type == "circle" then
       result = makeCircle(meta.pos.x, meta.pos.y, meta.data.radius, meta.data.steps or 10)
+   elseif meta.type == "star" then
+      result = makeStarPolygon(meta.pos.x, meta.pos.y, meta.data.sides, meta.data.r1, meta.data.r2, meta.data.a1, meta.data.a2)
+   elseif meta.type == "polygon" then
+      print(#meta.data.points)
+      result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points)
+   else
+      love.errhand("Unknown shape type: "..meta.type)
    end
-   if meta.type == "star" then
-      result = makeStarPolygon(meta.pos.x, meta.pos.y,
-                               meta.data.sides, meta.data.r1, meta.data.r2, meta.data.a1, meta.data.a2)
 
-   end
 
    return result
 end
