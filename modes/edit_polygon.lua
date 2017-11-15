@@ -1,8 +1,14 @@
 local mode = {}
 
+function mode:init()
+   self.touches = {}
+   self.dragging = {} -- for dragging handlers
+end
+
 function mode:enter(from, data)
    self.child = data
    print("Hi entering edit polygon mode, lots of ui needs to be drawn here.")
+
 end
 
 function mode:pointerpressed(x,y,id)
@@ -20,6 +26,22 @@ function mode:touchpressed( id, x, y, dx, dy, pressure )
    table.insert(self.touches, {id=id, x=x, y=y, dx=dx, dy=dy, pressure=pressure})
    self:pointerpressed(x,y,id)
 end
+
+function mode:update()
+
+end
+
+
+function mode:draw()
+   camera:attach()
+   -- the polygon has a handle per vertex
+   -- draw handles
+   camera:detach()
+
+   -- draw UI
+
+end
+
 
 
 
