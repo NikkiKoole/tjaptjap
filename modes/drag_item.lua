@@ -22,12 +22,17 @@ function mode:touchmoved( id, x, y, dx, dy, pressure )
 end
 
 function mode:pointerreleased()
-
    local current_time = love.timer.getTime()
    if (current_time - self.start_time) > 0.2 then
       Signal.emit("switch-state", "stage")
    else
-      Signal.emit("switch-state", "edit-item", self.child)
+
+      if (self.child.type == "polygon") then
+         Signal.emit("switch-state", "edit-polygon", self.child)
+      else
+         Signal.emit("switch-state", "edit-item", self.child)
+      end
+
    end
 end
 

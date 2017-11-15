@@ -1,6 +1,8 @@
 local utils = require "utils"
 local mode = {}
 
+
+
 function mode:init()
    self.touches = {}
 end
@@ -17,21 +19,14 @@ function mode:pointerpressed(x, y)
          hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, o.data.radius)
       end
       if o.type == "star" then
-         hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, math.max(o.data.r1, o.data.r2))
+         hit = pointInPoly({x=wx,y=wy}, o.triangles)
+         --hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, math.max(o.data.r1, o.data.r2))
       end
       if o.type=="rect" then
          hit = utils.pointInRect2(wx, wy, o.pos.x + cdx,   o.pos.y + cdy, o.data.w, o.data.h )
       end
       if o.type=="polygon" then
-         -- TODO atm this just checks and assumes 1 triangle, you want todo this check for multiple/all triangles in a polygon
-         -- TODO OPTIMIZE make the pointInTriangle work on the triangle data i already have
-
-         local t1 = {x=o.triangles[1][1], y=o.triangles[1][2]}
-         local t2 = {x=o.triangles[1][3], y=o.triangles[1][4]}
-         local t3 = {x=o.triangles[1][5], y=o.triangles[1][6]}
-         hit = utils.pointInTriangle({x=wx,y=wy}, t1, t2, t3)
-
-         print(hit)
+         hit = pointInPoly({x=wx,y=wy}, o.triangles)
       end
 
 

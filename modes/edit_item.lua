@@ -146,7 +146,8 @@ function mode:pointerpressed(x,y,id)
    elseif o.type == "circle" then
       hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, o.data.radius)
    elseif o.type == "star" then
-      hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, math.max(o.data.r1, o.data.r2))
+      hit = pointInPoly({x=wx,y=wy}, o.triangles)
+      --hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, math.max(o.data.r1, o.data.r2))
    end
    if hit then found = true end
    hit = utils.pointInRect(x,y,ui_item.backdrop.x,ui_item.backdrop.y,ui_item.backdrop.w,ui_item.backdrop.h)

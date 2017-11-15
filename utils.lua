@@ -132,7 +132,19 @@ function pointInTriangle(p, t1, t2, t3)
 end
 
 
-
+function pointInPoly(point, triangles)
+   local hit = false
+   for i=1, #triangles do
+      local t = triangles[i]
+      local t1 = {x=t[1], y=t[2]}
+      local t2 = {x=t[3], y=t[4]}
+      local t3 = {x=t[5], y=t[6]}
+      hit = pointInTriangle(point, t1, t2, t3)
+      --print("triangle # ".. i .. " hit? ("..tostring(hit)..")" )
+      if hit then break end
+   end
+   return hit
+end
 
 
 function pointInRect(x,y, rx, ry, rw, rh)
@@ -188,6 +200,7 @@ return {
    pointInRect2=pointInRect2,
    pointInTriangle=pointInTriangle,
    pointInCircle=pointInCircle,
+   pointInPoly=pointInPoly,
    rotatePoint=rotatePoint,
    clamp=clamp
 }
