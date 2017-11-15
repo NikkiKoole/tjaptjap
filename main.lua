@@ -16,7 +16,6 @@ local utils = require "utils"
 local shapes = require "shapes"
 poly = require 'poly'
 
-
 function love.load()
    if arg[#arg] == "-debug" then require("mobdebug").start() end
    love.window.setMode(1024, 768, {resizable=true, vsync=true, fullscreen=false})
@@ -42,22 +41,30 @@ function love.load()
          shape = shapes.rotateShape(c.pos.x, c.pos.y, shape, c.rotation)
       end
       c.triangles = poly.triangulate(shape)
-      print("triangle count for "..c.type.." = "..#c.triangles)
+      --print("triangle count for "..c.type.." = "..#c.triangles)
    end
 
    camera = Camera(0, 0)
    Gamestate.registerEvents()
    Gamestate.switch(StageMode)
 
-   Signal.register('switch-state',
-                   function(state, data)
-                      local State = nil
-                      if state == "stage" then State = StageMode end
-                      if state == "drag-item" then State = DragMode end
-                      if state == "edit-item" then State = ItemMode end
-                      if state == "edit-polygon" then State = PolygonMode end
-                      Gamestate.switch(State, data)
-                   end)
+   Signal.register(
+      'switch-state',
+      function(state, data)
+         local State = nil
+         if state == "stage" then
+            State = StageMode
+         elseif state == "drag-item" then
+            State = DragMode
+         elseif state == "edit-item" then
+            State = ItemMode
+         elseif state == "edit-polygon" then
+            State = PolygonMode
+         end
+         Gamestate.switch(State, data)
+      end
+   )
+
 end
 
 function love.keypressed(key)
@@ -88,19 +95,14 @@ function love.update(dt)
          if c.rotation then
             shape = shapes.rotateShape(c.pos.x, c.pos.y, shape, c.rotation)
          end
-
             c.triangles = poly.triangulate(shape)
-
-
       end
    end
-
 end
 
 function love.draw()
-   --love.graphics.print("press <O> to open the library (drop the file on the stage), <S> to save the current stage")
    love.graphics.setColor(255,255,255)
-   love.graphics.print("camera "..math.floor(camera.x)..", "..math.floor(camera.y)..","..tonumber(string.format("%.3f", camera.scale)))
+   love.graphics.print("camera " .. math.floor(camera.x) .. ", " .. math.floor(camera.y) .. "," .. tonumber(string.format("%.3f", camera.scale)))
    camera:attach()
    for i=1, #world.children do
       if world.children[i].triangles  then
@@ -112,5 +114,4 @@ function love.draw()
    end
 
    camera:detach()
-
 end

@@ -27,7 +27,6 @@ local ui = {
       strings = {
          {str="steps", x=160, y=50, r=255, g=255, b=255},
       }
-
    },
    star = {
       backdrop = {x=10, y=50, w=200, h=200, r=100, g=100, b=0},
@@ -44,8 +43,6 @@ local ui = {
    },
 }
 
-
-
 function mode:update(dt)
 end
 
@@ -57,12 +54,12 @@ end
 function mode:updateHandles()
    local child = self.child
    if (child.type == "rect") then
+
       local rx1,ry1    = utils.rotatePoint(child.pos.x + child.data.w/2, child.pos.y, child.pos.x, child.pos.y, child.rotation)
       local rx2, ry2 = utils.rotatePoint(child.pos.x + child.data.w/2, child.pos.y + child.data.h/2, child.pos.x, child.pos.y, child.rotation)
       local rx3, ry3 = utils.rotatePoint(child.pos.x + child.data.w/2 - child.data.radius, child.pos.y - child.data.h/2, child.pos.x, child.pos.y, child.rotation)
 
-      self.handles = {
-         {
+      self.handles = {{
             x=rx1, y=ry1,
             r=32,
             type="rect-rotator"
@@ -76,25 +73,20 @@ function mode:updateHandles()
             x=rx3, y=ry3,
             r=32,
             type="rect-radius"
-         },
-
-      }
+      }}
    elseif (child.type == "circle") then
-      self.handles = {
-         {
+      self.handles = {{
             x=child.pos.x + child.data.radius/1.4,
             y=child.pos.y+ child.data.radius/1.4,
             r=32,
             type="circle-resizer"
-         }
-      }
+      }}
    elseif (child.type == "star") then
       local a = (math.pi*2)/child.data.sides
       local rx,ry      = utils.rotatePoint(child.pos.x + child.data.r1, child.pos.y, child.pos.x, child.pos.y, child.data.a1)
       local rx2,ry2    = utils.rotatePoint(child.pos.x + child.data.r2, child.pos.y, child.pos.x, child.pos.y, child.data.a2)
 
-      self.handles = {
-         {
+      self.handles = {{
             x=rx,
             y=ry,
             r=32,
@@ -105,13 +97,11 @@ function mode:updateHandles()
             y=ry2,
             r=32,
             type="r2"
-         },
-      }
+      }}
    else
       print("ERROR unknown data type in edit-item", data.type)
    end
 end
-
 
 function mode:enter(from,data)
    self.child = data
@@ -196,7 +186,6 @@ function mode:pointermoved(x, y, id)
                self.child.data.w = math.max(math.abs(w), 0)
                self.child.data.h = math.max(math.abs(h), 0)
 
-
                if (self.child.data.radius) then
                   if (self.child.data.radius > (self.child.data.w/2)-1) then
                      self.child.data.radius = (self.child.data.w/2)-1
@@ -210,18 +199,15 @@ function mode:pointermoved(x, y, id)
 
                self.child.dirty = true
                mode:updateHandles()
-            end
-            if it.h.type == "circle-resizer" then
+            elseif it.h.type == "circle-resizer" then
                local distance = (utils.distance(nx, ny, self.child.pos.x, self.child.pos.y))
                self.child.data.radius = distance
                self.child.dirty = true
-            end
-            if it.h.type == "rect-rotator" then
+            elseif it.h.type == "rect-rotator" then
                self.child.rotation = math.atan2(ny - self.child.pos.y, nx - self.child.pos.x)
                self.child.dirty = true
                mode:updateHandles()
-            end
-            if it.h.type == "rect-radius" then
+            elseif it.h.type == "rect-radius" then
                local dx = nx - (self.child.pos.x+self.child.data.w/2)
                local dy = ny - (self.child.pos.y+self.child.data.h/2)
                local w, h = utils.rotatePoint(dx, dy, 0,0, -self.child.rotation)
@@ -233,16 +219,14 @@ function mode:pointermoved(x, y, id)
                self.child.data.radius = r
                self.child.dirty = true
                mode:updateHandles()
-            end
-            if it.h.type == "r1" then
+            elseif it.h.type == "r1" then
                local distance = (utils.distance(nx, ny, self.child.pos.x, self.child.pos.y))
                local angle = (math.pi/2 +  utils.angle(nx,ny, self.child.pos.x, self.child.pos.y)) * -1
                self.child.data.r1 = distance
                self.child.data.a1 = angle
                self.child.dirty = true
                mode:updateHandles()
-            end
-            if it.h.type == "r2" then
+            elseif it.h.type == "r2" then
                local distance = (utils.distance(nx, ny, self.child.pos.x, self.child.pos.y))
                local angle = (math.pi/2 +  utils.angle(nx,ny, self.child.pos.x, self.child.pos.y)) * -1
                self.child.data.r2 = distance
@@ -250,7 +234,6 @@ function mode:pointermoved(x, y, id)
                self.child.dirty = true
                mode:updateHandles()
             end
-
          end
       end
    end

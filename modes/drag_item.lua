@@ -26,13 +26,11 @@ function mode:pointerreleased()
    if (current_time - self.start_time) > 0.2 then
       Signal.emit("switch-state", "stage")
    else
-
       if (self.child.type == "polygon") then
          Signal.emit("switch-state", "edit-polygon", self.child)
       else
          Signal.emit("switch-state", "edit-item", self.child)
       end
-
    end
 end
 
