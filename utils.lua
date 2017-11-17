@@ -188,6 +188,72 @@ function clamp(v, min, max)
    return v
 end
 
+function distancePointSegment(x,y, x1,y1, x2, y2)
+   local A = x - x1
+   local B = y - y1
+   local C = x2 - x1
+   local D = y2 - y1
+
+   local dot    = A * C + B * D
+   local len_sq = C * C + D * D
+   local param = -1
+   --print(len_sq)
+   if (len_sq ~= 0) then
+      param = dot / len_sq
+   end
+
+   local xx, yy
+
+   if (param < 0) then
+      xx = x1
+      yy = y1
+   elseif (param > 1) then
+      xx = x2
+      yy = y2
+   else
+      xx = x1 + param * C
+      yy = y1 + param * D
+   end
+   local dx = x - xx
+   local dy = y - yy
+
+   return math.sqrt(dx * dx + dy*dy)
+end
+
+
+-- public float pDistance(float x, float y, float x1, float y1, float x2, float y2) {
+
+--           float A = x - x1;
+--           float B = y - y1;
+--           float C = x2 - x1;
+--           float D = y2 - y1;
+
+--           float dot = A * C + B * D;
+--           float len_sq = C * C + D * D;
+--           float param = -1;
+--           if (len_sq != 0) //in case of 0 length line
+--               param = dot / len_sq;
+
+--           float xx, yy;
+
+--           if (param < 0) {
+--             xx = x1;
+--             yy = y1;
+--           }
+--           else if (param > 1) {
+--             xx = x2;
+--             yy = y2;
+--           }
+--           else {
+--             xx = x1 + param * C;
+--             yy = y1 + param * D;
+--           }
+
+--           float dx = x - xx;
+--           float dy = y - yy;
+--           return (float) Math.sqrt(dx * dx + dy * dy);
+--         }
+
 return {
    HSL=HSL,
    generatePolygon=generatePolygon,
@@ -202,5 +268,6 @@ return {
    pointInCircle=pointInCircle,
    pointInPoly=pointInPoly,
    rotatePoint=rotatePoint,
-   clamp=clamp
+   clamp=clamp,
+   distancePointSegment=distancePointSegment
 }

@@ -75,7 +75,10 @@ function love.keypressed(key)
       love.filesystem.write("filename.txt", serialized)
    end
    if key == "o" then
-      love.system.openURL("file://"..love.filesystem.getSaveDirectory())
+      --love.system.openURL("file://"..love.filesystem.getSaveDirectory())
+
+      local data = love.filesystem.newFileData("filename.txt")
+      world = loadstring("return "..data:getString())()
    end
 end
 
