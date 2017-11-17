@@ -107,14 +107,18 @@ function love.draw()
    love.graphics.setColor(255,255,255)
    love.graphics.print("camera " .. math.floor(camera.x) .. ", " .. math.floor(camera.y) .. "," .. tonumber(string.format("%.3f", camera.scale)))
    camera:attach()
+   local triangle_count = 0
    for i=1, #world.children do
       if world.children[i].triangles  then
          for j=1, #world.children[i].triangles do
             love.graphics.setColor(255,255,255, 100)
             love.graphics.polygon("fill", world.children[i].triangles[j])
+            triangle_count = triangle_count + 1
          end
       end
    end
 
+
    camera:detach()
+   love.graphics.print("#tris "..triangle_count, 10, 30)
 end
