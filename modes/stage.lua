@@ -75,11 +75,13 @@ function mode:wheelmoved(x,y)
 end
 
 function mode:mousemoved(x, y, dx, dy, istouch)
-   if love.mouse.isDown(1) then
-      local c,s = math.cos(-camera.rot), math.sin(-camera.rot)
-      dx,dy = c*dx - s*dy, s*dx + c*dy
-      self.lastdelta = {x=dx, y=dy}
-      camera:move(-dx / camera.scale, -dy / camera.scale)
+   if (not istouch) then
+      if love.mouse.isDown(1) then
+         local c,s = math.cos(-camera.rot), math.sin(-camera.rot)
+         dx,dy = c*dx - s*dy, s*dx + c*dy
+         self.lastdelta = {x=dx, y=dy}
+         camera:move(-dx / camera.scale, -dy / camera.scale)
+      end
    end
 end
 

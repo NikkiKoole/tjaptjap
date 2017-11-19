@@ -61,8 +61,11 @@ function mode:mousereleased(x, y, button, istouch)
          end
 
          if it.h.type == "add_vertex" then
-            print("add some vertex somehere!")
-            local hx,hy = camera:worldCoords(it.h.x - self.child.pos.x, it.h.y - self.child.pos.y)
+
+            local hx,hy = camera:worldCoords(it.h.x, it.h.y)
+            hx = hx - self.child.pos.x
+            hy = hy - self.child.pos.y
+
             local best = self:getClosestNodes(hx, hy)
             table.insert(self.child.data.points, best.ni, {x=hx, y=hy})
             --self.child.dirty = false
@@ -85,8 +88,25 @@ function mode:touchreleased( id, x, y, dx, dy, pressure )
    for i=#self.dragging, 1 ,-1  do
       local it = self.dragging[i]
       if it.touchid == id then
+         if (it.h.type == "vertex") then
+            print("released vertex "..it.i.." does it collide with any of its neighbours?")
+         end
+
          if it.h.type == "add_vertex" then
-            print("add some vertex somehere!")
+            local hx,hy = camera:worldCoords(it.h.x, it.h.y)
+            hx = hx - self.child.pos.x
+            hy = hy - self.child.pos.y
+
+
+            local best = self:getClosestNodes(hx, hy)
+
+
+            table.insert(self.child.data.points, best.ni, {x=hx, y=hy})
+            --self.child.dirty = false
+            local shape = shapes.makeShape(self.child)
+            self.child.triangles = poly.triangulate(shape)
+            --
+            mode:makeHandles()
          end
 
       end
@@ -123,8 +143,6 @@ function mode:pointermoved(x, y, id)
                it.h.x = x
                it.h.y = y
             end
-
-
          end
       end
    end
@@ -208,27 +226,31 @@ function mode:draw()
          love.graphics.setColor(200,100,100)
          love.graphics.circle("fill", d.h.x, d.h.y , d.h.r)
          if (d.h.type == "add_vertex") then
-            local hx,hy = camera:worldCoords(d.h.x - self.child.pos.x, d.h.y - self.child.pos.y)
+            -- just draw the first vertex and see if its correct
+            -- local p = self.child.data.points[1]
+            -- local px,py = camera:cameraCoords(p.x + self.child.pos.x , p.y + self.child.pos.y)
+            -- love.graphics.circle("fill", px, py, 32)
+            -- love.graphics.print(px..", "..py, 20, 640)
+
+
+            --local hx,hy = camera:worldCoords(d.h.x - self.child.pos.x, d.h.y - self.child.pos.y)
+            local hx,hy = camera:worldCoords(d.h.x, d.h.y)
+            hx = hx - self.child.pos.x
+            hy = hy - self.child.pos.y
+
+            love.graphics.setColor(255,100,255)
+            love.graphics.circle("fill", hx, hy, 36)
+
+
             local best = self:getClosestNodes(hx, hy)
             local si = self.child.data.points[best.si]
-            local six, siy = camera:cameraCoords(si.x, si.y)
+            local six, siy = camera:cameraCoords(si.x + self.child.pos.x, si.y + self.child.pos.y)
             local ni = self.child.data.points[best.ni]
-            local nix, niy = camera:cameraCoords(ni.x, ni.y)
+            local nix, niy = camera:cameraCoords(ni.x + self.child.pos.x, ni.y + self.child.pos.y)
 
-            love.graphics.circle("fill", six + self.child.pos.x, siy+self.child.pos.y, 32)
-            love.graphics.circle("fill", nix + self.child.pos.x, niy+self.child.pos.y, 32)
+            love.graphics.circle("fill", six, siy, 32)
+            love.graphics.circle("fill", nix, niy, 32)
          end
-         -- if (d.h.type == "add_cp") then
-         --    local hx,hy = camera:worldCoords(d.h.x - self.child.pos.x, d.h.y - self.child.pos.y)
-         --    local best = self:getClosestNodes(hx, hy)
-         --    local si = self.child.data.points[best.si]
-         --    local six, siy = camera:cameraCoords(si.x, si.y)
-         --    local ni = self.child.data.points[best.ni]
-         --    local nix, niy = camera:cameraCoords(ni.x, ni.y)
-
-         --    love.graphics.circle("fill", six + self.child.pos.x, siy+self.child.pos.y, 32)
-         --    love.graphics.circle("fill", nix + self.child.pos.x, niy+self.child.pos.y, 32)
-         -- end
       end
    end
 
