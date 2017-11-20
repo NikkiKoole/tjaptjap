@@ -50,6 +50,41 @@ function mode:pointerpressed(x,y,id)
    end
 end
 
+function mode:addVertex(x, y)
+   local hx,hy = camera:worldCoords(x, y)
+   hx = hx - self.child.pos.x
+   hy = hy - self.child.pos.y
+
+   local best = self:getClosestNodes(hx, hy)
+   table.insert(self.child.data.points, best.ni, {x=hx, y=hy})
+
+   local shape = shapes.makeShape(self.child)
+   self.child.triangles = poly.triangulate(shape)
+   mode:makeHandles()
+end
+
+function mode:removeVertexIfOverlappingWithNextOrPrevious(it)
+   local next_i = it.i + 1
+   local prev_i = it.i - 1
+
+   if next_i > #self.child.data.points then next_i = 1 end
+   if prev_i < 1 then prev_i = #self.child.data.points end
+
+   local t = self.child.data.points[it.i]
+   local n = self.child.data.points[next_i]
+   local p = self.child.data.points[prev_i]
+   local dn = utils.distance(t.x, t.y, n.x, n.y)
+   local dp = utils.distance(t.x, t.y, p.x, p.y)
+
+   if (dp < 32 or dn < 32) then
+      if #self.child.data.points > 3 then
+         table.remove(self.child.data.points, it.i)
+         local shape = shapes.makeShape(self.child)
+         self.child.triangles = poly.triangulate(shape)
+         mode:makeHandles()
+      end
+  end
+end
 
 
 function mode:mousereleased(x, y, button, istouch)
@@ -57,22 +92,10 @@ function mode:mousereleased(x, y, button, istouch)
       local it = self.dragging[i]
       if it.touchid == "mouse" then
          if (it.h.type == "vertex") then
-            print("released vertex "..it.i.." does it collide with any of its neighbours?")
+            self:removeVertexIfOverlappingWithNextOrPrevious(it)
          end
-
          if it.h.type == "add_vertex" then
-
-            local hx,hy = camera:worldCoords(it.h.x, it.h.y)
-            hx = hx - self.child.pos.x
-            hy = hy - self.child.pos.y
-
-            local best = self:getClosestNodes(hx, hy)
-            table.insert(self.child.data.points, best.ni, {x=hx, y=hy})
-            --self.child.dirty = false
-            local shape = shapes.makeShape(self.child)
-            self.child.triangles = poly.triangulate(shape)
-            --
-            mode:makeHandles()
+            self:addVertex(it.h.x, it.h.y)
          end
       end
    end
@@ -89,24 +112,11 @@ function mode:touchreleased( id, x, y, dx, dy, pressure )
       local it = self.dragging[i]
       if it.touchid == id then
          if (it.h.type == "vertex") then
-            print("released vertex "..it.i.." does it collide with any of its neighbours?")
+            self:removeVertexIfOverlappingWithNextOrPrevious(it)
          end
 
          if it.h.type == "add_vertex" then
-            local hx,hy = camera:worldCoords(it.h.x, it.h.y)
-            hx = hx - self.child.pos.x
-            hy = hy - self.child.pos.y
-
-
-            local best = self:getClosestNodes(hx, hy)
-
-
-            table.insert(self.child.data.points, best.ni, {x=hx, y=hy})
-            --self.child.dirty = false
-            local shape = shapes.makeShape(self.child)
-            self.child.triangles = poly.triangulate(shape)
-            --
-            mode:makeHandles()
+            self:addVertex(it.h.x, it.h.y)
          end
 
       end
@@ -177,6 +187,7 @@ function mode:getClosestNodes(x, y)
    for i=1, #self.child.data.points do
       local self_index = i
       local next_index
+
       if (i == #self.child.data.points) then
          next_index = 1
       else
@@ -185,9 +196,8 @@ function mode:getClosestNodes(x, y)
 
       local this = self.child.data.points[self_index]
       local next = self.child.data.points[next_index]
-      --print(i, x, y, this.x, this.y, next.x, next.y)
-      --print(self.child.pos.x, self.child.pos.y)
       local d = utils.distancePointSegment(x, y, this.x , this.y, next.x, next.y)
+
       if (d < best_distance) then
          best_distance = d
          best_pair = {si=self_index, ni = next_index}
@@ -226,21 +236,13 @@ function mode:draw()
          love.graphics.setColor(200,100,100)
          love.graphics.circle("fill", d.h.x, d.h.y , d.h.r)
          if (d.h.type == "add_vertex") then
-            -- just draw the first vertex and see if its correct
-            -- local p = self.child.data.points[1]
-            -- local px,py = camera:cameraCoords(p.x + self.child.pos.x , p.y + self.child.pos.y)
-            -- love.graphics.circle("fill", px, py, 32)
-            -- love.graphics.print(px..", "..py, 20, 640)
 
-
-            --local hx,hy = camera:worldCoords(d.h.x - self.child.pos.x, d.h.y - self.child.pos.y)
             local hx,hy = camera:worldCoords(d.h.x, d.h.y)
             hx = hx - self.child.pos.x
             hy = hy - self.child.pos.y
 
             love.graphics.setColor(255,100,255)
             love.graphics.circle("fill", hx, hy, 36)
-
 
             local best = self:getClosestNodes(hx, hy)
             local si = self.child.data.points[best.si]
