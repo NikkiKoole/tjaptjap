@@ -154,12 +154,44 @@ end
 
 function makeCustomPolygon(x,y, points)
    local result = {}
-   for i=1, #points do
+
+   local i = 1
+
+   while i < #points+1 do
       local p = points[i]
-      --assert(p.x and p.y)
-      table.insert(result, x + p.x)
-      table.insert(result, y + p.y)
+
+      if (p.x and p.y) then
+         table.insert(result, x + p.x)
+         table.insert(result, y + p.y)
+         i = i +1
+
+      else
+         local array = {points[i-1].x, points[i-1].y}
+
+         local j = i
+         local next = points[j]
+         while (not (next.x and next.y)) do
+
+            table.insert(array, next.cx)
+            table.insert(array, next.cy)
+
+            j = j + 1
+            next = points[j]
+         end
+
+         i = i + ((#array-2)/2)
+         table.insert(array, points[j].x)
+         table.insert(array, points[j].y)
+         curve = love.math.newBezierCurve(array)
+         local curve_points = curve:render(4)
+         TableConcat(result, curve_points)
+
+      end
+
+
    end
+
+
    return result
 end
 

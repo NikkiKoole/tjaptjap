@@ -5,7 +5,6 @@ local mode = {}
 
 function mode:init()
    self.touches = {}
-
 end
 
 function mode:enter(from, data)
@@ -64,20 +63,18 @@ function mode:addVertex(x, y)
 end
 
 function mode:removeVertexIfOverlappingWithNextOrPrevious(it)
-   local next_i = it.i + 1
-   local prev_i = it.i - 1
+   local points = self.child.data.points
+   local next_i, prev_i = it.i + 1, it.i - 1
 
-   if next_i > #self.child.data.points then next_i = 1 end
-   if prev_i < 1 then prev_i = #self.child.data.points end
+   if next_i > #points then next_i = 1 end
+   if prev_i < 1 then prev_i = #points end
 
-   local t = self.child.data.points[it.i]
-   local n = self.child.data.points[next_i]
-   local p = self.child.data.points[prev_i]
+   local t, n, p = points[it.i], points[next_i], points[prev_i]
    local dn = utils.distance(t.x, t.y, n.x, n.y)
    local dp = utils.distance(t.x, t.y, p.x, p.y)
 
    if (dp < 32 or dn < 32) then
-      if #self.child.data.points > 3 then
+      if #points > 3 then
          table.remove(self.child.data.points, it.i)
          local shape = shapes.makeShape(self.child)
          self.child.triangles = poly.triangulate(shape)
@@ -170,7 +167,6 @@ function mode:touchmoved(id, x, y, dx, dy, pressure)
    self:pointermoved(x,y,id)
 end
 
-
 function mode:update()
    if self.child.dirty then
       self.child.dirty = false
@@ -179,23 +175,21 @@ function mode:update()
    end
 end
 
-
-
 function mode:getClosestNodes(x, y)
+   local points = self.child.data.points
    local best_distance = math.huge
    local best_pair = {si=-1, ni=-1}
-   for i=1, #self.child.data.points do
-      local self_index = i
-      local next_index
+   for i=1, #points do
 
-      if (i == #self.child.data.points) then
+      local self_index = i
+      local next_index = i + 1
+
+      if (i == #points) then
          next_index = 1
-      else
-         next_index = i+1
       end
 
-      local this = self.child.data.points[self_index]
-      local next = self.child.data.points[next_index]
+      local this = points[self_index]
+      local next = points[next_index]
       local d = utils.distancePointSegment(x, y, this.x , this.y, next.x, next.y)
 
       if (d < best_distance) then
@@ -255,14 +249,6 @@ function mode:draw()
          end
       end
    end
-
-   -- draw UI
-
 end
-
-
-
-
-
 
 return mode
