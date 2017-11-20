@@ -290,14 +290,13 @@ function mode:draw()
    love.graphics.setColor(255,255,255)
    love.graphics.print("remove last touched", 20, 240)
 
-
-
    for i=1, #self.dragging do
       local d = self.dragging[i]
       if (d.h.type ~= "vertex") then
-         love.graphics.setColor(200,100,100)
-         love.graphics.circle("fill", d.h.x, d.h.y , d.h.r)
+
          if (d.h.type == "add_vertex" or d.h.type == "add_cp") then
+            love.graphics.setColor(200,100,100)
+            love.graphics.circle("fill", d.h.x, d.h.y , d.h.r)
 
             local hx,hy = camera:worldCoords(d.h.x, d.h.y)
             hx = hx - self.child.pos.x

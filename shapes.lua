@@ -184,7 +184,7 @@ function makeCustomPolygon(x,y, points)
          table.insert(array, points[j].x + x)
          table.insert(array, points[j].y + y)
          curve = love.math.newBezierCurve(array)
-         local curve_points = curve:render(3)
+         local curve_points = curve:render(2)
 
          table.remove(curve_points, #curve_points)
          table.remove(curve_points, #curve_points)
