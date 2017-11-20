@@ -25,7 +25,7 @@ function love.load()
          --{type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
          --{type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
          --{type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
-         {type="polygon", pos={x=0, y=0, z=0}, data={ points={{x=0,y=0}, {cx=100, cy=-100}, {cx=150, cy=-150},{x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
+         {type="polygon", pos={x=0, y=0, z=0}, data={ points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
       },
    }
 
@@ -111,7 +111,7 @@ function love.draw()
    for i=1, #world.children do
       if world.children[i].triangles  then
          for j=1, #world.children[i].triangles do
-            love.graphics.setColor(255,255,255, 100)
+            love.graphics.setColor(255,love.math.random()*255,255, 100)
             love.graphics.polygon("fill", world.children[i].triangles[j])
             triangle_count = triangle_count + 1
          end

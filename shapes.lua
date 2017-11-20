@@ -166,31 +166,35 @@ function makeCustomPolygon(x,y, points)
          i = i +1
 
       else
-         local array = {points[i-1].x, points[i-1].y}
+
+         local prev_index = i - 1
+         if i <= 1 then prev_index = #points end
+         local array = {points[prev_index].x + x, points[prev_index].y + y}
 
          local j = i
          local next = points[j]
          while (not (next.x and next.y)) do
-
-            table.insert(array, next.cx)
-            table.insert(array, next.cy)
-
+            table.insert(array, x + next.cx)
+            table.insert(array, y + next.cy)
             j = j + 1
             next = points[j]
          end
 
          i = i + ((#array-2)/2)
-         table.insert(array, points[j].x)
-         table.insert(array, points[j].y)
+         table.insert(array, points[j].x + x)
+         table.insert(array, points[j].y + y)
          curve = love.math.newBezierCurve(array)
-         local curve_points = curve:render(4)
+         local curve_points = curve:render(3)
+
+         table.remove(curve_points, #curve_points)
+         table.remove(curve_points, #curve_points)
+         table.remove(curve_points, 1)
+         table.remove(curve_points, 1)
+
+         -- TODO this curve_points should be stripp[ed of its firts and last pair.
          TableConcat(result, curve_points)
-
       end
-
-
    end
-
 
    return result
 end

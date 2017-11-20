@@ -164,14 +164,14 @@ function triangulate(poly)
 
    for i=1 , #polys do
       local p = polys[i]
-      local triangles = love.math.triangulate(p)
-      for j = 1, #triangles do
-         local t = triangles[j]
-         local cx, cy = getCentroid(t)
-         if isPointInPath(cx,cy, p) then
-            table.insert(result, t)
+         local triangles = love.math.triangulate(p)
+         for j = 1, #triangles do
+            local t = triangles[j]
+            local cx, cy = getCentroid(t)
+            if isPointInPath(cx,cy, p) then
+               table.insert(result, t)
+            end
          end
-      end
    end
    return result
 end

@@ -6,7 +6,6 @@ function mode:enter(from,data)
 end
 
 function mode:pointermoved(x,y,dx,dy)
-   print(self.child.pos.x, dx, camera.scale)
    self.child.pos.x =    self.child.pos.x + (dx/camera.scale)
    self.child.pos.y =    self.child.pos.y + (dy/camera.scale)
    self.child.dirty = true
