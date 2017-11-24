@@ -1,4 +1,4 @@
-
+polyline = require 'polyline'
 
 function TableConcat(t1,t2)
     for i=1,#t2 do
@@ -211,6 +211,11 @@ function makeShape(meta)
       result = makeStarPolygon(meta.pos.x, meta.pos.y, meta.data.sides, meta.data.r1, meta.data.r2, meta.data.a1, meta.data.a2)
    elseif meta.type == "polygon" then
       result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points)
+   elseif meta.type == "polyline" then
+      --coords = {0,0,100,0}
+      --local vertices, indices, draw_mode = polyline('none', coords, 10, 1, false)
+      --print(vertices, #vertices, vertices[1][1],vertices[1][2], vertices[2][1],vertices[2][2])
+      --result = vertices
    else
       love.errhand("Unknown shape type: "..meta.type)
    end
