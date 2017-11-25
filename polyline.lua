@@ -246,7 +246,7 @@ local function polyline(join_type, coords, half_width, pixel_size, draw_overdraw
   end
 
   if join_type == 'none' then
-    vertex_count = vertex_count - 4
+   vertex_count = vertex_count - 4
     for i=3,#normals-2 do
       table.insert(vertices, {
         anchors[i].x + normals[i].x,

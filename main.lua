@@ -22,11 +22,11 @@ function love.load()
 
    world = {
       children={
-         {type="polyline"}
+         {type="polyline", pos={x=100,y=100,z=0}, data={coords={0,0,100,0, 50, 50, 100,50,10,200,0,0}, join="miter", half_width=5 }}
          --{type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
          --{type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
          --{type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
-         --{type="polygon", pos={x=0, y=0, z=0}, data={ points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
+         --{type="polygon", pos={x=0, y=0, z=0}, data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
       },
    }
 
@@ -41,7 +41,8 @@ function love.load()
       if c.rotation then
          shape = shapes.rotateShape(c.pos.x, c.pos.y, shape, c.rotation)
       end
-      c.triangles = poly.triangulate(shape)
+
+      c.triangles = poly.triangulate(c.type, shape)
       --print("triangle count for "..c.type.." = "..#c.triangles)
    end
 
@@ -99,7 +100,7 @@ function love.update(dt)
          if c.rotation then
             shape = shapes.rotateShape(c.pos.x, c.pos.y, shape, c.rotation)
          end
-            c.triangles = poly.triangulate(shape)
+            c.triangles = poly.triangulate(c.type, shape)
       end
    end
 end

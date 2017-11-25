@@ -1,6 +1,5 @@
 local utils = require "utils"
 local shapes = require "shapes"
-
 local mode = {}
 
 function mode:init()
@@ -110,10 +109,8 @@ function mode:removeVertexIfOverlappingWithNextOrPrevious(it)
 end
 
 function mode:removeLastTouched()
-   --self.lastTouchedIndex
    if (self.lastTouchedIndex) then
       table.remove(self.child.data.points, self.lastTouchedIndex)
-
       local shape = shapes.makeShape(self.child)
       self.child.triangles = poly.triangulate(shape)
       mode:makeHandles()
@@ -134,11 +131,9 @@ function mode:mousereleased(x, y, button, istouch)
          if it.h.type == "add_cp" then
             self:addControlPoint(it.h.x, it.h.y)
          end
-
          if it.h.type == "remove_last" then
             self:removeLastTouched()
          end
-
       end
    end
 
@@ -156,21 +151,18 @@ function mode:touchreleased( id, x, y, dx, dy, pressure )
          if (it.h.type == "vertex") then
             self:removeVertexIfOverlappingWithNextOrPrevious(it)
          end
-
          if it.h.type == "add_vertex" then
             self:addVertex(it.h.x, it.h.y)
          end
          if it.h.type == "add_cp" then
             self:addControlPoint(it.h.x, it.h.y)
          end
-
          if it.h.type == "remove_last" then
             self:removeLastTouched()
          end
-
-
       end
    end
+
 end
 
 function mode:mousepressed( x, y, button, istouch )
@@ -207,7 +199,6 @@ function mode:pointermoved(x, y, id)
                self.child.data.points[it.i].cy = ny - self.child.pos.y
                self.child.dirty = true
             else
-
             end
          end
       end
@@ -263,13 +254,14 @@ end
 function mode:draw()
    camera:attach()
    love.graphics.setColor(255,255,255)
+
    for i=1, #self.handles do
       local h = self.handles[i]
       if (h.type == "vertex") then love.graphics.setColor(255,255,255) end
       if (h.type == "cp")     then love.graphics.setColor(0  ,255,255) end
-
       love.graphics.circle("fill", h.x, h.y , h.r/camera.scale)
    end
+
    camera:detach()
 
    love.graphics.setColor(100,100,100)

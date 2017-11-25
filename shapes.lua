@@ -152,7 +152,7 @@ end
 
 
 
-function makeCustomPolygon(x,y, points)
+function makeCustomPolygon(x,y, points, steps)
    local result = {}
 
    local i = 1
@@ -164,9 +164,7 @@ function makeCustomPolygon(x,y, points)
          table.insert(result, x + p.x)
          table.insert(result, y + p.y)
          i = i +1
-
       else
-
          local prev_index = i - 1
          if i <= 1 then prev_index = #points end
          local array = {points[prev_index].x + x, points[prev_index].y + y}
@@ -184,14 +182,13 @@ function makeCustomPolygon(x,y, points)
          table.insert(array, points[j].x + x)
          table.insert(array, points[j].y + y)
          curve = love.math.newBezierCurve(array)
-         local curve_points = curve:render(2)
+         local curve_points = curve:render(steps)
 
          table.remove(curve_points, #curve_points)
          table.remove(curve_points, #curve_points)
          table.remove(curve_points, 1)
          table.remove(curve_points, 1)
 
-         -- TODO this curve_points should be stripp[ed of its firts and last pair.
          TableConcat(result, curve_points)
       end
    end
@@ -210,12 +207,14 @@ function makeShape(meta)
    elseif meta.type == "star" then
       result = makeStarPolygon(meta.pos.x, meta.pos.y, meta.data.sides, meta.data.r1, meta.data.r2, meta.data.a1, meta.data.a2)
    elseif meta.type == "polygon" then
-      result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points)
+
+      --result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points)
+      result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points, meta.data.steps)
+
    elseif meta.type == "polyline" then
-      --coords = {0,0,100,0}
-      --local vertices, indices, draw_mode = polyline('none', coords, 10, 1, false)
+      local vertices, indices, draw_mode = polyline(meta.data.join, meta.data.coords, meta.data.half_width, 1, false)
       --print(vertices, #vertices, vertices[1][1],vertices[1][2], vertices[2][1],vertices[2][2])
-      --result = vertices
+      result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
    else
       love.errhand("Unknown shape type: "..meta.type)
    end

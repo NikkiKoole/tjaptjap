@@ -158,8 +158,46 @@ function isPointInPath(x,y, poly)
 end
 
 
-function triangulate(poly)
+function triangulate(type, poly)
    local result = {}
+
+   if type=="polyline" then
+      print(poly.draw_mode)
+      if (poly.draw_mode == "triangles") then
+         for i=1, #poly.indices, 3 do
+            local i1 = poly.indices[i]
+            local i2 = poly.indices[i+1]
+            local i3 = poly.indices[i+2]
+            table.insert(result, {poly.vertices[i1][1], poly.vertices[i1][2],
+                                  poly.vertices[i2][1], poly.vertices[i2][2],
+                                  poly.vertices[i3][1], poly.vertices[i3][2]})
+         end
+      elseif (poly.draw_mode == "strip") then
+         -- this is quite dumb, the input data is very efficient and now i go and make separate triangles from it again
+         -- this is only for as long as I am not using meshes.
+
+         print(#poly.vertices)
+         for i=1, #poly.vertices-2 do
+            if (i % 2 == 0) then
+               -- 0 1 2
+            table.insert(result, {poly.vertices[i+0][1], poly.vertices[i+0][2],
+                                  poly.vertices[i+1][1], poly.vertices[i+1][2],
+                                  poly.vertices[i+2][1], poly.vertices[i+2][2]})
+
+            else
+               -- 0 2 1
+            table.insert(result, {poly.vertices[i+0][1], poly.vertices[i+0][2],
+                                  poly.vertices[i+2][1], poly.vertices[i+2][2],
+                                  poly.vertices[i+1][1], poly.vertices[i+1][2]})
+
+            end
+
+         end
+
+      end
+
+
+   else
    local polys = decompose_complex_poly(poly, {})
 
    for i=1 , #polys do
@@ -173,6 +211,8 @@ function triangulate(poly)
             end
          end
    end
+   end
+
    return result
 end
 
