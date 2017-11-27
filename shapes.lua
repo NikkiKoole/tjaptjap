@@ -9,9 +9,9 @@ end
 
 function makeCirclePart(cx, cy, radius, angle1, angle2, step)
    if not step then step = (math.pi/32) end
+
    local result = {}
    local x, y
-
    for angle=angle1, angle2, step do
       x = cx + radius * math.cos(angle)
       y = cy + radius * math.sin(angle)
@@ -23,17 +23,16 @@ function makeCirclePart(cx, cy, radius, angle1, angle2, step)
    y = cy + radius * math.sin(angle2)
    table.insert(result, x)
    table.insert(result, y)
-
    return result
 end
 
 function makeRoundedRect(cx,cy, w, h, radius, step)
+   local result = {}
+   if not step then step = 32 end
    step = math.pi/step
-   if not step then step = (math.pi/32) end
    local w2 = w/2
    local h2 = h/2
    local rounded
-   local result = {}
 
    w2 = math.max(w2, 1)
    h2 = math.max(h2, 1)
@@ -68,8 +67,6 @@ function makeRoundedRect(cx,cy, w, h, radius, step)
 
    table.insert(result, cx - (w2))
    table.insert(result, cy - (h2-radius))
-
-
 
    return result
 end
@@ -207,13 +204,9 @@ function makeShape(meta)
    elseif meta.type == "star" then
       result = makeStarPolygon(meta.pos.x, meta.pos.y, meta.data.sides, meta.data.r1, meta.data.r2, meta.data.a1, meta.data.a2)
    elseif meta.type == "polygon" then
-
-      --result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points)
       result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points, meta.data.steps)
-
    elseif meta.type == "polyline" then
       local vertices, indices, draw_mode = polyline(meta.data.join, meta.data.coords, meta.data.half_width, 1, false)
-      --print(vertices, #vertices, vertices[1][1],vertices[1][2], vertices[2][1],vertices[2][2])
       result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
    else
       love.errhand("Unknown shape type: "..meta.type)
@@ -225,7 +218,6 @@ end
 
 function rotateShape(cx, cy, shape, theta)
    local result = {}
-
    local costheta = math.cos(theta)
    local sintheta = math.sin(theta)
    local x,y,nx,ny
@@ -241,7 +233,6 @@ function rotateShape(cx, cy, shape, theta)
 
    return result
 end
-
 
 return {
    makeShape=makeShape,

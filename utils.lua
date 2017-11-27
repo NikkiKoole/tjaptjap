@@ -1,9 +1,3 @@
-function clip(value, min, max)
-   if (min > max) then return value
-   elseif (value < min) then return min
-   elseif (value > max) then return max
-   else return value end
-end
 
 function gaussian(mean, stdev)
    -- TODO get rid of returning a function, just return the result already
@@ -40,7 +34,6 @@ end
 function generatePolygon(ctrX, ctrY, aveRadius, irregularity, spikeyness, numVerts)
    irregularity = clip( irregularity, 0,1 ) * 2 * math.pi / numVerts
    spikeyness = clip( spikeyness, 0,1 ) * aveRadius
-
    angleSteps = {}
    lower = (2 * math.pi / numVerts) - irregularity
    upper = (2 * math.pi / numVerts) + irregularity
@@ -82,7 +75,8 @@ function HSL(h, s, l, a)
 	elseif h < 4 then r,g,b = 0,x,c
 	elseif h < 5 then r,g,b = x,0,c
 	else              r,g,b = c,0,x
-	end return (r+m)*255,(g+m)*255,(b+m)*255,a
+	end
+    return (r+m)*255, (g+m)*255, (b+m)*255,a
 end
 
 function transformPolygon(tx, ty, polygon)
@@ -116,12 +110,10 @@ function center(x, x1)
    return x1 + dx/2
 end
 
-
-
-
 function signT(p1, p2, p3)
    return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y)
 end
+
 function pointInTriangle(p, t1, t2, t3)
    local b1, b2, b3
    b1 = signT(p, t1, t2) < 0.0
@@ -130,7 +122,6 @@ function pointInTriangle(p, t1, t2, t3)
 
    return ((b1 == b2) and (b2 == b3))
 end
-
 
 function pointInPoly(point, triangles)
    local hit = false
@@ -187,23 +178,27 @@ function clamp(v, min, max)
    if v > max then return max end
    return v
 end
+function clip(value, min, max)
+   if (min > max) then return value
+   elseif (value < min) then return min
+   elseif (value > max) then return max
+   else return value end
+end
 
 function distancePointSegment(x,y, x1,y1, x2, y2)
    local A = x - x1
    local B = y - y1
    local C = x2 - x1
    local D = y2 - y1
-
    local dot    = A * C + B * D
    local len_sq = C * C + D * D
    local param = -1
-   --print(len_sq)
+
    if (len_sq ~= 0) then
       param = dot / len_sq
    end
 
    local xx, yy
-
    if (param < 0) then
       xx = x1
       yy = y1
@@ -214,45 +209,11 @@ function distancePointSegment(x,y, x1,y1, x2, y2)
       xx = x1 + param * C
       yy = y1 + param * D
    end
+
    local dx = x - xx
    local dy = y - yy
-
    return math.sqrt(dx * dx + dy*dy)
 end
-
-
--- public float pDistance(float x, float y, float x1, float y1, float x2, float y2) {
-
---           float A = x - x1;
---           float B = y - y1;
---           float C = x2 - x1;
---           float D = y2 - y1;
-
---           float dot = A * C + B * D;
---           float len_sq = C * C + D * D;
---           float param = -1;
---           if (len_sq != 0) //in case of 0 length line
---               param = dot / len_sq;
-
---           float xx, yy;
-
---           if (param < 0) {
---             xx = x1;
---             yy = y1;
---           }
---           else if (param > 1) {
---             xx = x2;
---             yy = y2;
---           }
---           else {
---             xx = x1 + param * C;
---             yy = y1 + param * D;
---           }
-
---           float dx = x - xx;
---           float dy = y - yy;
---           return (float) Math.sqrt(dx * dx + dy * dy);
---         }
 
 return {
    HSL=HSL,
