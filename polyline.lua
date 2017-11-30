@@ -208,18 +208,30 @@ local function polyline(join_type, coords, half_width, pixel_size, draw_overdraw
 
   local len_s = length(s)
   local thick_index = 1
-  local ns = normal({}, s, half_width[thick_index] / len_s)
+
+  local function getHalfWidth(index)
+     if type(half_width) == "table" then
+        if index > #half_width then return half_width[#half_width] end
+        return half_width[index]
+     else
+        return half_width
+     end
+
+  end
+
+
+  local ns = normal({}, s, getHalfWidth(thick_index) / len_s)
 
   local r, q = Vector(coords[1], coords[2]), Vector(0, 0)
   for i=1,#coords-2,2 do
      if draw_overdraw then
-       half_width[thick_index] = half_width[thick_index] - pixel_size * 0.3
+       half_width[thick_index] = getHalfWidth(thick_index) - pixel_size * 0.3
     end
 
     q.x, q.y = r.x, r.y
     r.x, r.y = coords[i + 2], coords[i + 3]
-    ns = normal({}, s, half_width[thick_index] / len_s)
-    len_s = renderEdge(anchors, normals, s, len_s, ns, q, r, half_width[thick_index])
+    ns = normal({}, s, getHalfWidth(thick_index) / len_s)
+    len_s = renderEdge(anchors, normals, s, len_s, ns, q, r, getHalfWidth(thick_index))
     thick_index = thick_index + 1
 
   end
@@ -232,9 +244,10 @@ local function polyline(join_type, coords, half_width, pixel_size, draw_overdraw
   end
 
   -- 'fix', when you havent added enough thicknesses (1 more then lengths) just use the last one
-  if thick_index > #half_width then half_width[thick_index] = half_width[#half_width] end
-  ns = normal({}, s, half_width[thick_index] / len_s)
-  len_s = renderEdge(anchors, normals, s, len_s, ns, q, r, half_width[thick_index])
+  --hal_widthgetHalfWidth(thick_index)
+  --if thick_index > #half_width then half_width[thick_index] = half_width[#half_width] end
+  ns = normal({}, s, getHalfWidth(thick_index) / len_s)
+  len_s = renderEdge(anchors, normals, s, len_s, ns, q, r, getHalfWidth(thick_index))
 
 
   local vertices = {}

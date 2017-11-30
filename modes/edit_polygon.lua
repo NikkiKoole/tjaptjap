@@ -69,7 +69,10 @@ function mode:addVertex(x, y)
    table.insert(self.child.data.points, best.ni, {x=hx, y=hy})
 
    local shape = shapes.makeShape(self.child)
-   self.child.triangles = poly.triangulate(shape)
+   print(#shape)
+   local p = poly.triangulate(self.child.type, shape)
+   print(#p, "triangles")
+   self.child.triangles = p
    mode:makeHandles()
 end
 
@@ -82,7 +85,7 @@ function mode:addControlPoint(x,y)
    table.insert(self.child.data.points, best.ni, {cx=hx, cy=hy})
 
    local shape = shapes.makeShape(self.child)
-   self.child.triangles = poly.triangulate(shape)
+   self.child.triangles = poly.triangulate(self.child.type, shape)
    mode:makeHandles()
 end
 
@@ -102,7 +105,7 @@ function mode:removeVertexIfOverlappingWithNextOrPrevious(it)
       if #points > 3 then
          table.remove(self.child.data.points, it.i)
          local shape = shapes.makeShape(self.child)
-         self.child.triangles = poly.triangulate(shape)
+         self.child.triangles = poly.triangulate(self.child.type, shape)
          mode:makeHandles()
       end
   end
@@ -110,9 +113,10 @@ end
 
 function mode:removeLastTouched()
    if (self.lastTouchedIndex) then
+      print(self.lastTouchedIndex)
       table.remove(self.child.data.points, self.lastTouchedIndex)
       local shape = shapes.makeShape(self.child)
-      self.child.triangles = poly.triangulate(shape)
+      self.child.triangles = poly.triangulate(self.child.type, shape)
       mode:makeHandles()
    end
 
@@ -221,7 +225,7 @@ function mode:update()
    if self.child.dirty then
       self.child.dirty = false
       local shape = shapes.makeShape(self.child)
-      self.child.triangles = poly.triangulate(shape)
+      self.child.triangles = poly.triangulate(self.child.type, shape)
    end
 end
 
