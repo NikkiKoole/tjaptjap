@@ -161,7 +161,7 @@ end
 function triangulate(type, poly)
    local result = {}
 
-   if type=="polyline" then
+   if type=="polyline" or type=="rope" then
       print(poly.draw_mode)
       if (poly.draw_mode == "triangles") then
          for i=1, #poly.indices, 3 do

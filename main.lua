@@ -1,5 +1,5 @@
 --[[
-
+   todo polygon is broken; cannot add new vertices
 ]]--
 
 Signal = require 'vendor.signal'
@@ -16,13 +16,37 @@ local utils = require "utils"
 local shapes = require "shapes"
 poly = require 'poly'
 
+
+
+
 function love.load()
    if arg[#arg] == "-debug" then require("mobdebug").start() end
    love.window.setMode(1024, 768, {resizable=true, vsync=true, fullscreen=false})
 
    world = {
       children={
-         {type="polyline", pos={x=100,y=100,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200,0,0}, join="miter", half_width=5  }}
+         {
+            type="rope",
+            pos={x=100,y=100,z=0},
+            data={
+               relative_rotation = false,
+               rotations={-math.pi/2,-math.pi/2 -0.2,-math.pi/2 -0.4,-math.pi/2},
+               lengths={120,120,100,50},
+               thicknesses={10,80,30,40,10},
+            }
+         },
+         {type="rope",
+          pos={x=-100,y=100,z=0},
+          data={
+             relative_rotation = true,
+             rotations={-math.pi/2,-0.8,-0.8,0.8},
+             lengths={120,120,100,50},
+             thicknesses={40,40,30,20},
+          }
+         },
+
+
+         --{type="polyline", pos={x=100,y=100,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200,0,0}, join="miter", half_width=5  }}
          --{type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
          --{type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
          --{type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
@@ -113,7 +137,7 @@ function love.draw()
    for i=1, #world.children do
       if world.children[i].triangles  then
          for j=1, #world.children[i].triangles do
-            love.graphics.setColor(255,love.math.random()*255,255, 100)
+            love.graphics.setColor(255,200 + math.random()*55,255, 100)
             love.graphics.polygon("fill", world.children[i].triangles[j])
             triangle_count = triangle_count + 1
          end

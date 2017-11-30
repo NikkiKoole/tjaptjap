@@ -1,4 +1,5 @@
 polyline = require 'polyline'
+local utils = require "utils"
 
 function TableConcat(t1,t2)
     for i=1,#t2 do
@@ -147,6 +148,36 @@ function makeStarPolygon(cx, cy, sides, r1, r2, a1, a2)
    return result
 end
 
+function moveAtAngle(x,y, angle, distance)
+   local px = math.cos( angle ) * distance
+   local py = math.sin( angle ) * distance
+   return x + px, y + py
+end
+
+
+
+function makeRope(x, y, lengths, rotations, thicknesses, relative_rotation)
+   local result = {}
+   local cx, cy = x, y
+   local coords = {cx, cy}
+   local rotation = 0
+   for i=1, #lengths do
+      if relative_rotation then
+         rotation = rotation + rotations[i]
+      else
+         rotation = rotations[i]
+      end
+
+      cx, cy = moveAtAngle(cx, cy, rotation or -math.pi/2, lengths[i])
+      table.insert(coords, cx)
+      table.insert(coords, cy)
+   end
+   print("coords: ", #coords/2)
+   local vertices, indices, draw_mode = polyline("miter", coords, thicknesses, 1, false)
+   result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
+
+   return result
+end
 
 
 function makeCustomPolygon(x,y, points, steps)
@@ -205,6 +236,8 @@ function makeShape(meta)
       result = makeStarPolygon(meta.pos.x, meta.pos.y, meta.data.sides, meta.data.r1, meta.data.r2, meta.data.a1, meta.data.a2)
    elseif meta.type == "polygon" then
       result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points, meta.data.steps)
+   elseif meta.type == "rope" then
+      result = makeRope(meta.pos.x, meta.pos.y, meta.data.lengths, meta.data.rotations or {}, meta.data.thicknesses or {}, meta.data.relative_rotation)
    elseif meta.type == "polyline" then
       local vertices, indices, draw_mode = polyline(meta.data.join, meta.data.coords, meta.data.half_width, 1, false)
       result = {vertices=vertices, indices=indices, draw_mode=draw_mode}

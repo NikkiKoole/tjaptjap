@@ -172,6 +172,12 @@ function rotatePoint(x,y,cx,cy,theta)
    local py = math.sin(theta) * (x-cx) + math.cos(theta) * (y-cy) + cy
    return px,py
 end
+function angleAtDistance(x,y,angle, distance)
+   local px = math.cos( angle ) * distance
+   local py = math.sin( angle ) * distance
+   return px, py
+end
+
 
 function clamp(v, min, max)
    if v < min then return min end
@@ -229,6 +235,7 @@ return {
    pointInCircle=pointInCircle,
    pointInPoly=pointInPoly,
    rotatePoint=rotatePoint,
+   angleAtDistance,
    clamp=clamp,
    distancePointSegment=distancePointSegment
 }

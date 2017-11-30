@@ -198,10 +198,6 @@ local function polyline(join_type, coords, half_width, pixel_size, draw_overdraw
   local anchors = {}
   local normals = {}
 
-  if draw_overdraw then
-    half_width = half_width - pixel_size * 0.3
-  end
-
   local is_looping = (coords[1] == coords[#coords - 1]) and (coords[2] == coords[#coords])
   local s
   if is_looping then
@@ -211,13 +207,21 @@ local function polyline(join_type, coords, half_width, pixel_size, draw_overdraw
   end
 
   local len_s = length(s)
-  local ns = normal({}, s, half_width / len_s)
+  local thick_index = 1
+  local ns = normal({}, s, half_width[thick_index] / len_s)
 
   local r, q = Vector(coords[1], coords[2]), Vector(0, 0)
   for i=1,#coords-2,2 do
+     if draw_overdraw then
+       half_width[thick_index] = half_width[thick_index] - pixel_size * 0.3
+    end
+
     q.x, q.y = r.x, r.y
     r.x, r.y = coords[i + 2], coords[i + 3]
-    len_s = renderEdge(anchors, normals, s, len_s, ns, q, r, half_width)
+    ns = normal({}, s, half_width[thick_index] / len_s)
+    len_s = renderEdge(anchors, normals, s, len_s, ns, q, r, half_width[thick_index])
+    thick_index = thick_index + 1
+
   end
 
   q.x, q.y = r.x, r.y
@@ -226,7 +230,12 @@ local function polyline(join_type, coords, half_width, pixel_size, draw_overdraw
   else
     r.x, r.y = r.x + s.x, r.y + s.y
   end
-  len_s = renderEdge(anchors, normals, s, len_s, ns, q, r, half_width)
+
+  -- 'fix', when you havent added enough thicknesses (1 more then lengths) just use the last one
+  if thick_index > #half_width then half_width[thick_index] = half_width[#half_width] end
+  ns = normal({}, s, half_width[thick_index] / len_s)
+  len_s = renderEdge(anchors, normals, s, len_s, ns, q, r, half_width[thick_index])
+
 
   local vertices = {}
   local indices = nil
