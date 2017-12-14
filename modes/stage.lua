@@ -22,10 +22,11 @@ function mode:pointerpressed(x, y)
          hit = utils.pointInRect2(wx, wy, o.pos.x + cdx,   o.pos.y + cdy, o.data.w, o.data.h )
       elseif o.type=="polygon" then
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
-      else
+      elseif o.triangles then
+         --print("no specfifi hittest (just use triangles) for ", o.type)
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
-
-         print("dont know how to hittest : ", o.type)
+      else
+         print("dont know how to hittest : ", o.type, hit)
       end
 
 
@@ -100,6 +101,9 @@ function mode:touchmoved( id, x, y, dx, dy, pressure )
       self.touches[index].dx = dx
       self.touches[index].dy = dy
       self.touches[index].pressure = pressure
+      --print(dx,dy)
+   else
+      --print("did this show?")
    end
 
    if #self.touches == 1 then

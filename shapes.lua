@@ -148,11 +148,6 @@ function makeStarPolygon(cx, cy, sides, r1, r2, a1, a2)
    return result
 end
 
-function moveAtAngle(x,y, angle, distance)
-   local px = math.cos( angle ) * distance
-   local py = math.sin( angle ) * distance
-   return x + px, y + py
-end
 
 
 
@@ -168,11 +163,11 @@ function makeRope(x, y, lengths, rotations, thicknesses, relative_rotation)
          rotation = rotations[i]
       end
 
-      cx, cy = moveAtAngle(cx, cy, rotation or -math.pi/2, lengths[i])
+      cx, cy = utils.moveAtAngle(cx, cy, rotation or -math.pi/2, lengths[i])
       table.insert(coords, cx)
       table.insert(coords, cy)
    end
-   print("coords: ", #coords/2)
+   --print("coords: ", #coords/2)
    local vertices, indices, draw_mode = polyline("miter", coords, thicknesses, 1, false)
    result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
 

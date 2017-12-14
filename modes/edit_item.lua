@@ -1,3 +1,5 @@
+local suit = require 'vendor.suit'
+
 local utils = require "utils"
 local mode ={}
 
@@ -43,7 +45,58 @@ local ui = {
    },
 }
 
+local slider = {value = 8, min = 3, max = 24}
+--local checkbox = {checked = true, text="stuff"}
+
+
+function numeric_stepper(child, key)
+   local dirty = false
+   suit.Label(key, {align="left"},suit.layout:row(60, 10))
+   if suit.Button(" - ", suit.layout:col(40, 40)).hit then
+      child.data[key] = child.data[key] - 1
+      dirty = true
+   end
+   suit.Label(child.data[key], suit.layout:col(40,40))
+
+   if suit.Button(" + ", suit.layout:col(40, 40)).hit then
+      child.data[key] = child.data[key] + 1
+      dirty = true
+   end
+
+   return dirty
+end
+
+
 function mode:update(dt)
+      local child = self.child
+      local dirty = false
+
+      local prop = "steps"
+      if (child.type == "rect" or child.type == "circle") then
+         prop = "steps"
+      elseif (child.type== "star") then
+         prop="sides"
+      end
+      suit.layout:reset(10,100)
+      suit.layout:padding(10,10)
+      suit.Label(child.type, {align="left"}, suit.layout:row(150, 10))
+      suit.layout:row()
+      suit.Label(prop, {align="left"}, suit.layout:row(150, 10))
+
+
+      if suit.Slider(slider, suit.layout:row(150,30)).changed then
+         child.data[prop] = math.floor(slider.value)
+         dirty = true
+      end
+      suit.Label(child.data[prop], suit.layout:col(50,30))
+      suit.layout:left(150)
+      dirty = numeric_stepper(child, prop) or dirty
+
+      if dirty then
+         slider.value = child.data[prop]
+         self.child.dirty = true
+         mode:updateHandles()
+      end
 end
 
 function mode:init()
@@ -143,14 +196,14 @@ function mode:pointerpressed(x,y,id)
    hit = utils.pointInRect(x,y,ui_item.backdrop.x,ui_item.backdrop.y,ui_item.backdrop.w,ui_item.backdrop.h)
    if hit then found = true end
 
-   for i=1, #ui_item.buttons do
-      local b = ui_item.buttons[i]
-      if (pointInRect(x,y,b.x, b.y, b.w, b.h)) then
-         self.child.data[b.value] = b.action(self.child.data[b.value])
-         self.child.dirty = true
-         mode:updateHandles()
-      end
-   end
+   -- for i=1, #ui_item.buttons do
+   --    local b = ui_item.buttons[i]
+   --    if (pointInRect(x,y,b.x, b.y, b.w, b.h)) then
+   --       self.child.data[b.value] = b.action(self.child.data[b.value])
+   --       self.child.dirty = true
+   --       mode:updateHandles()
+   --    end
+   -- end
 
    if (found == false) then
       Signal.emit("switch-state", "stage")
@@ -279,27 +332,30 @@ function mode:draw()
    end
    camera:detach()
 
+      suit.draw()
 
-   local ui_item = ui[self.child.type]
-   love.graphics.setColor(ui_item.backdrop.r, ui_item.backdrop.g, ui_item.backdrop.b)
-   love.graphics.rectangle("fill", ui_item.backdrop.x, ui_item.backdrop.y, ui_item.backdrop.w, ui_item.backdrop.h)
+   -- local ui_item = ui[self.child.type]
+   -- love.graphics.setColor(ui_item.backdrop.r, ui_item.backdrop.g, ui_item.backdrop.b)
+   -- love.graphics.rectangle("fill", ui_item.backdrop.x, ui_item.backdrop.y, ui_item.backdrop.w, ui_item.backdrop.h)
 
-   for i=1, #ui_item.buttons do
-      local b = ui_item.buttons[i]
-      love.graphics.setColor(b.r,b.g,b.b)
-      love.graphics.rectangle("fill", b.x,b.y,b.w,b.h)
-   end
+   -- for i=1, #ui_item.buttons do
+   --    local b = ui_item.buttons[i]
+   --    love.graphics.setColor(b.r,b.g,b.b)
+   --    love.graphics.rectangle("fill", b.x,b.y,b.w,b.h)
+   -- end
 
-   for i=1, #ui_item.values do
-      local v = ui_item.values[i]
-      love.graphics.setColor(v.r, v.g, v.b)
-      love.graphics.print(self.child.data[v.path], v.x, v.y  )
-   end
-   for i=1, #ui_item.strings do
-      local s = ui_item.strings[i]
-      love.graphics.setColor(s.r, s.g, s.b)
-      love.graphics.print(s.str, s.x, s.y  )
-   end
+   -- for i=1, #ui_item.values do
+   --    local v = ui_item.values[i]
+   --    love.graphics.setColor(v.r, v.g, v.b)
+   --    love.graphics.print(self.child.data[v.path], v.x, v.y  )
+   -- end
+   -- for i=1, #ui_item.strings do
+   --    local s = ui_item.strings[i]
+   --    love.graphics.setColor(s.r, s.g, s.b)
+   --    love.graphics.print(s.str, s.x, s.y  )
+   -- end
 end
+
+
 
 return mode

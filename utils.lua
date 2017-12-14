@@ -221,6 +221,12 @@ function distancePointSegment(x,y, x1,y1, x2, y2)
    return math.sqrt(dx * dx + dy*dy)
 end
 
+function moveAtAngle(x,y, angle, distance)
+   local px = math.cos( angle ) * distance
+   local py = math.sin( angle ) * distance
+   return x + px, y + py
+end
+
 return {
    HSL=HSL,
    generatePolygon=generatePolygon,
@@ -237,5 +243,6 @@ return {
    rotatePoint=rotatePoint,
    angleAtDistance,
    clamp=clamp,
-   distancePointSegment=distancePointSegment
+   distancePointSegment=distancePointSegment,
+   moveAtAngle=moveAtAngle
 }

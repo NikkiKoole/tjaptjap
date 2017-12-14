@@ -28,6 +28,8 @@ function mode:pointerreleased()
    else
       if (self.child.type == "polygon") then
          Signal.emit("switch-state", "edit-polygon", self.child)
+      elseif (self.child.type == "rope") then
+         Signal.emit("switch-state", "edit-rope", self.child)
       else
          Signal.emit("switch-state", "edit-item", self.child)
       end

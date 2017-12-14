@@ -162,7 +162,7 @@ function triangulate(type, poly)
    local result = {}
 
    if type=="polyline" or type=="rope" then
-      print(poly.draw_mode)
+      --print(poly.draw_mode)
       if (poly.draw_mode == "triangles") then
          for i=1, #poly.indices, 3 do
             local i1 = poly.indices[i]
@@ -176,7 +176,7 @@ function triangulate(type, poly)
          -- this is quite dumb, the input data is very efficient and now i go and make separate triangles from it again
          -- this is only for as long as I am not using meshes.
 
-         print(#poly.vertices)
+         --print(#poly.vertices)
          for i=1, #poly.vertices-2 do
             if (i % 2 == 0) then
                -- 0 1 2
