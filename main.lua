@@ -36,10 +36,10 @@ function love.load()
             type="rope",
             pos={x=100,y=100,z=0},
             data={
-               relative_rotation = false,
-               rotations={-math.pi/2,-math.pi/2,-math.pi/2,-math.pi/2},
-               lengths={120,120,100,50},
-               thicknesses={10,80,30,40,10},
+               relative_rotation = true,
+               rotations={0, 0, 0, 0, 0, 0,0,0,0},
+               lengths={120,120,100,100,100,100,100,100 },
+               thicknesses={20,50,60,70,70,70,70,60,20},
             }
          },
          -- {type="rope",
@@ -57,7 +57,7 @@ function love.load()
          --{type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
          -- {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
          -- {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
-         -- {type="polygon", pos={x=0, y=0, z=0}, data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
+         {type="polygon", pos={x=0, y=0, z=0}, data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
       },
    }
 
@@ -168,7 +168,7 @@ function love.draw()
    for i=1, #world.children do
       if world.children[i].triangles  then
          for j=1, #world.children[i].triangles do
-            love.graphics.setColor(255,200 + math.random()*55,255, 100)
+            love.graphics.setColor(math.random()*50 + 20,  math.random()*50 + 20,55, 255)
             love.graphics.polygon("fill", world.children[i].triangles[j])
             triangle_count = triangle_count + 1
          end

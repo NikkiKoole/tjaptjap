@@ -33,6 +33,31 @@ function mode:draw()
 end
 
 function mode:updateHandles()
+
+   local it = self.child
+   local cx, cy = it.pos.x, it.pos.y
+   local rotation = 0
+
+   self.handles[1].x = cx
+   self.handles[1].y = cy
+
+   --table.insert(self.handles, {type="rope-point", index=1, x=cx, y=cy, r=32})
+
+   for i=1, #it.data.lengths do
+
+      if it.data.relative_rotation then
+         rotation = rotation + it.data.rotations[i]
+      else
+         rotation = it.data.rotations[i]
+      end
+
+      cx, cy = utils.moveAtAngle(cx, cy, rotation or -math.pi/2, it.data.lengths[i])
+      self.handles[i+1].x = cx
+      self.handles[i+1].y = cy
+
+      --table.insert(self.handles, {type="rope-point", index=i+1, x=cx, y=cy, r=32})
+   end
+
 end
 
 
@@ -57,6 +82,8 @@ function mode:makeHandles()
    end
  end
 
+
+
 function mode:pointerpressed(x,y,id)
    local found = false
    for i=1, #self.handles do
@@ -69,9 +96,17 @@ function mode:pointerpressed(x,y,id)
          self.lastTouchedIndex = i
       end
    end
-    if not found then
+
+   function sorter(a, b)
+      return a.h.index < b.h.index
+   end
+   table.sort(self.dragging, sorter)
+
+   if not found then
       Signal.emit("switch-state", "stage")
    end
+
+
 end
 
 function mode:mousepressed( x, y, button, istouch )
@@ -95,6 +130,36 @@ function mode:touchmoved(id, x, y, dx, dy, pressure)
    self:pointermoved(x,y,id)
 end
 
+function mode:touchreleased( id, x, y, dx, dy, pressure )
+   local index = utils.tablefind_id(self.touches, tostring(id))
+   table.remove(self.touches, index)
+
+   for i=#self.dragging,1 ,-1  do
+      local it = self.dragging[i]
+      if it.touchid == id then
+         table.remove(self.dragging, i)
+      end
+   end
+
+end
+
+
+function mode:update(dt)
+end
+
+
+function mode:getNestedRotation(index)
+   local result = 0
+   for i=index,1,-1 do
+      if self.child.data.rotations[i] then
+         result = result + self.child.data.rotations[i]
+      end
+   end
+
+   return result
+end
+
+
 
 
 function mode:pointermoved(x, y, id)
@@ -110,17 +175,28 @@ function mode:pointermoved(x, y, id)
                if (it.h.index > 1) then
                   local prev = self.handles[it.h.index-1]
                   local ap = utils.angle( nx, ny, prev.x, prev.y)
-                  ap = (math.pi * 2) - (ap + math.pi/2)
                   local dp = utils.distance(prev.x, prev.y, nx, ny)
 
+                  if child.data.relative_rotation then
+                     ap = ap * -1
+                     local startAngle = mode:getNestedRotation(it.h.index-2)
+                     ap = ap - startAngle
+                     ap = ap - math.pi/2
+                  else
+                     ap = (math.pi * 2) - (ap + math.pi/2)
+                  end
+
                   self.child.data.rotations[it.h.index-1] = ap
-                  --self.child.data.lengths[it.h.index-1] = dp
+                  self.child.data.lengths[it.h.index-1] = dp
 
-                  self.child.dirty = true
+               else
+                  self.child.pos.x = nx
+                  self.child.pos.y = ny
+
                end
-
+                  self.child.dirty = true
+                  mode:updateHandles()
             end
-
          end
       end
    end
