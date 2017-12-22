@@ -2,6 +2,18 @@ local utils = require "utils"
 local shapes = require "shapes"
 local mode = {}
 
+function getWithID(list, id)
+   if (list) then
+      for i=#list,1 ,-1 do
+         if list[i].id == id then
+            return  i
+         end
+      end
+   end
+   return -1
+end
+
+
 function mode:init()
    self.touches = {}
 end
@@ -10,7 +22,7 @@ function mode:enter(from, data)
    self.child = data
    self.dragging = {} -- for dragging handlers
    self.handles = {}
-   self:makeHandles()
+   --self:makeHandles()
 end
 
 function mode:makeHandles()
@@ -55,9 +67,9 @@ function mode:pointerpressed(x,y,id)
       found = true
    end
 
-   if not found then
-      Signal.emit("switch-state", "stage")
-   end
+   -- if not found then
+   --    Signal.emit("switch-state", "stage")
+   -- end
 end
 
 function mode:addVertex(x, y)
@@ -69,9 +81,7 @@ function mode:addVertex(x, y)
    table.insert(self.child.data.points, best.ni, {x=hx, y=hy})
 
    local shape = shapes.makeShape(self.child)
-   print(#shape)
    local p = poly.triangulate(self.child.type, shape)
-   print(#p, "triangles")
    self.child.triangles = p
    mode:makeHandles()
 end
@@ -227,6 +237,65 @@ function mode:update()
       local shape = shapes.makeShape(self.child)
       self.child.triangles = poly.triangulate(self.child.type, shape)
    end
+
+   if love.keyboard.isDown("k") then
+      Signal.emit("switch-state", "stage")
+   end
+
+   Hammer:reset(0,0)
+
+
+
+   for i=1, #self.child.data.points do
+
+      local point = self.child.data.points[i]
+      local cx2, cy2 = camera:cameraCoords(
+         (point.x or point.cx) + self.child.pos.x,
+         (point.y or point.cy) + self.child.pos.y)
+      local button = Hammer:rectangle("bluurp"..i, 50, 50, {x=cx2, y=cy2})
+
+      if button.dragging then
+         local p = getWithID(Hammer.pointers.moved, button.pointerID)
+         local moved = Hammer.pointers.moved[p]
+         if moved then
+            wx,wy = camera:worldCoords(moved.x, moved.y)
+            wx = wx - button.dx/camera.scale - self.child.pos.x
+            wy = wy - button.dy/camera.scale - self.child.pos.y
+
+            if point.x and point.y then
+               self.child.data.points[i].x = wx
+               self.child.data.points[i].y = wy
+            elseif point.cx and point.cy then
+               self.child.data.points[i].cx = wx
+               self.child.data.points[i].cy = wy
+            end
+            self.child.dirty = true
+         end
+      end
+   end
+
+   Hammer:pos(100,400)
+   --Hammer:label("add_vertex_label", "Add vertex", 100, 30)
+   --Hammer:ret()
+   local add_vertex = Hammer:rectangle("drag1", 80,80)
+
+   if add_vertex.dragging then
+      local p = getWithID(Hammer.pointers.moved, add_vertex.pointerID)
+      local moved = Hammer.pointers.moved[p]
+      if moved then
+         Hammer:circle("cursor1", 30, {x=moved.x, y=moved.y})
+      end
+   end
+   local add_cp = Hammer:rectangle("drag2", 80,80)
+   if add_cp.dragging then
+      local p = getWithID(Hammer.pointers.moved, add_cp.pointerID)
+      local moved = Hammer.pointers.moved[p]
+      if moved then
+         Hammer:circle("cursor2", 30, {x=moved.x, y=moved.y})
+      end
+   end
+
+
 end
 
 function mode:getClosestNodes(x, y)
@@ -259,12 +328,12 @@ function mode:draw()
    camera:attach()
    love.graphics.setColor(255,255,255)
 
-   for i=1, #self.handles do
-      local h = self.handles[i]
-      if (h.type == "vertex") then love.graphics.setColor(255,255,255) end
-      if (h.type == "cp")     then love.graphics.setColor(0  ,255,255) end
-      love.graphics.circle("fill", h.x, h.y , h.r/camera.scale)
-   end
+   -- for i=1, #self.handles do
+   --    local h = self.handles[i]
+   --    if (h.type == "vertex") then love.graphics.setColor(255,255,255) end
+   --    if (h.type == "cp")     then love.graphics.setColor(0  ,255,255) end
+   --    love.graphics.circle("fill", h.x, h.y , h.r/camera.scale)
+   -- end
 
    camera:detach()
 

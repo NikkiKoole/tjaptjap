@@ -1,49 +1,48 @@
 local suit = require 'vendor.suit'
-
 local utils = require "utils"
 local mode ={}
 
-local ui = {
-   circle = {
-      backdrop = {x=10, y=50, w=200, h=200, r=100, g=100, b=0},
-      buttons = {
-         {value='steps', action=function(v) return math.max(2,v-1) end, x=10, y=50,w=40,h=40,r=150,g=150,b=150},
-         {value='steps', action=function(v) return v+1 end, x=110,y=50,w=40,h=40,r=150,g=150,b=150},
-      },
-      values = {
-         {path='steps', x=60, y=50, r=255, g=255, b=255},
-      },
-      strings = {
-         {str="steps", x=160, y=50, r=255, g=255, b=255},
-      }
-   },
-   rect = {
-      backdrop = {x=10, y=50, w=200, h=200, r=100, g=100, b=0},
-      buttons = {
-         {value='steps', action=function(v) return math.max(2,v-1) end,  x=10, y=50,w=40,h=40,r=150,g=150,b=150},
-         {value='steps', action=function(v) return v+1 end, x=110,y=50,w=40,h=40,r=150,g=150,b=150},
-      },
-      values = {
-         {path='steps', x=60, y=50, r=255, g=255, b=255},
-      },
-      strings = {
-         {str="steps", x=160, y=50, r=255, g=255, b=255},
-      }
-   },
-   star = {
-      backdrop = {x=10, y=50, w=200, h=200, r=100, g=100, b=0},
-      buttons = {
-         {value='sides', action=function(v) return math.max(2,v-1) end, x=10, y=50,w=40,h=40,r=150,g=150,b=150},
-         {value='sides', action=function(v) return v+1 end, x=110,y=50,w=40,h=40,r=150,g=150,b=150},
-      },
-      values = {
-         {path='sides', x=60, y=50, r=255, g=255, b=255},
-      },
-      strings = {
-         {str="sides", x=160, y=50, r=255, g=255, b=255},
-      }
-   },
-}
+-- local ui = {
+--    circle = {
+--       backdrop = {x=10, y=50, w=200, h=200, r=100, g=100, b=0},
+--       buttons = {
+--          {value='steps', action=function(v) return math.max(2,v-1) end, x=10, y=50,w=40,h=40,r=150,g=150,b=150},
+--          {value='steps', action=function(v) return v+1 end, x=110,y=50,w=40,h=40,r=150,g=150,b=150},
+--       },
+--       values = {
+--          {path='steps', x=60, y=50, r=255, g=255, b=255},
+--       },
+--       strings = {
+--          {str="steps", x=160, y=50, r=255, g=255, b=255},
+--       }
+--    },
+--    rect = {
+--       backdrop = {x=10, y=50, w=200, h=200, r=100, g=100, b=0},
+--       buttons = {
+--          {value='steps', action=function(v) return math.max(2,v-1) end,  x=10, y=50,w=40,h=40,r=150,g=150,b=150},
+--          {value='steps', action=function(v) return v+1 end, x=110,y=50,w=40,h=40,r=150,g=150,b=150},
+--       },
+--       values = {
+--          {path='steps', x=60, y=50, r=255, g=255, b=255},
+--       },
+--       strings = {
+--          {str="steps", x=160, y=50, r=255, g=255, b=255},
+--       }
+--    },
+--    star = {
+--       backdrop = {x=10, y=50, w=200, h=200, r=100, g=100, b=0},
+--       buttons = {
+--          {value='sides', action=function(v) return math.max(2,v-1) end, x=10, y=50,w=40,h=40,r=150,g=150,b=150},
+--          {value='sides', action=function(v) return v+1 end, x=110,y=50,w=40,h=40,r=150,g=150,b=150},
+--       },
+--       values = {
+--          {path='sides', x=60, y=50, r=255, g=255, b=255},
+--       },
+--       strings = {
+--          {str="sides", x=160, y=50, r=255, g=255, b=255},
+--       }
+--    },
+-- }
 
 local slider = {value = 8, min = 3, max = 24}
 --local checkbox = {checked = true, text="stuff"}
@@ -97,6 +96,9 @@ function mode:update(dt)
          self.child.dirty = true
          mode:updateHandles()
       end
+
+      -- can i make some hammer button be postiioned in world space?
+
 end
 
 function mode:init()
@@ -152,7 +154,10 @@ function mode:updateHandles()
             type="r2"
       }}
    else
-      print("ERROR unknown data type in edit-item", data.type)
+
+         --love.errhand("ERROR unknown data type in edit-item: ".. child.data.type)
+
+
    end
 end
 
@@ -181,7 +186,7 @@ function mode:pointerpressed(x,y,id)
    local cdy = camera.y - camera.y * layer_speed
 
    local hit
-   local ui_item = ui[o.type]
+--   local ui_item = ui[o.type]
 
    if o.type == "rect" then
       hit = utils.pointInRect2(wx, wy, o.pos.x + cdx, o.pos.y + cdy, o.data.w, o.data.h  )
@@ -193,7 +198,7 @@ function mode:pointerpressed(x,y,id)
       --hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, math.max(o.data.r1, o.data.r2))
    end
    if hit then found = true end
-   hit = utils.pointInRect(x,y,ui_item.backdrop.x,ui_item.backdrop.y,ui_item.backdrop.w,ui_item.backdrop.h)
+   --hit = utils.pointInRect(x,y,ui_item.backdrop.x,ui_item.backdrop.y,ui_item.backdrop.w,ui_item.backdrop.h)
    if hit then found = true end
 
    -- for i=1, #ui_item.buttons do

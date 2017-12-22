@@ -1,5 +1,5 @@
 --[[
-   todo polygon is broken; cannot add new vertices
+
 ]]--
 
 local suit = require 'vendor.suit'
@@ -13,6 +13,7 @@ DragMode = require "modes.drag_item"
 ItemMode = require "modes.edit_item"
 PolygonMode = require "modes.edit_polygon"
 RopeMode = require "modes.edit_rope"
+Hammer = require "hammer"
 
 local utils = require "utils"
 local shapes = require "shapes"
@@ -23,6 +24,99 @@ local input = {text = ""}
 local slider = {value = 1, min = 0, max = 2}
 local checkbox = {checked = true, text="stuff"}
 
+--------------------------------
+
+local pointers = {
+   pressed = {},
+   moved = {},
+   released = {},
+}
+
+function removePointer(list, id)
+   if (list) then
+      for i=#list,1 ,-1 do
+         if list[i].id == id then
+            table.remove(list, i)
+         end
+      end
+   end
+end
+
+function listGetPointerIndex(list, id)
+   if (list) then
+      for i=#list,1 ,-1 do
+         if list[i].id == id then
+            return  i
+         end
+      end
+   end
+   return -1
+end
+
+
+function pointerReleased(p)
+   table.insert(pointers.released, p)
+   removePointer(pointers.pressed, p.id)
+   removePointer(pointers.moved, p.id)
+end
+
+function love.touchreleased(id, x, y, dx, dy, pressure)
+   pointerReleased({id=id, x=x, y=y, dx=dx, dy=dy, pressure=pressure})
+end
+function love.mousereleased(x, y, button, isTouch)
+   print("mouse released")
+   if (not istouch) then
+      pointerReleased({id="mouse", x=x, y=y})
+   end
+
+end
+
+
+function pointerMoved(p)
+   removePointer(pointers.pressed, p.id)
+   local i = listGetPointerIndex(pointers.moved, p.id)
+   if i == -1 then
+      table.insert(pointers.moved, p)
+   else
+      pointers.moved[i].x = p.x
+      pointers.moved[i].y = p.y
+      pointers.moved[i].dx = p.dx
+      pointers.moved[i].dy = p.dy
+      pointers.moved[i].pressure = p.pressure
+   end
+end
+
+
+function love.mousemoved(x, y, dx, dy,  istouch)
+   if (not istouch) then
+      pointerMoved({id="mouse", x=x, y=y, dx=dx, dy=dy})
+   end
+end
+
+function love.touchmoved(id, x, y, dx, dy, pressure)
+   pointerMoved({id=id, x=x, y=y, dx=dx, dy=dy, pressure=pressure})
+end
+
+function pointerPressed(pointer)
+   table.insert(pointers.pressed, pointer)
+end
+function love.mousepressed(x, y, button, istouch )
+   if (not istouch) then
+      pointerPressed({id="mouse", x=x, y=y})
+   end
+end
+function love.touchpressed(id, x, y, dx, dy, pressure)
+   pointerPressed({id=id, x=x, y=y, dx=dx, dy=dy, pressure=pressure})
+end
+
+
+--------------------------------
+
+
+
+
+
+
 function love.load()
    if arg[#arg] == "-debug" then require("mobdebug").start() end
    love.window.setMode(1024, 768, {resizable=true, vsync=true, fullscreen=false})
@@ -32,16 +126,16 @@ function love.load()
 
    world = {
       children={
-         {
-            type="rope",
-            pos={x=100,y=100,z=0},
-            data={
-               relative_rotation = true,
-               rotations={0, 0, 0, 0, 0, 0,0,0,0},
-               lengths={120,120,100,100,100,100,100,100 },
-               thicknesses={20,50,60,70,70,70,70,60,20},
-            }
-         },
+         -- {
+         --    type="rope",
+         --    pos={x=100,y=100,z=0},
+         --    data={
+         --       relative_rotation = true,
+         --       rotations={0, 0, 0, 0, 0, 0,0,0,0},
+         --       lengths={120,120,100,100,100,100,100,100 },
+         --       thicknesses={20,50,60,70,70,70,70,60,20},
+         --    }
+         -- },
          -- {type="rope",
          --  pos={x=-100,y=100,z=0},
          --  data={
@@ -54,7 +148,7 @@ function love.load()
 
 
          -- {type="polyline", pos={x=100,y=100,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200,0,0}, join="miter", half_width=5  }},
-         --{type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
+         -- {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
          -- {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
          -- {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
          {type="polygon", pos={x=0, y=0, z=0}, data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
@@ -158,17 +252,22 @@ function love.update(dt)
             c.triangles = poly.triangulate(c.type, shape)
       end
    end
+   Hammer:reset(200,30)
+   Hammer.pointers = pointers--{pressed={}, moved={}, released={}}
+   local b = Hammer:rectangle("r3", 40,40)
+
 end
 
 function love.draw()
    love.graphics.setColor(255,255,255)
    love.graphics.print("camera " .. math.floor(camera.x) .. ", " .. math.floor(camera.y) .. "," .. tonumber(string.format("%.3f", camera.scale)))
+   love.graphics.print("pointers moved: "..(#pointers.moved), 0, 30)
    camera:attach()
    local triangle_count = 0
    for i=1, #world.children do
       if world.children[i].triangles  then
          for j=1, #world.children[i].triangles do
-            love.graphics.setColor(math.random()*50 + 20,  math.random()*50 + 20,55, 255)
+            love.graphics.setColor(math.random()*50 + 20, 255+ math.random()*50 + 20,55, 155)
             love.graphics.polygon("fill", world.children[i].triangles[j])
             triangle_count = triangle_count + 1
          end
@@ -178,17 +277,5 @@ function love.draw()
 
    camera:detach()
    love.graphics.print("#tris "..triangle_count, 10, 30)
-
-   --suit.draw()
-
-end
-
-function love.textedited(text, start, length)
-    -- for IME input
-    suit.textedited(text, start, length)
-end
-
-function love.textinput(t)
-	-- forward text input to SUIT
-	suit.textinput(t)
+   Hammer:draw()
 end
