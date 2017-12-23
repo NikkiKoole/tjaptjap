@@ -64,7 +64,6 @@ function love.touchreleased(id, x, y, dx, dy, pressure)
    pointerReleased({id=id, x=x, y=y, dx=dx, dy=dy, pressure=pressure})
 end
 function love.mousereleased(x, y, button, isTouch)
-   print("mouse released")
    if (not istouch) then
       pointerReleased({id="mouse", x=x, y=y})
    end
@@ -73,7 +72,6 @@ end
 
 
 function pointerMoved(p)
-   removePointer(pointers.pressed, p.id)
    local i = listGetPointerIndex(pointers.moved, p.id)
    if i == -1 then
       table.insert(pointers.moved, p)
@@ -123,7 +121,7 @@ function love.load()
 
    icon_font = love.graphics.newFont("resources/icons.ttf", 30)
    helvetica = love.graphics.newFont("resources/helvetica_bold.ttf", 18)
-
+--   pointers = {moved={}, released={}, pressed={}}
    world = {
       children={
          -- {
@@ -150,7 +148,7 @@ function love.load()
          -- {type="polyline", pos={x=100,y=100,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200,0,0}, join="miter", half_width=5  }},
          -- {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
          -- {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
-         -- {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
+         {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
          {type="polygon", pos={x=0, y=0, z=0}, data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
       },
    }
@@ -261,7 +259,10 @@ end
 function love.draw()
    love.graphics.setColor(255,255,255)
    love.graphics.print("camera " .. math.floor(camera.x) .. ", " .. math.floor(camera.y) .. "," .. tonumber(string.format("%.3f", camera.scale)))
-   love.graphics.print("pointers moved: "..(#pointers.moved), 0, 30)
+   love.graphics.print("pointers    moved: "..(#pointers.moved), 0, 30)
+   love.graphics.print("pointers  pressed: "..(#pointers.pressed), 0, 60)
+   love.graphics.print("pointers released: "..(#pointers.released), 0, 90)
+
    camera:attach()
    local triangle_count = 0
    for i=1, #world.children do

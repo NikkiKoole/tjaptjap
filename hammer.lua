@@ -1,5 +1,11 @@
 local hammer = {}
 
+function distance(x, y, x1, y1)
+   local dx = x - x1
+   local dy = y - y1
+   local dist = math.sqrt(dx * dx + dy * dy)
+   return dist
+end
 
 
 
@@ -33,6 +39,7 @@ function hammer:reset(x,y)
 
    self.margin = 10
    self.rowHeight = 40
+
 end
 function hammer:pos(x,y)
    self.x = x
@@ -109,7 +116,6 @@ function hammer:slider(id, width, height, props)
                       self.y + result.thumbY,
                       math.min(width, height),
                       math.min(width, height))) then
-
          result.pressed = true
          result.startdrag = true
          result.pointerID = pressed.id
@@ -175,9 +181,14 @@ end
 function hammer:rectangle(id, width, height, opt_pos)
    local result =  {type="rect",id=id,
                     dx=0,dy=0,
-                    x=(opt_pos and opt_pos.x or self.x) - width/2,
-                    y=(opt_pos and opt_pos.y or self.y) - height/2,
+                    x=(opt_pos and opt_pos.x or self.x),
+                    y=(opt_pos and opt_pos.y or self.y),
                     w=width,h=height}
+
+   if opt_pos and opt_pos.color then
+      result.color = opt_pos.color
+   end
+
 
    if (self.history) then
       local  hi = listGetPointerIndex(self.history, id)
@@ -196,6 +207,13 @@ function hammer:rectangle(id, width, height, opt_pos)
       end
    end
 
+   if #self.pointers.pressed > 0 then
+      --print("pressed ", #self.pointers.pressed)
+   end
+
+
+
+
    for i=1, #self.pointers.pressed do
       local pressed = self.pointers.pressed[i]
 
@@ -206,30 +224,40 @@ function hammer:rectangle(id, width, height, opt_pos)
                       width, height)) then
 
          result.pressed = true
-         --result.dragging = true
-         result.startdrag = true
+         result.dragging = true
+         --result.startdrag = true
          result.pointerID = pressed.id
+         if result.dx == 0 and result.dy == 0 then
          result.dx = pressed.x - (result.x + width/2)
          result.dy = pressed.y - (result.y + height/2)
+         end
+      else
+
       end
+
    end
    for i=1, #self.pointers.moved do
+
       if (pointInRect(self.pointers.moved[i].x,
                       self.pointers.moved[i].y,
                       result.x,
                       result.y,
                       width, height)) then
          result.over = true
-         if result.startdrag then
-            result.startdrag = false
-            result.dragging = true
-         end
+
+
+         -- if result.startdrag then
+         --    result.startdrag = false
+         --    result.dragging = true
+         -- end
       end
    end
 
 
    for i=1, #self.pointers.released do
       if self.pointers.released[i].id == result.pointerID then
+
+
          result.dragging = false
          result.startdrag = false
          result.enddrag = true
@@ -256,6 +284,9 @@ function hammer:draw()
    for i=1, #(self.drawables) do
       local it = self.drawables[i]
       love.graphics.setColor(255,255,255)
+      if (it.color) then
+         love.graphics.setColor(it.color[1],it.color[2],it.color[3], 100)
+      end
 
       if (it.over) then
          love.graphics.setColor(255,0,255)
@@ -271,7 +302,6 @@ function hammer:draw()
       end
 
        if it.type == "circle" then
-          print(it.x, it.y)
          love.graphics.circle("fill", it.x, it.y, it.r)
       end
 
@@ -307,7 +337,7 @@ function hammer:draw()
       end
 
 
-      table.insert(self.history, {id=it.id, dx=it.dx, dy=it.dy, dragging=it.dragging, startdrag=it.startdrag, pointerID=it.pointerID})
+      table.insert(self.history, {id=it.id, color=it.color, dx=it.dx, dy=it.dy, dragging=it.dragging, startdrag=it.startdrag, pointerID=it.pointerID})
    end
 
    self.pointers.released = {}
