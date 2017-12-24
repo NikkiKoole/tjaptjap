@@ -17,7 +17,6 @@ end
 
 function mode:enter(from, data)
    self.child = data
-   self.updatecount = 0
 end
 
 
@@ -93,7 +92,11 @@ function mode:getClosestNodes(x, y)
 
       local this = points[self_index]
       local next = points[next_index]
-      local d = utils.distancePointSegment(x, y, this.x or this.cx , this.y or this.cy, next.x or next.cx, next.y or next.cy)
+      local d = utils.distancePointSegment(x, y,
+                                           this.x or this.cx ,
+                                           this.y or this.cy,
+                                           next.x or next.cx,
+                                           next.y or next.cy)
 
       if (d < best_distance) then
          best_distance = d
@@ -105,24 +108,24 @@ end
 
 
 function mode:update()
-   if self.child.dirty then
+   local child = self.child
+
+   if child.dirty then
+      local shape = shapes.makeShape(child)
+      self.child.triangles = poly.triangulate(child.type, shape)
       self.child.dirty = false
-      local shape = shapes.makeShape(self.child)
-      self.child.triangles = poly.triangulate(self.child.type, shape)
    end
 
 
    Hammer:reset(0,0)
 
-
-
-   for i=1, #self.child.data.points do
-
-      local point = self.child.data.points[i]
+   for i=1, #child.data.points do
+      local point = child.data.points[i]
       local cx2, cy2 = camera:cameraCoords(
-         (point.x or point.cx) + self.child.pos.x,
-         (point.y or point.cy) + self.child.pos.y)
+         (point.x or point.cx) + child.pos.x,
+         (point.y or point.cy) + child.pos.y)
       local color
+
       if point.x and point.y then
          color={0,100,100}
       else
@@ -130,10 +133,8 @@ function mode:update()
       end
 
 
-      local button = Hammer:rectangle("poly-handle"..i, 60, 60,
-                                      {x=cx2-30,
-                                       y=cy2-30,
-                                       color=color})
+      local button = Hammer:rectangle( "poly-handle"..i, 30, 30,
+                                       {x=cx2-15, y=cy2-15, color=color})
 
       if button.pressed then
          self.lastTouchedIndex = i
@@ -146,8 +147,8 @@ function mode:update()
          local moved = Hammer.pointers.moved[p]
          if moved then
             local wx,wy = camera:worldCoords(moved.x, moved.y)
-            wx = wx - button.dx/camera.scale - self.child.pos.x
-            wy = wy - button.dy/camera.scale - self.child.pos.y
+            wx = wx - button.dx/camera.scale - child.pos.x
+            wy = wy - button.dy/camera.scale - child.pos.y
 
             if point.x and point.y then
                self.child.data.points[i].x = wx
@@ -161,18 +162,23 @@ function mode:update()
       end
    end
 
+
+
+
    Hammer:pos(10,300)
    Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
    Hammer:ret()
    Hammer:label("addvid", "add vertex", 100, 20)
    local add_vertex = Hammer:rectangle("drag1", 80,80)
-
    if add_vertex.dragging then
       local p = getWithID(Hammer.pointers.moved, add_vertex.pointerID)
       local moved = Hammer.pointers.moved[p]
       if moved then
          Hammer:circle("cursor1", 30, {x=moved.x, y=moved.y})
          local wx,wy = camera:worldCoords(moved.x, moved.y)
+         wx = wx - self.child.pos.x
+         wy = wy - self.child.pos.y
+
          local best =mode:getClosestNodes(wx,wy)
          local si = self.child.data.points[best.si]
          local ni = self.child.data.points[best.ni]
@@ -181,11 +187,10 @@ function mode:update()
             (si.y or si.cy) + self.child.pos.y )
 
          Hammer:circle("si", 10, {x=x2, y=y2})
+
          x2,y2 = camera:cameraCoords(
             (ni.x or ni.cx) + self.child.pos.x,
             (ni.y or ni.cy) + self.child.pos.y )
-
-
          Hammer:circle("ni", 10, {x=x2, y=y2})
       end
    end
@@ -208,6 +213,9 @@ function mode:update()
       if moved then
          Hammer:circle("cursor2", 30, {x=moved.x, y=moved.y})
          local wx,wy = camera:worldCoords(moved.x, moved.y)
+         wx = wx - self.child.pos.x
+         wy = wy - self.child.pos.y
+
          local best =mode:getClosestNodes(wx,wy)
          local si = self.child.data.points[best.si]
          local ni = self.child.data.points[best.ni]
@@ -216,6 +224,7 @@ function mode:update()
             (si.y or si.cy) + self.child.pos.y )
 
          Hammer:circle("si", 10, {x=x2, y=y2})
+
          x2,y2 = camera:cameraCoords(
             (ni.x or ni.cx) + self.child.pos.x,
             (ni.y or ni.cy) + self.child.pos.y )
@@ -242,12 +251,19 @@ function mode:update()
    Hammer:label("quit", "exit mode", 200, 20)
    Hammer:ret()
 
-   local exit_node = Hammer:rectangle("exit_mode", 60,60)
-   if exit_node.released then
-      Signal.emit("switch-state", "stage")
+
+   if #Hammer.pointers.pressed == 1 then
+      local isDirty = false
+      for i=1, #Hammer.drawables do
+         local it = Hammer.drawables[i]
+         if it.over or it.pressed or it.dragging then
+            isDirty = true
+         end
+      end
+      if not isDirty then
+         Signal.emit("switch-state", "stage")
+      end
    end
-
-
 
 end
 

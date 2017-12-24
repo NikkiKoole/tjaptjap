@@ -191,16 +191,20 @@ function makeCustomPolygon(x,y, points, steps)
       else
          local prev_index = i - 1
          if i <= 1 then prev_index = #points end
+        -- print(prev_index, #points)
          local array = {points[prev_index].x + x, points[prev_index].y + y}
 
          local j = i
          local next = points[j]
+         if next then
          while (not (next.x and next.y)) do
             table.insert(array, x + next.cx)
             table.insert(array, y + next.cy)
             j = j + 1
             next = points[j]
          end
+         end
+
 
          i = i + ((#array-2)/2)
          table.insert(array, points[j].x + x)

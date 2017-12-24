@@ -118,9 +118,16 @@ function hammer:slider(id, width, height, props)
                       math.min(width, height))) then
          result.pressed = true
          result.startdrag = true
-         result.pointerID = pressed.id
-         result.dx = pressed.x - (self.x + result.thumbX)
-         result.dy = pressed.y - (self.y + result.thumbY)
+
+         if not result.pointerID then
+            result.pointerID = pressed.id
+         end
+
+
+         if not result.dx and not result.dy then
+            result.dx = pressed.x - (self.x + result.thumbX)
+            result.dy = pressed.y - (self.y + result.thumbY)
+         end
 
       end
    end
@@ -226,10 +233,13 @@ function hammer:rectangle(id, width, height, opt_pos)
          result.pressed = true
          result.dragging = true
          --result.startdrag = true
-         result.pointerID = pressed.id
+         if not result.pointerID  then
+            result.pointerID = pressed.id
+         end
+
          if result.dx == 0 and result.dy == 0 then
-         result.dx = pressed.x - (result.x + width/2)
-         result.dy = pressed.y - (result.y + height/2)
+            result.dx = pressed.x - (result.x + width/2)
+            result.dy = pressed.y - (result.y + height/2)
          end
       else
 

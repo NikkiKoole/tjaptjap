@@ -72,6 +72,7 @@ end
 
 
 function pointerMoved(p)
+   --print("pointer moved: ",p.id)
    local i = listGetPointerIndex(pointers.moved, p.id)
    if i == -1 then
       table.insert(pointers.moved, p)
@@ -121,19 +122,18 @@ function love.load()
 
    icon_font = love.graphics.newFont("resources/icons.ttf", 30)
    helvetica = love.graphics.newFont("resources/helvetica_bold.ttf", 18)
---   pointers = {moved={}, released={}, pressed={}}
    world = {
       children={
-         -- {
-         --    type="rope",
-         --    pos={x=100,y=100,z=0},
-         --    data={
-         --       relative_rotation = true,
-         --       rotations={0, 0, 0, 0, 0, 0,0,0,0},
-         --       lengths={120,120,100,100,100,100,100,100 },
-         --       thicknesses={20,50,60,70,70,70,70,60,20},
-         --    }
-         -- },
+         {
+            type="rope",
+            pos={x=100,y=100,z=0},
+            data={
+               relative_rotation = true,
+               rotations={0, 0, 0, 0, 0, 0,0,0,0},
+               lengths={120,120,100,100,100,100,100,100 },
+               thicknesses={20,50,60,70,70,70,70,60,20},
+            }
+         },
          -- {type="rope",
          --  pos={x=-100,y=100,z=0},
          --  data={
@@ -147,7 +147,7 @@ function love.load()
 
          -- {type="polyline", pos={x=100,y=100,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200,0,0}, join="miter", half_width=5  }},
          -- {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
-         -- {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
+         {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
          {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
          {type="polygon", pos={x=0, y=0, z=0}, data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
       },
@@ -158,7 +158,7 @@ function love.load()
        br={x = 1000, y = 1000}
    }
 
-   for i=1, #world.children do
+    for i=1, #world.children do
       local c = world.children[i]
       local shape = shapes.makeShape(c)
       if c.rotation then
@@ -192,6 +192,7 @@ function love.load()
    )
    love.graphics.setFont(helvetica)
 
+   pointers = {moved={}, released={}, pressed={}}
 
 end
 
@@ -268,7 +269,7 @@ function love.draw()
    for i=1, #world.children do
       if world.children[i].triangles  then
          for j=1, #world.children[i].triangles do
-            love.graphics.setColor(math.random()*50 + 20, 255+ math.random()*50 + 20,55, 155)
+            love.graphics.setColor(math.random()*50 + 20, 155+ math.random()*50 + 20,55, 155)
             love.graphics.polygon("fill", world.children[i].triangles[j])
             triangle_count = triangle_count + 1
          end

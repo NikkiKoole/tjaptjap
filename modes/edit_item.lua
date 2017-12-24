@@ -45,6 +45,8 @@ local mode ={}
 -- }
 
 local slider = {value = 8, min = 3, max = 24}
+local steps = {value = 8, min = 2, max = 24}
+
 --local checkbox = {checked = true, text="stuff"}
 
 
@@ -68,36 +70,140 @@ end
 
 function mode:update(dt)
       local child = self.child
-      local dirty = false
+      -- local dirty = false
 
-      local prop = "steps"
-      if (child.type == "rect" or child.type == "circle") then
-         prop = "steps"
-      elseif (child.type== "star") then
-         prop="sides"
-      end
-      suit.layout:reset(10,100)
-      suit.layout:padding(10,10)
-      suit.Label(child.type, {align="left"}, suit.layout:row(150, 10))
-      suit.layout:row()
-      suit.Label(prop, {align="left"}, suit.layout:row(150, 10))
+      -- local prop = "steps"
+      -- if (child.type == "rect" or child.type == "circle") then
+      --    prop = "steps"
+      -- elseif (child.type== "star") then
+      --    prop="sides"
+      -- end
+      -- suit.layout:reset(10,100)
+      -- suit.layout:padding(10,10)
+      -- suit.Label(child.type, {align="left"}, suit.layout:row(150, 10))
+      -- suit.layout:row()
+      -- suit.Label(prop, {align="left"}, suit.layout:row(150, 10))
 
 
-      if suit.Slider(slider, suit.layout:row(150,30)).changed then
-         child.data[prop] = math.floor(slider.value)
-         dirty = true
-      end
-      suit.Label(child.data[prop], suit.layout:col(50,30))
-      suit.layout:left(150)
-      dirty = numeric_stepper(child, prop) or dirty
+      -- if suit.Slider(slider, suit.layout:row(150,30)).changed then
+      --    child.data[prop] = math.floor(slider.value)
+      --    dirty = true
+      -- end
+      -- suit.Label(child.data[prop], suit.layout:col(50,30))
+      -- suit.layout:left(150)
+      -- dirty = numeric_stepper(child, prop) or dirty
 
-      if dirty then
-         slider.value = child.data[prop]
-         self.child.dirty = true
-         mode:updateHandles()
-      end
+      -- if dirty then
+      --    slider.value = child.data[prop]
+      --    self.child.dirty = true
+      --    mode:updateHandles()
+      -- end
 
       -- can i make some hammer button be postiioned in world space?
+      -- HARDCORE FUTURE ME; you cant dumbass, you can roll your own instead and be back here a month or so in the future.
+
+
+      if child.type == "circle" then
+         local rx,ry      = camera:cameraCoords(child.pos.x + child.data.radius/1.4,
+                                                child.pos.y + child.data.radius/1.4)
+         local color = {200,100,100}
+
+         Hammer:reset(10,300)
+
+         local radius = Hammer:rectangle( "circle_radius_handle", 30, 30,{x=rx-15, y=ry-15, color=color})
+         if radius.dragging then
+            local p = getWithID(Hammer.pointers.moved, radius.pointerID)
+            local moved = Hammer.pointers.moved[p]
+
+            if moved then
+               local wx,wy = camera:worldCoords(moved.x-radius.dx, moved.y-radius.dy)
+               local distance = (utils.distance(wx, wy, self.child.pos.x, self.child.pos.y))
+               self.child.data.radius = distance
+               self.child.dirty = true
+
+            end
+
+         end
+
+
+         local value = steps.value
+         local sides = Hammer:slider("steps", 200,40, steps)
+         if steps.value ~= value then
+            self.child.data.steps = math.floor(steps.value)
+            self.child.dirty = true
+         end
+
+
+
+      end
+
+
+      if child.type == "star" then
+         local rx,ry      = camera:cameraCoords(utils.rotatePoint(child.pos.x + child.data.r1, child.pos.y, child.pos.x, child.pos.y, child.data.a1 ))
+         local rx2,ry2    = camera:cameraCoords(utils.rotatePoint(child.pos.x + child.data.r2, child.pos.y, child.pos.x, child.pos.y, child.data.a2))
+         local color = {200,100,100}
+
+         Hammer:reset(0,0)
+         local r1 = Hammer:rectangle( "star_r1_handle", 30, 30,{x=rx-15, y=ry-15, color=color})
+         if r1.dragging then
+            local p = getWithID(Hammer.pointers.moved, r1.pointerID)
+            local moved = Hammer.pointers.moved[p]
+            if moved then
+               local wx,wy = camera:worldCoords(moved.x-r1.dx, moved.y-r1.dy)
+               --wx = wx - r1.dx/camera.scale - child.pos.x
+               --wy = wy - r1.dy/camera.scale - child.pos.y
+               local distance = (utils.distance(wx, wy, self.child.pos.x, self.child.pos.y))
+               local angle = (math.pi/2 +  utils.angle(wx,wy, self.child.pos.x, self.child.pos.y)) * -1
+               self.child.data.r1 = distance
+               self.child.data.a1 = angle
+               self.child.dirty = true
+
+            end
+         end
+
+         local r2 = Hammer:rectangle( "star_r2_handle", 30, 30,{x=rx2-15, y=ry2-15, color=color})
+         if r2.dragging then
+            local p = getWithID(Hammer.pointers.moved, r2.pointerID)
+            local moved = Hammer.pointers.moved[p]
+            if moved then
+               local wx,wy = camera:worldCoords(moved.x-r2.dx, moved.y-r2.dy)
+               --wx = wx - r1.dx/camera.scale - child.pos.x
+               --wy = wy - r1.dy/camera.scale - child.pos.y
+               local distance = (utils.distance(wx, wy, self.child.pos.x, self.child.pos.y))
+               local angle = (math.pi/2 +  utils.angle(wx,wy, self.child.pos.x, self.child.pos.y)) * -1
+               self.child.data.r2 = distance
+               self.child.data.a2 = angle
+               self.child.dirty = true
+
+            end
+         end
+         Hammer:pos(10,300)
+         local value = slider.value
+         local sides = Hammer:slider("sides", 200,40, slider)
+         if slider.value ~= value then
+            self.child.data.sides = math.floor(slider.value)
+            self.child.dirty = true
+
+         end
+
+         --if sides.dragged then
+         --end
+      end
+
+
+   if #Hammer.pointers.pressed == 1 then
+      local isDirty = false
+      for i=1, #Hammer.drawables do
+         local it = Hammer.drawables[i]
+         if it.over or it.pressed or it.dragging then
+            isDirty = true
+         end
+      end
+      if not isDirty then
+         Signal.emit("switch-state", "stage")
+      end
+   end
+
 
 end
 
@@ -107,58 +213,59 @@ function mode:init()
 end
 
 function mode:updateHandles()
-   local child = self.child
-   if (child.type == "rect") then
+   -- local child = self.child
+   -- if (child.type == "rect") then
 
-      local rx1,ry1    = utils.rotatePoint(child.pos.x + child.data.w/2, child.pos.y, child.pos.x, child.pos.y, child.rotation)
-      local rx2, ry2 = utils.rotatePoint(child.pos.x + child.data.w/2, child.pos.y + child.data.h/2, child.pos.x, child.pos.y, child.rotation)
-      local rx3, ry3 = utils.rotatePoint(child.pos.x + child.data.w/2 - child.data.radius, child.pos.y - child.data.h/2, child.pos.x, child.pos.y, child.rotation)
+   --    local rx1,ry1    = utils.rotatePoint(child.pos.x + child.data.w/2, child.pos.y, child.pos.x, child.pos.y, child.rotation)
+   --    local rx2, ry2 = utils.rotatePoint(child.pos.x + child.data.w/2, child.pos.y + child.data.h/2, child.pos.x, child.pos.y, child.rotation)
+   --    local rx3, ry3 = utils.rotatePoint(child.pos.x + child.data.w/2 - child.data.radius, child.pos.y - child.data.h/2, child.pos.x, child.pos.y, child.rotation)
 
-      self.handles = {{
-            x=rx1, y=ry1,
-            r=32,
-            type="rect-rotator"
-         },
-         {
-            x=rx2, y=ry2,
-            r=32,
-            type="rect-resizer"
-         },
-         {
-            x=rx3, y=ry3,
-            r=32,
-            type="rect-radius"
-      }}
-   elseif (child.type == "circle") then
-      self.handles = {{
-            x=child.pos.x + child.data.radius/1.4,
-            y=child.pos.y+ child.data.radius/1.4,
-            r=32,
-            type="circle-resizer"
-      }}
-   elseif (child.type == "star") then
-      local a = (math.pi*2)/child.data.sides
-      local rx,ry      = utils.rotatePoint(child.pos.x + child.data.r1, child.pos.y, child.pos.x, child.pos.y, child.data.a1)
-      local rx2,ry2    = utils.rotatePoint(child.pos.x + child.data.r2, child.pos.y, child.pos.x, child.pos.y, child.data.a2)
+   --    self.handles = {{
+   --          x=rx1, y=ry1,
+   --          r=32,
+   --          type="rect-rotator"
+   --       },
+   --       {
+   --          x=rx2, y=ry2,
+   --          r=32,
+   --          type="rect-resizer"
+   --       },
+   --       {
+   --          x=rx3, y=ry3,
+   --          r=32,
+   --          type="rect-radius"
+   --    }}
+   -- elseif (child.type == "circle") then
+   --    self.handles = {{
+   --          x=child.pos.x + child.data.radius/1.4,
+   --          y=child.pos.y+ child.data.radius/1.4,
+   --          r=32,
+   --          type="circle-resizer"
+   --    }}
+   -- elseif (child.type == "star") then
+   --    local a = (math.pi*2)/child.data.sides
+   --    local rx,ry      = utils.rotatePoint(child.pos.x + child.data.r1, child.pos.y, child.pos.x, child.pos.y, child.data.a1)
+   --    local rx2,ry2    = utils.rotatePoint(child.pos.x + child.data.r2, child.pos.y, child.pos.x, child.pos.y, child.data.a2)
 
-      self.handles = {{
-            x=rx,
-            y=ry,
-            r=32,
-            type="r1"
-         },
-         {
-            x=rx2,
-            y=ry2,
-            r=32,
-            type="r2"
-      }}
-   else
+   --    self.handles = {{
+   --          x=rx,
+   --          y=ry,
+   --          r=32,
+   --          type="r1"
+   --       },
+   --       {
+   --          x=rx2,
+   --          y=ry2,
+   --          r=32,
+   --          type="r2"
+   --    }}
+   -- else
 
-         --love.errhand("ERROR unknown data type in edit-item: ".. child.data.type)
+   --       --love.errhand("ERROR unknown data type in edit-item: ".. child.data.type)
 
 
-   end
+   -- end
+   self.handles = {}
 end
 
 function mode:enter(from,data)
@@ -168,51 +275,51 @@ end
 
 
 function mode:pointerpressed(x,y,id)
-   local found = false
+--    local found = false
 
-   for i=1, #self.handles do
-      local h = self.handles[i]
-      local hx,hy =camera:cameraCoords(h.x,h.y)
-      if (utils.pointInCircle(x,y, hx,hy, 32*camera.scale)) then
-         table.insert(self.dragging, {touchid=id, h=self.handles[i], dx=x-hx, dy=y-hy})
-         found = true
-      end
-   end
+--    for i=1, #self.handles do
+--       local h = self.handles[i]
+--       local hx,hy =camera:cameraCoords(h.x,h.y)
+--       if (utils.pointInCircle(x,y, hx,hy, 32*camera.scale)) then
+--          table.insert(self.dragging, {touchid=id, h=self.handles[i], dx=x-hx, dy=y-hy})
+--          found = true
+--       end
+--    end
 
-   local wx, wy = camera:worldCoords(x,y)
-   local o = self.child
-   local layer_speed = 1.0 + o.pos.z
-   local cdx = camera.x - camera.x * layer_speed
-   local cdy = camera.y - camera.y * layer_speed
+--    local wx, wy = camera:worldCoords(x,y)
+--    local o = self.child
+--    local layer_speed = 1.0 + o.pos.z
+--    local cdx = camera.x - camera.x * layer_speed
+--    local cdy = camera.y - camera.y * layer_speed
 
-   local hit
---   local ui_item = ui[o.type]
+--    local hit
+-- --   local ui_item = ui[o.type]
 
-   if o.type == "rect" then
-      hit = utils.pointInRect2(wx, wy, o.pos.x + cdx, o.pos.y + cdy, o.data.w, o.data.h  )
-      if hit then found = true end
-   elseif o.type == "circle" then
-      hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, o.data.radius)
-   elseif o.type == "star" then
-      hit = pointInPoly({x=wx,y=wy}, o.triangles)
-      --hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, math.max(o.data.r1, o.data.r2))
-   end
-   if hit then found = true end
-   --hit = utils.pointInRect(x,y,ui_item.backdrop.x,ui_item.backdrop.y,ui_item.backdrop.w,ui_item.backdrop.h)
-   if hit then found = true end
+--    if o.type == "rect" then
+--       hit = utils.pointInRect2(wx, wy, o.pos.x + cdx, o.pos.y + cdy, o.data.w, o.data.h  )
+--       --if hit then found = true end
+--    elseif o.type == "circle" then
+--       hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, o.data.radius)
+--    elseif o.type == "star" then
+--       hit = pointInPoly({x=wx,y=wy}, o.triangles)
+--       --hit = utils.pointInCircle(wx, wy, o.pos.x + cdx, o.pos.y + cdx, math.max(o.data.r1, o.data.r2))
+--    end
+--    if hit then found = true end
+--    --hit = utils.pointInRect(x,y,ui_item.backdrop.x,ui_item.backdrop.y,ui_item.backdrop.w,ui_item.backdrop.h)
+--    --if hit then found = true end
 
-   -- for i=1, #ui_item.buttons do
-   --    local b = ui_item.buttons[i]
-   --    if (pointInRect(x,y,b.x, b.y, b.w, b.h)) then
-   --       self.child.data[b.value] = b.action(self.child.data[b.value])
-   --       self.child.dirty = true
-   --       mode:updateHandles()
-   --    end
-   -- end
+--    -- for i=1, #ui_item.buttons do
+--    --    local b = ui_item.buttons[i]
+--    --    if (pointInRect(x,y,b.x, b.y, b.w, b.h)) then
+--    --       self.child.data[b.value] = b.action(self.child.data[b.value])
+--    --       self.child.dirty = true
+--    --       mode:updateHandles()
+--    --    end
+--    -- end
 
-   if (found == false) then
-      Signal.emit("switch-state", "stage")
-   end
+--    if (found == false) then
+-- --      Signal.emit("switch-state", "stage")
+--    end
 end
 
 function mode:mousepressed( x, y, button, istouch )
@@ -328,16 +435,16 @@ function mode:touchreleased( id, x, y, dx, dy, pressure )
 end
 
 function mode:draw()
-   camera:attach()
-   love.graphics.setColor(255, 255, 255)
+   -- camera:attach()
+   -- love.graphics.setColor(255, 255, 255)
 
-   for i=1, #self.handles do
-      local h = self.handles[i]
-      love.graphics.circle("fill", h.x, h.y , h.r)
-   end
-   camera:detach()
+   -- for i=1, #self.handles do
+   --    local h = self.handles[i]
+   --    love.graphics.circle("fill", h.x, h.y , h.r)
+   -- end
+   -- camera:detach()
 
-      suit.draw()
+   --    suit.draw()
 
    -- local ui_item = ui[self.child.type]
    -- love.graphics.setColor(ui_item.backdrop.r, ui_item.backdrop.g, ui_item.backdrop.b)
