@@ -169,7 +169,7 @@ function makeRope(x, y, lengths, rotations, thicknesses, relative_rotation)
    end
    --print("coords: ", #coords/2)
    --"miter", "none", "bevel"
-   local vertices, indices, draw_mode = polyline("bevel", coords, thicknesses, 1, false)
+   local vertices, indices, draw_mode = polyline("miter", coords, thicknesses, 1, false)
    result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
 
    return result
