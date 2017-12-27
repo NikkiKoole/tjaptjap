@@ -1,152 +1,9 @@
 local mode ={}
 local utils = require "utils"
 
-
--- function mode:init()
---    self.touches = {}
--- end
-
-
 function mode:enter(from,data)
    self.child = data
-   -- self.dragging = {} -- for dragging handlers
-   -- self.handles = {}
-   -- self:makeHandles()
-   -- mode:updateHandles()
-
 end
-
-function mode:draw()
-   -- camera:attach()
-
-   -- for i=1, #self.handles do
-   --    local h = self.handles[i]
-
-   --    if (h.type == "rope-point") then
-   --       love.graphics.setColor(255,255,255)
-   --    end
-
-   --    love.graphics.circle("fill", h.x, h.y , h.r/camera.scale)
-   -- end
-   -- camera:detach()
-
-end
-
-function mode:updateHandles()
-
-   -- local it = self.child
-   -- local cx, cy = it.pos.x, it.pos.y
-   -- local rotation = 0
-
-   -- self.handles[1].x = cx
-   -- self.handles[1].y = cy
-
-   -- --table.insert(self.handles, {type="rope-point", index=1, x=cx, y=cy, r=32})
-
-   -- for i=1, #it.data.lengths do
-
-   --    if it.data.relative_rotation then
-   --       rotation = rotation + it.data.rotations[i]
-   --    else
-   --       rotation = it.data.rotations[i]
-   --    end
-
-   --    cx, cy = utils.moveAtAngle(cx, cy, rotation or -math.pi/2, it.data.lengths[i])
-   --    self.handles[i+1].x = cx
-   --    self.handles[i+1].y = cy
-
-   --    --table.insert(self.handles, {type="rope-point", index=i+1, x=cx, y=cy, r=32})
-   -- end
-
-end
-
-
-function mode:makeHandles()
-   -- self.handles = {}
-   -- local it = self.child
-   -- local cx, cy = it.pos.x, it.pos.y
-   -- local rotation = 0
-
-   -- table.insert(self.handles, {type="rope-point", index=1, x=cx, y=cy, r=32})
-
-   -- for i=1, #it.data.lengths do
-
-   --    if it.data.relative_rotation then
-   --       rotation = rotation + it.data.rotations[i]
-   --    else
-   --       rotation = it.data.rotations[i]
-   --    end
-
-   --    cx, cy = utils.moveAtAngle(cx, cy, rotation or -math.pi/2, it.data.lengths[i])
-   --    table.insert(self.handles, {type="rope-point", index=i+1, x=cx, y=cy, r=32})
-   -- end
- end
-
-
-
-function mode:pointerpressed(x,y,id)
-   -- local found = false
-   -- for i=1, #self.handles do
-   --    local h = self.handles[i]
-   --    local hx,hy = camera:cameraCoords(h.x, h.y)
-
-   --    if (utils.pointInCircle(x,y, hx,hy, h.r)) then
-   --       table.insert(self.dragging, {touchid=id,  h=self.handles[i], i=i, dx=x-hx, dy=y-hy})
-   --       found = true
-   --       self.lastTouchedIndex = i
-   --    end
-   -- end
-
-   -- function sorter(a, b)
-   --    return a.h.index < b.h.index
-   -- end
-   -- table.sort(self.dragging, sorter)
-
-   -- if not found then
-   --    Signal.emit("switch-state", "stage")
-   -- end
-
-
-end
-
-function mode:mousepressed( x, y, button, istouch )
-   if (not istouch) then
-      self:pointerpressed(x, y,'mouse')
-   end
-end
-
-function mode:touchpressed( id, x, y, dx, dy, pressure )
-   table.insert(self.touches, {id=id, x=x, y=y, dx=dx, dy=dy, pressure=pressure})
-   self:pointerpressed(x,y,id)
-end
-
-function mode:mousemoved(x,y,dx,dy, istouch)
-   if (not istouch) then
-      self:pointermoved(x,y,'mouse')
-   end
-end
-
-function mode:touchmoved(id, x, y, dx, dy, pressure)
-   self:pointermoved(x,y,id)
-end
-
-function mode:touchreleased( id, x, y, dx, dy, pressure )
-   local index = utils.tablefind_id(self.touches, tostring(id))
-   table.remove(self.touches, index)
-
-   for i=#self.dragging,1 ,-1  do
-      local it = self.dragging[i]
-      if it.touchid == id then
-         table.remove(self.dragging, i)
-      end
-   end
-
-end
-
-
-function mode:update(dt)
-end
-
 
 function mode:getNestedRotation(index)
    local result = 0
@@ -160,47 +17,84 @@ function mode:getNestedRotation(index)
 end
 
 
+function mode:update(dt)
+   local child = self.child
+   Hammer:reset(0,0)
+   local color={200,100,100}
+
+   local rotation   = 0
+   local cx, cy     = child.pos.x, child.pos.y
+   local rx,ry      = camera:cameraCoords(cx, cy)
+   local root       = Hammer:rectangle( "root", 30, 30,{x=rx-15, y=ry-15, color=color})
+   local positions  = {{cx,cy}}
+
+   if root.dragging then
+      local p = getWithID(Hammer.pointers.moved, root.pointerID)
+      local moved = Hammer.pointers.moved[p]
+
+      if moved then
+         local wx,wy = camera:worldCoords(moved.x-root.dx, moved.y-root.dy)
+         child.pos.x = wx
+         child.pos.y = wy
+         child.dirty = true
+      end
+   end
 
 
-function mode:pointermoved(x, y, id)
-   -- local child = self.child
-   -- if #self.dragging then
-   --    for i=1, #self.dragging do
-   --       local it = self.dragging[i]
-   --       if it.touchid == id then
-   --          local nx, ny = camera:worldCoords(x - it.dx, y - it.dy)
-   --          it.h.x = nx
-   --          it.h.y = ny
-   --          if (it.h.type == "rope-point") then
-   --             if (it.h.index > 1) then
-   --                local prev = self.handles[it.h.index-1]
-   --                local ap = utils.angle( nx, ny, prev.x, prev.y)
-   --                local dp = utils.distance(prev.x, prev.y, nx, ny)
+   for i=1, #child.data.lengths do
+      if child.data.relative_rotation then
+         rotation = rotation + child.data.rotations[i]
+      else
+         rotation = child.data.rotations[i]
+      end
 
-   --                if child.data.relative_rotation then
-   --                   ap = ap * -1
-   --                   local startAngle = mode:getNestedRotation(it.h.index-2)
-   --                   ap = ap - startAngle
-   --                   ap = ap - math.pi/2
-   --                else
-   --                   ap = (math.pi * 2) - (ap + math.pi/2)
-   --                end
+      cx, cy = utils.moveAtAngle(cx, cy, rotation or -math.pi/2, child.data.lengths[i])
+      table.insert(positions, {cx,cy})
+      local rx,ry      = camera:cameraCoords(cx, cy)
+      local node = Hammer:rectangle( "node"..i, 30, 30,{x=rx-15, y=ry-15, color=color})
+      if node.dragging then
+         local p = getWithID(Hammer.pointers.moved, node.pointerID)
+         local moved = Hammer.pointers.moved[p]
+         if moved then
+            local wx,wy = camera:worldCoords(moved.x-node.dx, moved.y-node.dy)
+            local ap = utils.angle( wx, wy, positions[i][1], positions[i][2])
+            local dp = utils.distance(positions[i][1], positions[i][2], wx, wy)
 
-   --                self.child.data.rotations[it.h.index-1] = ap
-   --                self.child.data.lengths[it.h.index-1] = dp
+            if child.data.relative_rotation then
+               ap = ap * -1
+               local startAngle = mode:getNestedRotation(i-2)
+               ap = ap - startAngle
+               ap = ap - math.pi/2
+            else
+               ap = (math.pi * 2) - (ap + math.pi/2)
+            end
+            self.child.data.rotations[i] = ap
+            --self.child.data.lengths[i] = dp
+            self.child.dirty = true
+         end
+      end
+   end
 
-   --             else
-   --                self.child.pos.x = nx
-   --                self.child.pos.y = ny
 
-   --             end
-   --                self.child.dirty = true
-   --                mode:updateHandles()
-   --          end
-   --       end
-   --    end
-   -- end
+
+   if #Hammer.pointers.pressed == 1 then
+      local isDirty = false
+      for i=1, #Hammer.drawables do
+         local it = Hammer.drawables[i]
+         if it.over or it.pressed or it.dragging then
+            isDirty = true
+         end
+      end
+      if not isDirty then
+         Signal.emit("switch-state", "stage")
+      end
+   end
+
 end
+
+
+
+
 
 
 return mode

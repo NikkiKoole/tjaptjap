@@ -124,31 +124,31 @@ function love.load()
    helvetica = love.graphics.newFont("resources/helvetica_bold.ttf", 18)
    world = {
       children={
-         -- {
-         --    type="rope",
-         --    pos={x=100,y=100,z=0},
-         --    data={
-         --       relative_rotation = true,
-         --       rotations={0, 0, 0, 0, 0, 0,0,0,0},
-         --       lengths={120,120,100,100,100,100,100,100 },
-         --       thicknesses={20,50,60,70,70,70,70,60,20},
-         --    }
-         -- },
-         -- {type="rope",
-         --  pos={x=-100,y=100,z=0},
-         --  data={
-         --     relative_rotation = false,
-         --     rotations={-math.pi/2,-0.8,-0.8,0.8},
-         --     lengths={120,120,100,50},
-         --     thicknesses={40,40,30,20},
-         --  }
-         -- },
+         {
+            type="rope",
+            pos={x=100,y=100,z=0},
+            data={
+               relative_rotation = true,
+               rotations={0, 0, 0, 0, 0, 0,0,0,0},
+               lengths={120,120,100,100,100,100,100,100 },
+               thicknesses={20,50,60,70,70,70,70,60,20},
+            }
+         },
+         {type="rope",
+          pos={x=-100,y=100,z=0},
+          data={
+             relative_rotation = false,
+             rotations={-math.pi/2,-0.8,-0.8,0.8},
+             lengths={120,120,100,50},
+             thicknesses={40,40,30,20},
+          }
+         },
 
 
          -- {type="polyline", pos={x=100,y=100,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200,0,0}, join="miter", half_width=5  }},
-         {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
-         {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
-         {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
+         -- {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
+         -- {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
+         -- {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
          -- {type="polygon", pos={x=0, y=0, z=0}, data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
       },
    }
