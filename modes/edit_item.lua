@@ -1,4 +1,3 @@
-local suit = require 'vendor.suit'
 local utils = require "utils"
 local mode ={}
 

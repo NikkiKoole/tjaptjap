@@ -151,7 +151,7 @@ end
 
 
 
-function makeRope(x, y, lengths, rotations, thicknesses, relative_rotation)
+function makeRope(x, y, join_type, lengths, rotations, thicknesses, relative_rotation)
    local result = {}
    local cx, cy = x, y
    local coords = {cx, cy}
@@ -169,7 +169,7 @@ function makeRope(x, y, lengths, rotations, thicknesses, relative_rotation)
    end
    --print("coords: ", #coords/2)
    --"miter", "none", "bevel"
-   local vertices, indices, draw_mode = polyline("miter", coords, thicknesses, 1, false)
+   local vertices, indices, draw_mode = polyline(join_type, coords, thicknesses, 1, false)
    result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
 
    return result
@@ -237,7 +237,7 @@ function makeShape(meta)
    elseif meta.type == "polygon" then
       result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points, meta.data.steps)
    elseif meta.type == "rope" then
-      result = makeRope(meta.pos.x, meta.pos.y, meta.data.lengths, meta.data.rotations or {}, meta.data.thicknesses or {}, meta.data.relative_rotation)
+      result = makeRope(meta.pos.x, meta.pos.y, meta.data.join or 'none', meta.data.lengths, meta.data.rotations or {}, meta.data.thicknesses or {}, meta.data.relative_rotation)
    elseif meta.type == "polyline" then
       local vertices, indices, draw_mode = polyline(meta.data.join, meta.data.coords, meta.data.half_width, 1, false)
       result = {vertices=vertices, indices=indices, draw_mode=draw_mode}

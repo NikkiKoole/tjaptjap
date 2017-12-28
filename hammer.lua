@@ -1,4 +1,31 @@
-local hammer = {}
+
+
+
+
+
+-----
+
+-- TODO
+--
+-- you can drag multiple elements with 1 pointer, this isnt nice.
+--
+-- even weirder is that startpress events are thrown
+-- it boils down to not knowing if a pointerID is already dragging any element
+
+
+
+
+
+
+
+
+
+
+
+
+local hammer = {
+   pointersThatAreDragging={}
+}
 
 function distance(x, y, x1, y1)
    local dx = x - x1
@@ -116,12 +143,15 @@ function hammer:slider(id, width, height, props)
                       self.y + result.thumbY,
                       math.min(width, height),
                       math.min(width, height))) then
+
          result.pressed = true
          result.startdrag = true
 
          if not result.pointerID then
             result.pointerID = pressed.id
+         else
          end
+
 
 
          if not result.dx and not result.dy then
@@ -197,6 +227,7 @@ function hammer:rectangle(id, width, height, opt_pos)
    end
 
 
+
    if (self.history) then
       local  hi = listGetPointerIndex(self.history, id)
       if hi > -1 then
@@ -210,6 +241,7 @@ function hammer:rectangle(id, width, height, opt_pos)
          if self.history[hi].startdrag or self.history[hi].dragging then
             result.dragging = true
             result.pointerID = self.history[hi].pointerID
+
          end
       end
    end
@@ -217,6 +249,7 @@ function hammer:rectangle(id, width, height, opt_pos)
    if #self.pointers.pressed > 0 then
       --print("pressed ", #self.pointers.pressed)
    end
+
 
 
 
@@ -230,22 +263,25 @@ function hammer:rectangle(id, width, height, opt_pos)
                       result.y,
                       width, height)) then
 
+
          result.pressed = true
          result.dragging = true
          --result.startdrag = true
          if not result.pointerID  then
             result.pointerID = pressed.id
+            result.startpress = true
          end
 
          if result.dx == 0 and result.dy == 0 then
             result.dx = pressed.x - (result.x + width/2)
             result.dy = pressed.y - (result.y + height/2)
          end
-      else
 
       end
 
    end
+
+
    for i=1, #self.pointers.moved do
 
       if (pointInRect(self.pointers.moved[i].x,
@@ -254,12 +290,6 @@ function hammer:rectangle(id, width, height, opt_pos)
                       result.y,
                       width, height)) then
          result.over = true
-
-
-         -- if result.startdrag then
-         --    result.startdrag = false
-         --    result.dragging = true
-         -- end
       end
    end
 
@@ -347,7 +377,12 @@ function hammer:draw()
       end
 
 
-      table.insert(self.history, {id=it.id, color=it.color, dx=it.dx, dy=it.dy, dragging=it.dragging, startdrag=it.startdrag, pointerID=it.pointerID})
+      table.insert(self.history, {id=it.id, color=it.color,
+                                  dx=it.dx, dy=it.dy,
+                                  dragging=it.dragging,
+                                  startpress=it.startpress,
+                                  startdrag=it.startdrag,
+                                  pointerID=it.pointerID})
    end
 
    self.pointers.released = {}

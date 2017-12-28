@@ -23,8 +23,6 @@ function mode:pointerpressed(x, y)
       elseif o.type=="polygon" then
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
       elseif o.triangles then
-         print("no specific hit-test (just use triangles) for ", o.type)
-         assert(o.triangles)
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
       else
          print("dont know how to hittest : ", o.type, hit)
