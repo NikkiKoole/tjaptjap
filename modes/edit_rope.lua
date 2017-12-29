@@ -13,6 +13,7 @@ function mode:getClosestNode(x, y, points)
 
    local best_distance = math.huge
    local index = -1
+   local insertIndex = -1
    --local best_pair = {si=-1, ni=-1}
    for i=1, #points do
       local d = utils.distance(x,y,points[i][1],points[i][2])
@@ -27,24 +28,26 @@ function mode:getClosestNode(x, y, points)
    if index < #points then
       local d1 = utils.distance(x,y,points[index+1][1],points[index+1][2])
       local d2 = utils.distance(points[index][1],points[index][2],points[index+1][1],points[index+1][2])
-
       if d1 < d2 then
-         print("insert after")
+         insertIndex = index
       else
-         print("insert before")
+         insertIndex = index -1
       end
    elseif index == #points then
       local d1 = utils.distance(x,y,points[index-1][1],points[index-1][2])
       local d2 = utils.distance(points[index][1],points[index][2],points[index-1][1],points[index-1][2])
       if d1 < d2 then
          print("insert before")
+         insertIndex = index-1
+
       else
          print("insert after")
-      end
+         insertIndex = index
 
+      end
    end
 
-   return points[index]
+   return points[index], insertIndex
 end
 
 
@@ -125,10 +128,10 @@ function mode:update(dt)
          thickness_value.value = child.data.thicknesses[last_active_node_index] or 0
       end
       if node.released then
+
          local index = getIndexOfPointerID(node.pointerID)
          if index >-1 then
             table.remove(pointdragging,index)
-            --print("released "..tostring(node.pointerID))
          else
             --print("COULDNT FIND INDEX TO RELEASE POINTER")
          end
@@ -137,7 +140,6 @@ function mode:update(dt)
       end
 
       if node.dragging then
-
          local draggingID = getDraggingByPointerID(node.pointerID)
          if draggingID == -1 then
             table.insert(pointdragging, {pointerID=node.pointerID, draggingID=node.id})
@@ -169,6 +171,8 @@ function mode:update(dt)
          end
 
       end
+
+
    end
 
    -------------------------------
@@ -229,8 +233,6 @@ function mode:update(dt)
       if moved then
          Hammer:circle("cursor1", 30, {x=moved.x, y=moved.y})
          local wx,wy = camera:worldCoords(moved.x, moved.y)
-         --wx = wx - self.child.pos.x
-         --wy = wy - self.child.pos.y
          local si= mode:getClosestNode(wx,wy, positions)
          local x2,y2 = camera:cameraCoords(si[1], si[2])
          Hammer:circle("si", 10, {x=x2, y=y2})
@@ -238,6 +240,99 @@ function mode:update(dt)
          --Hammer:circle("ni", 10, {x=x2, y=y2})
       end
    end
+
+   if add_vertex.enddrag then
+      local p = getWithID(Hammer.pointers.released, add_vertex.pointerID)
+      local released = Hammer.pointers.released[p]
+      if released then
+         local wx,wy = camera:worldCoords(released.x, released.y)
+         local si, insertIndex = mode:getClosestNode(wx,wy, positions)
+         --print("add vertex somehewere!", wx, wy, "at index: ", insertIndex)
+         if insertIndex > 0 and insertIndex < #positions then
+            local d = utils.distance(positions[insertIndex][1],positions[insertIndex][2],wx,wy)
+            local a = utils.angle(wx,wy,positions[insertIndex][1],positions[insertIndex][2])
+
+            if not self.child.data.relative_rotation then
+               a = (math.pi*2)- (a + math.pi/2)
+            else
+               a = a * -1
+               local startAngle = mode:getNestedRotation(insertIndex-1)
+               a = a - startAngle
+               a = a - math.pi/2
+            end
+
+
+            self.child.data.lengths[insertIndex] = d
+            self.child.data.rotations[insertIndex] = a
+
+            local d2 = utils.distance(positions[insertIndex+1][1],positions[insertIndex+1][2],wx,wy)
+            local a2 = utils.angle(positions[insertIndex+1][1],positions[insertIndex+1][2],wx,wy)
+            if not self.child.data.relative_rotation then
+               a2 = (math.pi*2)- (a2 + math.pi/2)
+            else
+               a2 = a2 * -1
+               local startAngle = mode:getNestedRotation(insertIndex)
+               a2 = a2 - startAngle
+               a2 = a2 - math.pi/2
+            end
+
+            table.insert(self.child.data.lengths, insertIndex+1, d2)
+            table.insert(self.child.data.rotations, insertIndex+1, a2)
+            table.insert(self.child.data.thicknesses, insertIndex+1, (self.child.data.thicknesses[insertIndex] + self.child.data.thicknesses[insertIndex])/2)
+
+            self.child.dirty = true
+         else
+            if insertIndex == 0 then
+               self.child.pos.x = wx
+               self.child.pos.y = wy
+               local d2 = utils.distance(positions[1][1],positions[1][2],wx,wy)
+               local a2 = utils.angle(positions[1][1],positions[1][2],wx,wy)
+               if not self.child.data.relative_rotation then
+                  a2 = (math.pi*2)- (a2 + math.pi/2)
+               else
+                  local rot = self.child.data.rotations[1]
+                  local startAngle = rot--mode:getNestedRotation(0)
+
+                  a2 = a2 * -1
+                  a2 = a2 - startAngle
+                  a2 = a2 - math.pi/2
+                  print(rot, a2, rot-a2)
+                  self.child.data.rotations[1] = rot - a2
+                  print("this is a bit buggy ;(")
+               end
+
+
+
+               table.insert(self.child.data.lengths, 1, d2)
+               table.insert(self.child.data.rotations, 1, a2)
+               table.insert(self.child.data.thicknesses, 1, 10)
+
+               self.child.dirty = true
+            end
+            if insertIndex == #positions then
+               -- dont understand why this works without adding a new item ??
+
+               local d = utils.distance(positions[insertIndex][1],positions[insertIndex][2],wx,wy)
+               local a = utils.angle(wx,wy,positions[insertIndex][1],positions[insertIndex][2])
+
+               self.child.data.lengths[insertIndex] = d
+               self.child.data.rotations[insertIndex] = (math.pi*2)- (a + math.pi/2)
+
+
+               self.child.dirty = true
+
+            end
+
+
+
+         end
+
+
+
+      end
+
+   end
+
 
 
    -- if clicked outside any of the UI elements or the actual shape go back to the stage mode
