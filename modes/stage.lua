@@ -22,6 +22,10 @@ function mode:pointerpressed(x, y, id)
          hit = utils.pointInRect2(wx, wy, o.pos.x + cdx,   o.pos.y + cdy, o.data.w, o.data.h )
       elseif o.type=="polygon" then
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
+      elseif o.type=="polyline" then
+         hit = pointInPoly({x=wx,y=wy}, o.triangles)
+         --print("polyline?", #o.triangles, hit)
+
       elseif o.triangles then
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
       else

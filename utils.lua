@@ -130,6 +130,7 @@ function pointInPoly(point, triangles)
       local t1 = {x=t[1], y=t[2]}
       local t2 = {x=t[3], y=t[4]}
       local t3 = {x=t[5], y=t[6]}
+      --print(point.x, point.y, t[1]..","..t[2]..","..t[3]..","..t[4]..","..t[5]..","..t[6])
       hit = pointInTriangle(point, t1, t2, t3)
       --print("triangle # ".. i .. " hit? ("..tostring(hit)..")" )
       if hit then break end

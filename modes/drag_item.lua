@@ -34,8 +34,12 @@ function mode:pointerreleased()
          Signal.emit("switch-state", "edit-polygon", self.child)
       elseif (self.child.type == "rope") then
          Signal.emit("switch-state", "edit-rope", self.child)
-      else
+      elseif (self.child.type == "polyline") then
+         Signal.emit("switch-state", "edit-polyline", self.child)
+      elseif (self.child.type == "star" or self.child.type == "rectangle" or self.child.type == "circle") then
          Signal.emit("switch-state", "edit-item", self.child)
+      else
+         print("drag_item: unhandled child type: ",self.child.type)
       end
    end
 end

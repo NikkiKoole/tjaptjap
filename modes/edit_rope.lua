@@ -37,11 +37,11 @@ function mode:getClosestNode(x, y, points)
       local d1 = utils.distance(x,y,points[index-1][1],points[index-1][2])
       local d2 = utils.distance(points[index][1],points[index][2],points[index-1][1],points[index-1][2])
       if d1 < d2 then
-         print("insert before")
+         --print("insert before")
          insertIndex = index-1
 
       else
-         print("insert after")
+         --print("insert after")
          insertIndex = index
 
       end
@@ -293,7 +293,7 @@ function mode:update(dt)
                   local rot = self.child.data.rotations[1]
                   local startAngle = rot--mode:getNestedRotation(0)
 
-                  a2 = a2 * -1
+                  a2 =  (math.pi*2)- a2
                   a2 = a2 - startAngle
                   a2 = a2 - math.pi/2
                   print(rot, a2, rot-a2)

@@ -224,6 +224,18 @@ function makeCustomPolygon(x,y, points, steps)
    return result
 end
 
+function makePolyLine(x,y, join, coords, thicknesses)
+   local newcoords = {}
+   for i=1, #coords, 2 do
+      newcoords[i] = coords[i] + x
+      newcoords[i+1] = coords[i+1] + y
+   end
+
+   local vertices, indices, draw_mode = polyline(join, newcoords, thicknesses, 1, false)
+   local result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
+   return result
+end
+
 
 function makeShape(meta)
    local result = {}
@@ -239,8 +251,9 @@ function makeShape(meta)
    elseif meta.type == "rope" then
       result = makeRope(meta.pos.x, meta.pos.y, meta.data.join or 'none', meta.data.lengths, meta.data.rotations or {}, meta.data.thicknesses or {}, meta.data.relative_rotation)
    elseif meta.type == "polyline" then
-      local vertices, indices, draw_mode = polyline(meta.data.join, meta.data.coords, meta.data.half_width, 1, false)
-      result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
+      result = makePolyLine(meta.pos.x, meta.pos.y,
+                            meta.data.join, meta.data.coords,
+                            meta.data.half_width)
    else
       love.errhand("Unknown shape type: "..meta.type)
    end
