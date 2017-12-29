@@ -5,7 +5,7 @@ function mode:init()
    self.touches = {}
 end
 
-function mode:pointerpressed(x, y)
+function mode:pointerpressed(x, y, id)
    local wx, wy = camera:worldCoords(x,y)
    for i, o in ipairs(world.children) do
 
@@ -31,14 +31,14 @@ function mode:pointerpressed(x, y)
 
       if (hit) then
          self.touches = {}
-         Signal.emit("switch-state", "drag-item", world.children[i])
+         Signal.emit("switch-state", "drag-item", {child=world.children[i], pointerID=id})
       end
    end
 end
 
 function mode:mousepressed( x, y, button, istouch )
    if (not istouch) then
-      self:pointerpressed(x, y)
+      self:pointerpressed(x, y, "mouse")
    end
 end
 
@@ -46,7 +46,7 @@ function mode:touchpressed( id, x, y, dx, dy, pressure )
    table.insert(self.touches, {id=id, x=x, y=y, dx=dx, dy=dy, pressure=pressure})
 
    if #self.touches == 1 then
-      self:pointerpressed(x, y)
+      self:pointerpressed(x, y, id)
    elseif #self.touches == 2 then
       self.initial_distance = utils.distance(
          self.touches[1].x,

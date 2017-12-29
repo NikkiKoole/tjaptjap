@@ -1,7 +1,9 @@
 local mode = {}
 
 function mode:enter(from,data)
-   self.child = data
+
+   self.child = data.child
+   self.pointerID = (data.pointerID)
    self.start_time = love.timer.getTime()
 end
 
@@ -18,7 +20,9 @@ function mode:mousemoved(x,y,dx,dy,istouch)
 end
 
 function mode:touchmoved( id, x, y, dx, dy, pressure )
-   self:pointermoved(x,y,dx,dy)
+   if self.pointerID == id then --otherwise you can drag with multiple fingers
+      self:pointermoved(x,y,dx,dy)
+   end
 end
 
 function mode:pointerreleased()

@@ -8,6 +8,47 @@ function mode:enter(from,data)
    self.child = data
 end
 
+
+function mode:getClosestNode(x, y, points)
+
+   local best_distance = math.huge
+   local index = -1
+   --local best_pair = {si=-1, ni=-1}
+   for i=1, #points do
+      local d = utils.distance(x,y,points[i][1],points[i][2])
+      if d < best_distance then
+         index = i
+         best_distance = d
+      end
+   end
+
+   -- Figure out if the current x,y is closer to the next index then the current index is.
+
+   if index < #points then
+      local d1 = utils.distance(x,y,points[index+1][1],points[index+1][2])
+      local d2 = utils.distance(points[index][1],points[index][2],points[index+1][1],points[index+1][2])
+
+      if d1 < d2 then
+         print("insert after")
+      else
+         print("insert before")
+      end
+   elseif index == #points then
+      local d1 = utils.distance(x,y,points[index-1][1],points[index-1][2])
+      local d2 = utils.distance(points[index][1],points[index][2],points[index-1][1],points[index-1][2])
+      if d1 < d2 then
+         print("insert before")
+      else
+         print("insert after")
+      end
+
+   end
+
+   return points[index]
+end
+
+
+
 function mode:getNestedRotation(index)
    local result = 0
    for i=index,1,-1 do
@@ -19,20 +60,13 @@ function mode:getNestedRotation(index)
    return result
 end
 
---local draggingID = nil
-
--- a pointer can only be dragging one item at a time
--- {pointerID=x, draggingID=x}
 
 local pointdragging = {}
 function getDraggingByPointerID(pointerID)
    for i=1, #pointdragging do
       if pointdragging[i].pointerID == pointerID then
-         --print(pointerID, pointdragging[i].draggingID)
          return pointdragging[i].draggingID
       end
-
-      --print(pointdragging[i].pointerID, pointdragging[i].draggingID)
    end
    return -1
 end
@@ -94,7 +128,11 @@ function mode:update(dt)
          local index = getIndexOfPointerID(node.pointerID)
          if index >-1 then
             table.remove(pointdragging,index)
+            --print("released "..tostring(node.pointerID))
+         else
+            --print("COULDNT FIND INDEX TO RELEASE POINTER")
          end
+         --print("currently dragging "..#pointdragging.." draggables")
 
       end
 
@@ -179,12 +217,30 @@ function mode:update(dt)
          self.child.data.thicknesses[last_active_node_index] = math.floor(thickness_value.value)
          self.child.dirty = true
       end
+   end
 
+   Hammer:ret()
+
+   --- drag new vertexes into the rope, like edit-polygon does
+   local add_vertex = Hammer:rectangle("drag1", 80,80)
+   if add_vertex.dragging then
+      local p = getWithID(Hammer.pointers.moved, add_vertex.pointerID)
+      local moved = Hammer.pointers.moved[p]
+      if moved then
+         Hammer:circle("cursor1", 30, {x=moved.x, y=moved.y})
+         local wx,wy = camera:worldCoords(moved.x, moved.y)
+         --wx = wx - self.child.pos.x
+         --wy = wy - self.child.pos.y
+         local si= mode:getClosestNode(wx,wy, positions)
+         local x2,y2 = camera:cameraCoords(si[1], si[2])
+         Hammer:circle("si", 10, {x=x2, y=y2})
+         --x2,y2 = camera:cameraCoords(ni[1], ni[2])
+         --Hammer:circle("ni", 10, {x=x2, y=y2})
+      end
    end
 
 
-
-
+   -- if clicked outside any of the UI elements or the actual shape go back to the stage mode
    if #Hammer.pointers.pressed == 1 then
       local isDirty = false
       for i=1, #Hammer.drawables do

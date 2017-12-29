@@ -25,8 +25,8 @@ function mode:addVertex(x, y)
    hx = hx - self.child.pos.x
    hy = hy - self.child.pos.y
 
-   local best = self:getClosestNodes(hx, hy)
-   table.insert(self.child.data.points, best.ni, {x=hx, y=hy})
+   local si, ni  = self:getClosestNodes(hx, hy)
+   table.insert(self.child.data.points, ni, {x=hx, y=hy})
 
    local shape = shapes.makeShape(self.child)
    local p = poly.triangulate(self.child.type, shape)
@@ -39,8 +39,8 @@ function mode:addControlPoint(x,y)
    hx = hx - self.child.pos.x
    hy = hy - self.child.pos.y
 
-   local best = self:getClosestNodes(hx, hy)
-   table.insert(self.child.data.points, best.ni, {cx=hx, cy=hy})
+   local si,ni = self:getClosestNodes(hx, hy)
+   table.insert(self.child.data.points, ni, {cx=hx, cy=hy})
 
    local shape = shapes.makeShape(self.child)
    self.child.triangles = poly.triangulate(self.child.type, shape)
@@ -72,6 +72,7 @@ end
 function mode:removeLastTouched()
    if (self.lastTouchedIndex) then
       table.remove(self.child.data.points, self.lastTouchedIndex)
+      assert(self.child)
       local shape = shapes.makeShape(self.child)
       self.child.triangles = poly.triangulate(self.child.type, shape)
    end
@@ -80,7 +81,9 @@ end
 function mode:getClosestNodes(x, y)
    local points = self.child.data.points
    local best_distance = math.huge
-   local best_pair = {si=-1, ni=-1}
+   local si=-1
+   local ni=-1
+   --local best_pair = {si=-1, ni=-1}
    for i=1, #points do
 
       local self_index = i
@@ -100,10 +103,12 @@ function mode:getClosestNodes(x, y)
 
       if (d < best_distance) then
          best_distance = d
-         best_pair = {si=self_index, ni = next_index}
+         --best_pair = {si=self_index, ni = next_index}
+         si = self_index
+         ni = next_index
       end
    end
-   return best_pair
+   return si,ni
 end
 
 
@@ -179,9 +184,9 @@ function mode:update()
          wx = wx - self.child.pos.x
          wy = wy - self.child.pos.y
 
-         local best =mode:getClosestNodes(wx,wy)
-         local si = self.child.data.points[best.si]
-         local ni = self.child.data.points[best.ni]
+         local si,ni =mode:getClosestNodes(wx,wy)
+         si = self.child.data.points[si]
+         ni = self.child.data.points[ni]
          local x2,y2 = camera:cameraCoords(
             (si.x or si.cx) + self.child.pos.x,
             (si.y or si.cy) + self.child.pos.y )
@@ -197,7 +202,7 @@ function mode:update()
    if add_vertex.enddrag then
       local p = getWithID(Hammer.pointers.released,
                           add_vertex.pointerID)
-      local released = Hammer.pointers.released[p]
+       local released = Hammer.pointers.released[p]
 
       self:addVertex(released.x, released.y)
    end
@@ -216,9 +221,9 @@ function mode:update()
          wx = wx - self.child.pos.x
          wy = wy - self.child.pos.y
 
-         local best =mode:getClosestNodes(wx,wy)
-         local si = self.child.data.points[best.si]
-         local ni = self.child.data.points[best.ni]
+         local si,ni =mode:getClosestNodes(wx,wy)
+         si = self.child.data.points[si]
+         ni = self.child.data.points[ni]
          local x2,y2 = camera:cameraCoords(
             (si.x or si.cx) + self.child.pos.x,
             (si.y or si.cy) + self.child.pos.y )
