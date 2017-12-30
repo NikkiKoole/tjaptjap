@@ -253,7 +253,7 @@ function makeShape(meta)
    elseif meta.type == "polyline" then
       result = makePolyLine(meta.pos.x, meta.pos.y,
                             meta.data.join, meta.data.coords,
-                            meta.data.half_width)
+                            meta.data.thicknesses or meta.data.half_width)
    else
       love.errhand("Unknown shape type: "..meta.type)
    end
