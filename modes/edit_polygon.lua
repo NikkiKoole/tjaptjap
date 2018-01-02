@@ -173,8 +173,7 @@ function mode:update()
    Hammer:pos(10,300)
    Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
    Hammer:ret()
-   Hammer:label("addvid", "add vertex", 100, 20)
-   local add_vertex = Hammer:rectangle("drag1", 80,80)
+   local add_vertex = Hammer:labelbutton("add vertex", 120,40)
    if add_vertex.dragging then
       local p = getWithID(Hammer.pointers.moved, add_vertex.pointerID)
       local moved = Hammer.pointers.moved[p]
@@ -208,10 +207,7 @@ function mode:update()
    end
 
    Hammer:ret()
-   Hammer:ret()
-   Hammer:label("addcp", "bezier point", 100, 20)
-
-   local add_cp = Hammer:rectangle("drag2", 80,80)
+   local add_cp = Hammer:labelbutton("bezier", 120,40)
    if add_cp.dragging then
       local p = getWithID(Hammer.pointers.moved, add_cp.pointerID)
       local moved = Hammer.pointers.moved[p]
@@ -245,16 +241,24 @@ function mode:update()
       self:addControlPoint(released.x, released.y)
    end
    Hammer:ret()
-   Hammer:ret()
-   Hammer:label("delete", "delete last active node", 200, 20)
-   local del_node = Hammer:rectangle("del_last_active", 40,40)
+
+   local del_node = Hammer:labelbutton("delete last", 120,40)
    if del_node.released then
       mode:removeLastTouched()
       self.lastTouchedIndex = false
    end
+
    Hammer:ret()
-   Hammer:label("quit", "exit mode", 200, 20)
-   Hammer:ret()
+   local delete = Hammer:labelbutton("delete", 100, 40)
+   if delete.startpress then
+      for i=#world.children,1,-1 do
+         if world.children[i]==self.child then
+            table.remove(world.children, i)
+            Signal.emit("switch-state", "stage")
+         end
+      end
+   end
+
 
 
    if #Hammer.pointers.pressed == 1 then

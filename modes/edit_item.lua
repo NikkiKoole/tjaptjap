@@ -1,4 +1,5 @@
 local utils = require "utils"
+
 local mode ={}
 
 local star_value = {value = 8, min = 3, max = 24}
@@ -176,19 +177,31 @@ function mode:update(dt)
          --end
       end
 
-
-   if #Hammer.pointers.pressed == 1 then
-      local isDirty = false
-      for i=1, #Hammer.drawables do
-         local it = Hammer.drawables[i]
-         if it.over or it.pressed or it.dragging then
-            isDirty = true
+      Hammer:ret()
+      local delete = Hammer:labelbutton("delete", 100, 40)
+      if delete.startpress then
+         for i=#world.children,1,-1 do
+            if world.children[i]==self.child then
+               table.remove(world.children, i)
+               Signal.emit("switch-state", "stage")
+            end
          end
       end
-      if not isDirty then
-         Signal.emit("switch-state", "stage")
+
+
+
+      if #Hammer.pointers.pressed == 1 then
+         local isDirty = false
+         for i=1, #Hammer.drawables do
+            local it = Hammer.drawables[i]
+            if it.over or it.pressed or it.dragging then
+               isDirty = true
+            end
+         end
+         if not isDirty then
+            Signal.emit("switch-state", "stage")
+         end
       end
-   end
 
 
 end

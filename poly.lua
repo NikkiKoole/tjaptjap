@@ -163,6 +163,8 @@ function triangulate(type, poly)
 
    if type=="polyline" or type=="rope" then
       --print(poly.draw_mode)
+
+
       if (poly.draw_mode == "triangles") then
          for i=1, #poly.indices, 3 do
             local i1 = poly.indices[i]

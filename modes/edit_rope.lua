@@ -180,22 +180,19 @@ function mode:update(dt)
    -- have a dropdown where you can select the joint type [none, join, bevel]
 
    Hammer:pos(20,300)
-   Hammer:label("jointype label1", "join:", 150, 30)
    Hammer:ret()
-   Hammer:label("jointype label2", "none/miter/bevel", 150, 30)
-
-   Hammer:ret()
-   local none  = Hammer:rectangle("none button", 30,30)
+   local none  = Hammer:labelbutton("none", 60,30)
    if none.startpress then
+      print("startpress ")
       self.child.data.join = "none"
       self.child.dirty = true
    end
-   local miter = Hammer:rectangle("miter button", 30,30)
+   local miter = Hammer:labelbutton("miter", 60,30)
    if miter.startpress then
       self.child.data.join = "miter"
       self.child.dirty = true
    end
-   local bevel = Hammer:rectangle("bevel button", 30,30)
+   local bevel = Hammer:labelbutton("bevel", 60,30)
    if bevel.startpress then
       self.child.data.join = "bevel"
       self.child.dirty = true
@@ -210,7 +207,7 @@ function mode:update(dt)
    if last_active_node_index > 0 then
       Hammer:ret()
       --thickness_value.value = self.child.data.thicknesses[last_active_node_index]
-      Hammer:label("thickness node", "thickness: "..thickness_value.value, 150, 30)
+      Hammer:label("thickness node", "thickness: "..math.floor(thickness_value.value), 150, 30)
       Hammer:ret()
 
       local value = thickness_value.value
@@ -226,7 +223,7 @@ function mode:update(dt)
    Hammer:ret()
 
    --- drag new vertexes into the rope, like edit-polygon does
-   local add_vertex = Hammer:rectangle("drag1", 80,80)
+   local add_vertex = Hammer:labelbutton("add vertex", 120,40)
    if add_vertex.dragging then
       local p = getWithID(Hammer.pointers.moved, add_vertex.pointerID)
       local moved = Hammer.pointers.moved[p]
@@ -331,6 +328,30 @@ function mode:update(dt)
 
       end
 
+   end
+   local del_node = Hammer:labelbutton("delete last", 140,40)
+   if del_node.released then
+      if last_active_node_index > 0 then
+         local index = last_active_node_index --((last_active_node_index-1)/2)+1
+         table.remove(self.child.data.thicknesses, index)
+         table.remove(self.child.data.lengths, index)
+         table.remove(self.child.data.rotations, index)
+         self.child.dirty=true
+         last_active_node_index = 0
+      end
+
+      --mode:removeLastTouched()
+      --self.lastTouchedIndex = false
+   end
+   Hammer:ret()
+   local delete = Hammer:labelbutton("delete", 100, 40)
+   if delete.startpress then
+      for i=#world.children,1,-1 do
+         if world.children[i]==self.child then
+            table.remove(world.children, i)
+            Signal.emit("switch-state", "stage")
+         end
+      end
    end
 
 

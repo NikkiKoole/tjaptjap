@@ -24,11 +24,16 @@ local last_active_node_index = 0
 -- end
 
 function mode:getClosestNode(x,y,coords)
+   -- TODO this is completely broken, this whole function
+
    local best_distance = math.huge
    local index = -1
 
+   --local x = x - self.child.pos.x
+   --local y = y - self.child.pos.y
+
    for i=1, #coords, 2 do
-      local d = utils.distance(x,y,coords[i] + self.child.pos.x, coords[i+1] + self.child.pos.y)
+      local d = utils.distance(x,y,coords[i], coords[i+1])
       if d < best_distance then
          index = i
          best_distance = d
@@ -36,11 +41,15 @@ function mode:getClosestNode(x,y,coords)
    end
 
    if index < #coords-1 then
-      local d1 = utils.distance(x,y,coords[index+2],coords[index+3])
+      local d1 = utils.distance(x, y,
+                                coords[index+2],coords[index+3])
       local d2 = utils.distance(coords[index],coords[index+1],coords[index+2],coords[index+3])
       if d1 < d2 then
          index = index + 2
+--         print("added 2")
       else
+  --       print("not added 2")
+
       end
 
    else
@@ -88,29 +97,28 @@ function mode:update(dt)
       if node.startpress then
          last_active_node_index = i
          local index = ((i-1)/2)+1
-         thickness_value.value = self.child.data.thicknesses[index] or 0
+         if self.child.data.thicknesses then
+            thickness_value.value = self.child.data.thicknesses[index] or 0
+         end
       end
 
    end
 
    Hammer:pos(20,300)
 
-   Hammer:label("jointype label1", "join:", 150, 30)
-   Hammer:ret()
-   Hammer:label("jointype label2", "none/miter/bevel", 150, 30)
 
    Hammer:ret()
-   local none  = Hammer:rectangle("none button", 30,30)
+   local none  = Hammer:labelbutton("none", 100,30)
    if none.startpress then
       self.child.data.join = "none"
       self.child.dirty = true
    end
-   local miter = Hammer:rectangle("miter button", 30,30)
+   local miter = Hammer:labelbutton("miter", 100,30)
    if miter.startpress then
       self.child.data.join = "miter"
       self.child.dirty = true
    end
-   local bevel = Hammer:rectangle("bevel button", 30,30)
+   local bevel = Hammer:labelbutton("bevel", 100,30)
    if bevel.startpress then
       self.child.data.join = "bevel"
       self.child.dirty = true
@@ -120,7 +128,7 @@ function mode:update(dt)
 
 
    --- drag new vertexes into the rope, like edit-polygon does
-   local add_vertex = Hammer:rectangle("drag1", 80,80)
+   local add_vertex = Hammer:labelbutton("add vertex", 100,60)
    if add_vertex.dragging then
       local p = getWithID(Hammer.pointers.moved, add_vertex.pointerID)
       local moved = Hammer.pointers.moved[p]
@@ -136,7 +144,7 @@ function mode:update(dt)
       local p = getWithID(Hammer.pointers.released, add_vertex.pointerID)
       local released = Hammer.pointers.released[p]
       if released then
-         local wx,wy = camera:worldCoords(released.x, released.y)
+         local wx,wy = camera:worldCoords(released.x-self.child.pos.x, released.y-self.child.pos.y)
          local si, insertIndex = mode:getClosestNode(wx,wy, self.child.data.coords)
          local index = ((insertIndex-1)/2)+1
          table.insert(self.child.data.coords, insertIndex, wy)
@@ -169,12 +177,15 @@ function mode:update(dt)
    end
 
    Hammer:ret()
-   Hammer:label("delete", "delete last active node", 200, 20)
-   local del_node = Hammer:rectangle("del_last_active", 40,40)
+
+   local del_node = Hammer:labelbutton("delete last", 140,40)
    if del_node.released then
       if last_active_node_index > 0 then
          local index = ((last_active_node_index-1)/2)+1
-         table.remove(self.child.data.thicknesses, index)
+         if self.child.data.thicknesses then
+            table.remove(self.child.data.thicknesses, index)
+         end
+
          table.remove(self.child.data.coords, last_active_node_index)
          table.remove(self.child.data.coords, last_active_node_index)
          self.child.dirty=true
@@ -186,6 +197,16 @@ function mode:update(dt)
    end
    Hammer:ret()
 
+   local delete = Hammer:labelbutton("delete", 100, 40)
+   if delete.startpress then
+      for i=#world.children,1,-1 do
+         if world.children[i]==self.child then
+            table.remove(world.children, i)
+            Signal.emit("switch-state", "stage")
+         end
+      end
+   end
+
 
 
 
@@ -195,6 +216,7 @@ function mode:update(dt)
          local it = Hammer.drawables[i]
          if it.over or it.pressed or it.dragging then
             isDirty = true
+            print("hammer dirty")
          end
       end
 
@@ -202,6 +224,8 @@ function mode:update(dt)
       local hit = pointInPoly({x=wx,y=wy}, self.child.triangles)
       if hit then
          isDirty = true
+         print("point in poly dirty")
+
       end
 
       if not isDirty then

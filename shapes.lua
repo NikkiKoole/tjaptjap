@@ -130,6 +130,7 @@ function makeStarPolygon(cx, cy, sides, r1, r2, a1, a2)
    local a = 0 --the angle my point points towards
    local r = 0 -- the radius, or distance of my point
 
+
    for i=1, steps do
       if i %  2 == 0 then
          r = r1
@@ -226,6 +227,7 @@ end
 
 function makePolyLine(x,y, join, coords, thicknesses)
    local newcoords = {}
+
    for i=1, #coords, 2 do
       newcoords[i] = coords[i] + x
       newcoords[i+1] = coords[i+1] + y
@@ -252,8 +254,9 @@ function makeShape(meta)
       result = makeRope(meta.pos.x, meta.pos.y, meta.data.join or 'none', meta.data.lengths, meta.data.rotations or {}, meta.data.thicknesses or {}, meta.data.relative_rotation)
    elseif meta.type == "polyline" then
       result = makePolyLine(meta.pos.x, meta.pos.y,
-                            meta.data.join, meta.data.coords,
+                            meta.data.join or 'none', meta.data.coords,
                             meta.data.thicknesses or meta.data.half_width)
+
    else
       love.errhand("Unknown shape type: "..meta.type)
    end

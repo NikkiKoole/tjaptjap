@@ -10,6 +10,8 @@ local inspect = require "vendor.inspect"
 
 StageMode = require "modes.stage"
 DragMode = require "modes.drag_item"
+DrawMode = require "modes.draw_item"
+
 ItemMode = require "modes.edit_item"
 PolygonMode = require "modes.edit_polygon"
 PolyLineMode = require "modes.edit_polyline"
@@ -116,11 +118,12 @@ end
 
 
 
-
+SCREEN_WIDTH = 1024
+SCREEN_HEIGHT = 768
 
 function love.load()
    if arg[#arg] == "-debug" then require("mobdebug").start() end
-   love.window.setMode(1024, 768, {resizable=true, vsync=true, fullscreen=false})
+   love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT, {resizable=true, vsync=true, fullscreen=false})
 
    icon_font = love.graphics.newFont("resources/icons.ttf", 30)
    helvetica = love.graphics.newFont("resources/helvetica_bold.ttf", 18)
@@ -149,13 +152,15 @@ function love.load()
          -- },
 
 
-         {type="polyline", pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200}, join="miter", half_width=50, thicknesses={10,20,30,40,50}  }},
+         -- {type="polyline", pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200}, join="miter", half_width=50, thicknesses={10,20,30,40,50}  }},
          -- {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
          -- {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
          -- {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
          --{type="polygon", pos={x=0, y=0, z=0}, data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
       },
    }
+
+
 
    bounds = {
        tl={x = -1000,  y = -1000},
@@ -184,6 +189,8 @@ function love.load()
             State = StageMode
          elseif state == "drag-item" then
             State = DragMode
+         elseif state == "draw-item" then
+            State = DrawMode
          elseif state == "edit-item" then
             State = ItemMode
          elseif state == "edit-polygon" then
@@ -275,15 +282,18 @@ function love.draw()
    for i=1, #world.children do
       if world.children[i].triangles  then
          for j=1, #world.children[i].triangles do
-            love.graphics.setColor(math.random()*50 + 20, 155+ math.random()*50 + 20,55, 155)
+            love.graphics.setColor(math.random()*200 + 100, 155+ math.random()*0 + 20,55, 155)
             love.graphics.polygon("fill", world.children[i].triangles[j])
             triangle_count = triangle_count + 1
          end
+      else
+         --print("child at index "..i.." has no triangles.")
       end
+
    end
 
 
    camera:detach()
-   love.graphics.print("#tris "..triangle_count, 10, 30)
+   love.graphics.print("#tris "..triangle_count, 10, 130)
    Hammer:draw()
 end

@@ -105,10 +105,7 @@ function hammer:label(id, text, width, height, opt_pos)
 end
 
 
-function hammer:slider(id, width, height, props)
-   local result =  {type="slider",thumbX=0, thumbY=0, id=id,x=self.x, y=self.y, w=width,h=height}
-
-
+function hammer:handle_history(id, result)
    if (self.history) then
       local  hi = listGetPointerIndex(self.history, id)
       if hi > -1 then
@@ -120,6 +117,14 @@ function hammer:slider(id, width, height, props)
          end
       end
    end
+
+end
+
+
+function hammer:slider(id, width, height, props)
+   local result =  {type="slider",thumbX=0, thumbY=0, id=id,x=self.x, y=self.y, w=width,h=height}
+
+   self:handle_history(id, result)
 
 
 
@@ -213,47 +218,7 @@ function hammer:slider(id, width, height, props)
 end
 
 
-
-
-function hammer:rectangle(id, width, height, opt_pos)
-   local result =  {type="rect",id=id,
-                    dx=0,dy=0,
-                    x=(opt_pos and opt_pos.x or self.x),
-                    y=(opt_pos and opt_pos.y or self.y),
-                    w=width,h=height}
-
-   if opt_pos and opt_pos.color then
-      result.color = opt_pos.color
-   end
-
-
-
-   if (self.history) then
-      local  hi = listGetPointerIndex(self.history, id)
-      if hi > -1 then
-
-         if self.history[hi].dx and self.history[hi].dy then
-            result.dx = self.history[hi].dx
-            result.dy = self.history[hi].dy
-         end
-
-
-         if self.history[hi].startdrag or self.history[hi].dragging then
-            result.dragging = true
-            result.pointerID = self.history[hi].pointerID
-
-         end
-      end
-   end
-
-   if #self.pointers.pressed > 0 then
-      --print("pressed ", #self.pointers.pressed)
-   end
-
-
-
-
-
+function hammer:default_pressed(result, width, height)
    for i=1, #self.pointers.pressed do
       local pressed = self.pointers.pressed[i]
 
@@ -270,7 +235,11 @@ function hammer:rectangle(id, width, height, opt_pos)
          if not result.pointerID  then
             result.pointerID = pressed.id
             result.startpress = true
+         else
+            result.startpress = false
+
          end
+
 
          if result.dx == 0 and result.dy == 0 then
             result.dx = pressed.x - (result.x + width/2)
@@ -281,8 +250,9 @@ function hammer:rectangle(id, width, height, opt_pos)
 
    end
 
-
-   for i=1, #self.pointers.moved do
+end
+function hammer:default_moved(result, width,height)
+      for i=1, #self.pointers.moved do
 
       if (pointInRect(self.pointers.moved[i].x,
                       self.pointers.moved[i].y,
@@ -293,7 +263,8 @@ function hammer:rectangle(id, width, height, opt_pos)
       end
    end
 
-
+end
+function hammer:default_released(result)
    for i=1, #self.pointers.released do
       if self.pointers.released[i].id == result.pointerID then
 
@@ -307,6 +278,55 @@ function hammer:rectangle(id, width, height, opt_pos)
       end
    end
 
+end
+
+
+function hammer:labelbutton(id, width, height, opt_pos)
+   local result =  {
+      type="labelbutton",id=id,
+      dx=0,dy=0,
+      text=id,
+      x=(opt_pos and opt_pos.x or self.x),
+      y=(opt_pos and opt_pos.y or self.y),
+      w=width,h=height
+   }
+
+   if opt_pos and opt_pos.color then
+      result.color = opt_pos.color
+   end
+
+   self:handle_history(id, result)
+
+   self:default_pressed(result, width, height)
+   self:default_moved(result, width, height)
+   self:default_released(result)
+
+
+   table.insert(self.drawables, result)
+   self.x = self.x + width + self.margin
+   return result
+end
+
+
+function hammer:rectangle(id, width, height, opt_pos)
+   local result =  {type="rect",id=id,
+                    dx=0,dy=0,
+                    x=(opt_pos and opt_pos.x or self.x),
+                    y=(opt_pos and opt_pos.y or self.y),
+                    w=width,h=height}
+
+   if opt_pos and opt_pos.color then
+      result.color = opt_pos.color
+   end
+
+
+   self:handle_history(id, result)
+
+   self:default_pressed(result, width, height)
+   self:default_moved(result, width, height)
+   self:default_released(result)
+
+
    table.insert(self.drawables, result)
    self.x = self.x + width + self.margin
 
@@ -314,9 +334,21 @@ function hammer:rectangle(id, width, height, opt_pos)
    return result
 end
 
+
+
 function hammer:button(label)
 
 end
+function hammer:isDirty()
+   for i=1, #self.drawables do
+      local it = self.drawables[i]
+      if it.over or it.pressed or it.dragging then
+         return true
+      end
+   end
+   return false
+end
+
 
 function hammer:draw()
    love.graphics.setColor(255,255,255)
@@ -345,7 +377,7 @@ function hammer:draw()
          love.graphics.circle("fill", it.x, it.y, it.r)
       end
 
-      if it.type == "rect" then
+      if it.type == "rect" or it.type=="labelbutton" then
          love.graphics.rectangle("fill", it.x, it.y, it.w, it.h)
       end
       if it.type == "slider" then
@@ -355,7 +387,7 @@ function hammer:draw()
          love.graphics.rectangle("fill", it.x + it.thumbX, it.y + it.thumbY, math.min(it.w, it.h), math.min(it.w, it.h))
 
       end
-      if it.type == "label" then
+      if it.type == "label" or it.type=="labelbutton" then
          love.graphics.setColor(55,55,55)
          love.graphics.rectangle("fill", it.x, it.y, it.w, it.h)
          local w = (love.graphics.getFont():getWidth(it.text))
