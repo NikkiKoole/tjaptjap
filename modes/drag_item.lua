@@ -11,6 +11,7 @@ function mode:pointermoved(x,y,dx,dy)
    self.child.pos.x =    self.child.pos.x + (dx/camera.scale)
    self.child.pos.y =    self.child.pos.y + (dy/camera.scale)
    self.child.dirty = true
+   --print(self.child.type, "dragging", self.child.pos.x, self.child.pos.y)
 end
 
 function mode:mousemoved(x,y,dx,dy,istouch)
@@ -36,6 +37,9 @@ function mode:pointerreleased()
          Signal.emit("switch-state", "edit-rope", self.child)
       elseif (self.child.type == "polyline") then
          Signal.emit("switch-state", "edit-polyline", self.child)
+      elseif (self.child.type == "mesh3d") then
+         Signal.emit("switch-state", "edit-mesh3d", self.child)
+
       elseif (self.child.type == "star" or self.child.type == "rect" or self.child.type == "circle") then
          Signal.emit("switch-state", "edit-item", self.child)
       else

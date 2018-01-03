@@ -161,10 +161,50 @@ end
 function triangulate(type, poly)
    local result = {}
 
-   if type=="polyline" or type=="rope" then
-      --print(poly.draw_mode)
+   if type=="mesh3d" then
+      for x=1, poly.width do
+         for y=1,poly.height do
+            local p1 = {x=poly.cells[x][y].x,     y=poly.cells[x][y].y}
+            local p2 = {x=poly.cells[x+1][y].x,   y=poly.cells[x+1][y].y}
+            local p3 = {x=poly.cells[x+1][y+1].x, y=poly.cells[x+1][y+1].y}
+            local p4 = {x=poly.cells[x][y+1].x,   y=poly.cells[x][y+1].y}
 
+            p1.x = p1.x + poly.cx
+            p2.x = p2.x + poly.cx
+            p3.x = p3.x + poly.cx
+            p4.x = p4.x + poly.cx
 
+            p1.y = p1.y + poly.cy
+            p2.y = p2.y + poly.cy
+            p3.y = p3.y + poly.cy
+            p4.y = p4.y + poly.cy
+
+            local triangle1, triangle2
+
+            if x%2==1 then
+               if y%2==1 then
+                  triangle1 = {p1.x,p1.y,p2.x,p2.y,p3.x,p3.y}
+                  triangle2 = {p1.x,p1.y,p3.x,p3.y,p4.x,p4.y}
+               else
+                  triangle1 = {p4.x,p4.y,p1.x,p1.y,p2.x,p2.y}
+                  triangle2 = {p4.x,p4.y,p3.x,p3.y,p2.x,p2.y}
+               end
+            else
+               if y%2==1 then
+                  triangle1 = {p4.x,p4.y,p1.x,p1.y,p2.x,p2.y}
+                  triangle2 = {p4.x,p4.y,p3.x,p3.y,p2.x,p2.y}
+               else
+                  triangle1 = {p1.x,p1.y,p2.x,p2.y,p3.x,p3.y}
+                  triangle2 = {p1.x,p1.y,p3.x,p3.y,p4.x,p4.y}
+               end
+            end
+
+            table.insert(result, triangle1)
+            table.insert(result, triangle2)
+         end
+      end
+
+   elseif type=="polyline" or type=="rope" then
       if (poly.draw_mode == "triangles") then
          for i=1, #poly.indices, 3 do
             local i1 = poly.indices[i]
@@ -200,10 +240,10 @@ function triangulate(type, poly)
 
 
    else
-   local polys = decompose_complex_poly(poly, {})
+      local polys = decompose_complex_poly(poly, {})
 
-   for i=1 , #polys do
-      local p = polys[i]
+      for i=1 , #polys do
+         local p = polys[i]
          local triangles = love.math.triangulate(p)
          for j = 1, #triangles do
             local t = triangles[j]
@@ -212,7 +252,7 @@ function triangulate(type, poly)
                table.insert(result, t)
             end
          end
-   end
+      end
    end
 
    return result

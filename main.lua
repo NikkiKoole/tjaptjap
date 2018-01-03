@@ -15,6 +15,7 @@ DrawMode = require "modes.draw_item"
 ItemMode = require "modes.edit_item"
 PolygonMode = require "modes.edit_polygon"
 PolyLineMode = require "modes.edit_polyline"
+Mesh3dMode = require "modes.edit_mesh3d"
 
 RopeMode = require "modes.edit_rope"
 Hammer = require "hammer"
@@ -115,9 +116,6 @@ end
 
 --------------------------------
 
-
-
-
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
 
@@ -125,10 +123,15 @@ function love.load()
    if arg[#arg] == "-debug" then require("mobdebug").start() end
    love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT, {resizable=true, vsync=true, fullscreen=false})
 
-   icon_font = love.graphics.newFont("resources/icons.ttf", 30)
+   --icon_font = love.graphics.newFont("resources/icons.ttf", 30)
    helvetica = love.graphics.newFont("resources/helvetica_bold.ttf", 18)
    world = {
       children={
+         {
+            type="mesh3d",
+            pos={x=0,y=0,z=0},
+            data={width=10, height=10, cellwidth=50, cellheight=50}
+         },
          {
             type="rope",
             pos={x=100,y=100,z=0},
@@ -197,6 +200,8 @@ function love.load()
             State = PolygonMode
          elseif state == "edit-polyline" then
             State = PolyLineMode
+         elseif state == "edit-mesh3d" then
+            State = Mesh3dMode
          elseif state == "edit-rope" then
             State = RopeMode
          end

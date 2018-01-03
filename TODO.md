@@ -1,6 +1,8 @@
 TODO
 -------
 
-- use polylne-routine to do some 'ropey' kind of animation on a bunch of segments.
-- make some bloody flamingo already
-- get rid of unneeded cruft in the `scene-graph.lua` file (Not yet using this file though)
+- add color,  per shape/per triangle / per triangle vertex
+- make a mesh per thing
+- keyframe animation, live recording animation
+- nested scene graph logic.
+- unify rope/polyline

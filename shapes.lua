@@ -238,6 +238,28 @@ function makePolyLine(x,y, join, coords, thicknesses)
    return result
 end
 
+function makeMesh3d(x,y,data)
+   local result = {}
+   result.width = data.width
+   result.height = data.height
+   result.cx = x
+   result.cy = y
+   if not data.cells then
+      data.cells = {}
+      for i=1, data.width+1 do
+         data.cells[i] = {}
+         for j=1, data.height+1 do
+            data.cells[i][j]= {
+               x=i*data.cellwidth ,
+               y=j*data.cellheight, z=0}
+         end
+      end
+   end
+
+   result.cells = data.cells
+
+   return result
+end
 
 function makeShape(meta)
    local result = {}
@@ -256,7 +278,8 @@ function makeShape(meta)
       result = makePolyLine(meta.pos.x, meta.pos.y,
                             meta.data.join or 'none', meta.data.coords,
                             meta.data.thicknesses or meta.data.half_width)
-
+   elseif meta.type == "mesh3d" then
+      result = makeMesh3d(meta.pos.x, meta.pos.y, meta.data)
    else
       love.errhand("Unknown shape type: "..meta.type)
    end
