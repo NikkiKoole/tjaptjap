@@ -267,8 +267,6 @@ end
 function hammer:default_released(result)
    for i=1, #self.pointers.released do
       if self.pointers.released[i].id == result.pointerID then
-
-
          result.dragging = false
          result.startdrag = false
          result.enddrag = true

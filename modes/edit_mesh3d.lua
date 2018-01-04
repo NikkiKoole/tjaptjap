@@ -17,16 +17,16 @@ function mode:update(dt)
    for i=1, data.width+1 do
       for j=1, data.height+1 do
          local rx,ry = camera:cameraCoords(data.cells[i][j].x +self.child.pos.x, data.cells[i][j].y+self.child.pos.y)
-         local node = Hammer:rectangle( "n"..i..","..j, 30, 30,{x=rx,
-                                                                y=ry,
-                                                                color=color})
+         local node = Hammer:rectangle( "n"..i..","..j, 30, 30,{x=rx-15, y=ry-15, color=color})
          if node.dragging then
             local p = getWithID(Hammer.pointers.moved, node.pointerID)
             local moved = Hammer.pointers.moved[p]
             if moved then
                local wx, wy = camera:worldCoords(moved.x, moved.y)
-               self.child.data.cells[i][j].x = wx - self.child.pos.x + node.dx
-               self.child.data.cells[i][j].y = wy - self.child.pos.y
+               wx = wx - node.dx/camera.scale - self.child.pos.x
+               wy = wy - node.dy/camera.scale - self.child.pos.y
+               self.child.data.cells[i][j].x = wx
+               self.child.data.cells[i][j].y = wy
                self.child.dirty=true
             end
 
