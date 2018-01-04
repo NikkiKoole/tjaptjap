@@ -114,6 +114,9 @@ function love.touchpressed(id, x, y, dx, dy, pressure)
 end
 
 
+
+
+
 --------------------------------
 
 SCREEN_WIDTH = 1024
@@ -130,7 +133,7 @@ function love.load()
          {
             type="mesh3d",
             pos={x=0,y=0,z=0},
-            data={width=10, height=10, cellwidth=50, cellheight=50}
+            data={width=3, height=10, cellwidth=50, cellheight=50}
          },
          {
             type="rope",
@@ -276,11 +279,8 @@ function love.update(dt)
 end
 
 function love.draw()
-   love.graphics.setColor(255,255,255)
-   love.graphics.print("camera " .. math.floor(camera.x) .. ", " .. math.floor(camera.y) .. "," .. tonumber(string.format("%.3f", camera.scale)))
-   love.graphics.print("pointers    moved: "..(#pointers.moved), 0, 30)
-   love.graphics.print("pointers  pressed: "..(#pointers.pressed), 0, 60)
-   love.graphics.print("pointers released: "..(#pointers.released), 0, 90)
+   --love.graphics.print("pointers  pressed: "..(#pointers.pressed), 0, 60)
+   --love.graphics.print("pointers released: "..(#pointers.released), 0, 90)
 
    camera:attach()
    local triangle_count = 0
@@ -299,6 +299,9 @@ function love.draw()
 
 
    camera:detach()
-   love.graphics.print("#tris "..triangle_count, 10, 130)
+
+   love.graphics.setColor(255,255,255)
+   love.graphics.print("camera " .. math.floor(camera.x) .. ", " .. math.floor(camera.y) .. "," .. tonumber(string.format("%.3f", camera.scale)).." pointers : ["..(#pointers.moved)..","..(#pointers.pressed)..","..(#pointers.released).."]")
+   love.graphics.print("#tris "..triangle_count, 10, 30)
    Hammer:draw()
 end
