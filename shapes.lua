@@ -313,6 +313,16 @@ function makeShape(meta)
    return result
 end
 
+function transformShape(tx,ty, shape)
+   local result = {}
+   for i=1, #shape, 2 do
+      result[i+0] = shape[i+0] + tx
+      result[i+1] = shape[i+1] + ty
+   end
+   return result
+end
+
+
 function rotateShape(cx, cy, shape, theta)
    local result = {}
    local costheta = math.cos(theta)
@@ -333,5 +343,6 @@ end
 
 return {
    makeShape=makeShape,
-   rotateShape=rotateShape
+   rotateShape=rotateShape,
+   transformShape=transformShape
 }

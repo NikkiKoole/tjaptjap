@@ -22,6 +22,7 @@ function mode:update(dt)
 
       result.pos.x = wx
       result.pos.y = wy
+      result.world_pos={x=0,y=0,z=0}
 
       local shape = shapes.makeShape(result)
       result.triangles = poly.triangulate(result.type, shape)

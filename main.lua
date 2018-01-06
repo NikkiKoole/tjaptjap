@@ -51,11 +51,41 @@ function love.load()
    Hammer.pointers = pointers
 
    world = {
+      world_pos={x=0,y=0,z=0,rot=0},
+      pos={x=0,y=0,z=0},
+      rotation=0,
+      id="world",
       children={
          {
             type="simplerect",
+            id="opa",
             pos={x=0,y=0,z=0},
-            data={w=300, h=100}
+            rotation=math.pi/4,
+            data={w=300, h=300},
+            world_pos={x=0,y=0,z=0,rot=0},
+
+            children={
+               {
+                  type="simplerect",
+                  id="papa",
+                  pos={x=100,y=0,z=0},
+                  data={w=200, h=200},
+                  world_pos={x=0,y=0,z=0,rot=0},
+                  rotation=0,
+
+                  children={
+                     {
+                        type="simplerect",
+                        id="jongen",
+                        pos={x=110,y=110,z=0},
+                        data={w=100, h=100},
+                        world_pos={x=0,y=0,z=0,rot=0},
+                        rotation=0,
+
+                     }
+                  }
+               }
+            }
          },
 
          -- {
@@ -94,22 +124,7 @@ function love.load()
       },
    }
 
-
-
-   bounds = {
-       tl={x = -1000,  y = -1000},
-       br={x = 1000, y = 1000}
-   }
-
-    for i=1, #world.children do
-      local c = world.children[i]
-      local shape = shapes.makeShape(c)
-      if c.rotation then
-         shape = shapes.rotateShape(c.pos.x, c.pos.y, shape, c.rotation)
-      end
-
-      c.triangles = poly.triangulate(c.type, shape)
-   end
+   updateSceneGraph(true, world)
 
    camera = Camera(0, 0)
    Gamestate.registerEvents()
@@ -139,10 +154,6 @@ function love.load()
          Gamestate.switch(State, data)
       end
    )
-   --love.graphics.setFont(helvetica)
-
-   --pointers = {moved={}, released={}, pressed={}}
-
 end
 
 function love.keypressed(key)
@@ -168,40 +179,66 @@ function love.filedropped(file)
    --world = bitser.loadData(data:getPointer(), data:getSize())
 end
 
+function updateSceneGraph(init, root)
 
+   if root.children then
+   for i=1, #root.children do
+      root.children[i].world_pos.x = root.pos.x + root.world_pos.x
+      root.children[i].world_pos.y = root.pos.y + root.world_pos.y
+      root.children[i].world_pos.rot = root.rotation + root.world_pos.rot
 
-function love.update(dt)
-   if love.keyboard.isDown("escape") then love.event.quit() end
-   for i=1, #world.children do
-      if (world.children[i].dirty) then
-         world.children[i].dirty = false
-         local c = world.children[i]
+      if (root.children[i].dirty or init) then
+         root.children[i].dirty = false
+         local c = root.children[i]
+         c.world_pos.x = root.pos.x + root.world_pos.x
+         c.world_pos.y = root.pos.y + root.world_pos.y
+         c.world_pos.rot = root.rotation + root.world_pos.rot
          local shape = shapes.makeShape(c)
-         if c.rotation then
-            shape = shapes.rotateShape(c.pos.x, c.pos.y, shape, c.rotation)
+         if c.type=="simplerect" then
+            shape = shapes.transformShape(c.world_pos.x, c.world_pos.y, shape)
          end
-            c.triangles = poly.triangulate(c.type, shape)
+         if c.rotation then
+            shape = shapes.rotateShape(c.pos.x, c.pos.y, shape, c.rotation+ c.world_pos.rot)
+         end
+         c.triangles = poly.triangulate(c.type, shape)
       end
-   end
-   Hammer:reset(200,30)
-end
+      if root.children[i].children then
+         updateSceneGraph(true, root.children[i])
+      end
 
-function love.draw()
-   camera:attach()
+   end
+
+   end
+end
+function drawSceneGraph(root)
    local triangle_count = 0
-   for i=1, #world.children do
-      if world.children[i].triangles  then
-         for j=1, #world.children[i].triangles do
+   for i=1, #root.children do
+      if root.children[i].children then
+         drawSceneGraph(root.children[i])
+      end
+
+      if root.children[i].triangles  then
+         for j=1, #root.children[i].triangles do
             love.graphics.setColor(math.random()*200 + 100, 155+ math.random()*0 + 20,55, 155)
-            love.graphics.polygon("fill", world.children[i].triangles[j])
+            love.graphics.polygon("fill", root.children[i].triangles[j])
             triangle_count = triangle_count + 1
          end
       else
          --print("child at index "..i.." has no triangles.")
       end
-
    end
+   return triangle_count
+end
 
+
+function love.update(dt)
+   if love.keyboard.isDown("escape") then love.event.quit() end
+   updateSceneGraph(false, world)
+end
+
+function love.draw()
+   camera:attach()
+   local triangle_count = drawSceneGraph(world)
    camera:detach()
 
    love.graphics.setColor(255,255,255)

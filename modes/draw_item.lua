@@ -68,7 +68,7 @@ function mode:update(dt)
 
    if #(Hammer.pointers.pressed) > 0 then
       if self.firstTime == true then
-         world.children[#world.children+1] = {type="polyline",pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200},join="miter", half_width=10}}
+         world.children[#world.children+1] = {type="polyline", world_pos={x=0,y=0,z=0}, pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200},join="miter", half_width=10}}
          self.thicknesses = {}
          self.firstTime = false
       end
