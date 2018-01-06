@@ -27,6 +27,29 @@ function makeCirclePart(cx, cy, radius, angle1, angle2, step)
    return result
 end
 
+
+function makeSimpleRect(cx, cy, w, h)
+   local result = {}
+   local w2 = w/2
+   local h2 = h/2
+
+   table.insert(result, cx + (w2))
+   table.insert(result, cy - (h2))
+
+   table.insert(result, cx + (w2))
+   table.insert(result, cy + (h2))
+
+   table.insert(result, cx - (w2))
+   table.insert(result, cy + (h2))
+
+   table.insert(result, cx - (w2))
+   table.insert(result, cy - (h2))
+
+   return result
+
+end
+
+
 function makeRoundedRect(cx,cy, w, h, radius, step)
    local result = {}
    if not step then step = 32 end
@@ -266,6 +289,8 @@ function makeShape(meta)
 
    if meta.type == "rect" then
       result = makeRoundedRect(meta.pos.x, meta.pos.y, meta.data.w, meta.data.h, meta.data.radius or 0, meta.data.steps or 8)
+   elseif meta.type == "simplerect" then
+      result = makeSimpleRect(meta.pos.x, meta.pos.y, meta.data.w, meta.data.h)
    elseif meta.type == "circle" then
       result = makeCircle(meta.pos.x, meta.pos.y, meta.data.radius, meta.data.steps or 10)
    elseif meta.type == "star" then

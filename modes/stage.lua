@@ -30,15 +30,14 @@ function mode:update(dt)
    end
 
 
-   Hammer:reset(10,SCREEN_HEIGHT-60-40-10)
+   Hammer:reset(10,love.graphics.getHeight()- 120)
    local add_shape = Hammer:labelbutton("draw shape", 130,40)
    if add_shape.released then
       self.touches = {}
       Signal.emit("switch-state", "draw-item", {pointerID=id})
    end
 
-
-   Hammer:pos(10,SCREEN_HEIGHT-60)
+   Hammer:pos(10,love.graphics.getHeight()- 60)
    local add_polygon = Hammer:labelbutton("add polygon", 130,40)
 
    if add_polygon.dragging then

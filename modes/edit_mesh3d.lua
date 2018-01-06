@@ -10,10 +10,7 @@ function mode:update(dt)
 
    Hammer:reset(0,0)
 
-   --print(self.child.data.width)
-   --print(self.child.data.cells[1][1].x)
    local data = self.child.data
-   --print(data.cx, data.cy)
    for i=1, data.width+1 do
       for j=1, data.height+1 do
          local rx,ry = camera:cameraCoords(data.cells[i][j].x +self.child.pos.x, data.cells[i][j].y+self.child.pos.y)
@@ -29,16 +26,9 @@ function mode:update(dt)
                self.child.data.cells[i][j].y = wy
                self.child.dirty=true
             end
-
          end
-
-
       end
    end
-
-
-
-
 
    ---------------------------
       if #Hammer.pointers.pressed == 1 then

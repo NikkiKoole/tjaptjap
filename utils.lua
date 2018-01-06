@@ -63,6 +63,25 @@ function generatePolygon(ctrX, ctrY, aveRadius, irregularity, spikeyness, numVer
    return points
 end
 
+local bytemarkers = { {0x7FF,192}, {0xFFFF,224}, {0x1FFFFF,240} }
+function utf8(decimal)
+   if decimal<128 then return string.char(decimal) end
+   local charbytes = {}
+   for bytes,vals in ipairs(bytemarkers) do
+      if decimal<=vals[1] then
+         for b=bytes+1,2,-1 do
+            local mod = decimal%64
+            decimal = (decimal-mod)/64
+            charbytes[b] = string.char(128+mod)
+         end
+         charbytes[1] = string.char(vals[2]+decimal)
+         break
+      end
+   end
+   return table.concat(charbytes)
+end
+
+
 function HSL(h, s, l, a)
 	if s<=0 then return l,l,l,a end
 	h, s, l = h/256*6, s/255, l/255
@@ -241,6 +260,7 @@ end
 
 return {
    HSL=HSL,
+   utf8=utf8,
    generatePolygon=generatePolygon,
    transformPolygon=transformPolygon,
    tablefind_id = tablefind_id,
