@@ -60,7 +60,7 @@ function love.load()
             type="simplerect",
             id="opa",
             pos={x=0,y=0,z=0},
-            rotation=math.pi/4,
+            rotation=0,
             data={w=300, h=300},
             world_pos={x=0,y=0,z=0,rot=0},
 
@@ -77,7 +77,7 @@ function love.load()
                      {
                         type="simplerect",
                         id="jongen",
-                        pos={x=110,y=110,z=0},
+                        pos={x=100,y=100,z=0},
                         data={w=100, h=100},
                         world_pos={x=0,y=0,z=0,rot=0},
                         rotation=0,
@@ -179,12 +179,32 @@ function love.filedropped(file)
    --world = bitser.loadData(data:getPointer(), data:getSize())
 end
 
+
+function localToParent(parent, x, y)
+   local px, py = x, y
+   -- scale
+   --px, py = px*parent.world_transform.scale.x, py*parent.world_transform.scale.y
+   -- rotate
+   local ca = math.cos(parent.world_pos.rot)
+   local sa = math.sin(parent.world_pos.rot)
+   local tx = ca*px - sa*py
+   local ty = sa*px + ca*py
+   px, py = tx, ty
+   -- translate
+   px = px + parent.world_pos.x
+   py = py + parent.world_pos.y
+   return px, py
+end
+
 function updateSceneGraph(init, root)
+
+   -- first
+
 
    if root.children then
    for i=1, #root.children do
-      root.children[i].world_pos.x = root.pos.x + root.world_pos.x
-      root.children[i].world_pos.y = root.pos.y + root.world_pos.y
+      root.children[i].world_pos.x = root.world_pos.x + root.pos.x
+      root.children[i].world_pos.y = root.world_pos.y + root.pos.y
       root.children[i].world_pos.rot = root.rotation + root.world_pos.rot
 
       if (root.children[i].dirty or init) then
@@ -196,9 +216,12 @@ function updateSceneGraph(init, root)
          local shape = shapes.makeShape(c)
          if c.type=="simplerect" then
             shape = shapes.transformShape(c.world_pos.x, c.world_pos.y, shape)
+            --local tx,ty = localToParent(c, c.pos.x, c.pos.y)
+            --shape = shapes.transformShape(tx, ty, shape)
+            print(c.id)
          end
          if c.rotation then
-            shape = shapes.rotateShape(c.pos.x, c.pos.y, shape, c.rotation+ c.world_pos.rot)
+            shape = shapes.rotateShape(c.world_pos.x, c.world_pos.y, shape, c.world_pos.rot + c.rotation)
          end
          c.triangles = poly.triangulate(c.type, shape)
       end
