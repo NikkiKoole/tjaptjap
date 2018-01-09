@@ -322,6 +322,23 @@ function transformShape(tx,ty, shape)
    return result
 end
 
+function getShapeBBox(shape)
+   local min={x=math.huge,y=math.huge}
+   local max={x=-math.huge,y=-math.huge}
+
+   local x,y
+   for i=1, #shape, 2 do
+      x = shape[i +0]
+      y = shape[i+1]
+      if math.min(x, min.x) then min.x = x end
+      if math.min(y, min.y) then min.y = y end
+      if math.max(x, max.x) then max.x = x end
+      if math.max(y, max.y) then max.y = y end
+   end
+
+   return min.x,min.y,max.x,max.y
+end
+
 
 function rotateShape(cx, cy, shape, theta)
    local result = {}
@@ -344,5 +361,6 @@ end
 return {
    makeShape=makeShape,
    rotateShape=rotateShape,
+   getShapeBBox=getShapeBBox,
    transformShape=transformShape
 }

@@ -27,6 +27,7 @@ poly = require 'poly'
 
 local pointers = require "pointer"
 
+local a = require "vendor.affine"
 --------------------------------
 
 SCREEN_WIDTH = 1024
@@ -56,28 +57,43 @@ end
 
 function updateGraph(root)
 
-   local tx,ty = localToParent(root.parent, root.pos.x, root.pos.y)
-   print(root.pos.x, root.pos.y, "8===>",tx,ty)
+ --local T1 = a.trans(150,0)
+   --local T1rot = a.rotate(math.pi/3)
+   --local T2 = a.trans(100,0)
+
+   --local TT = T1 * T1rot * T2
+
+   --print(TT(0,0))
+
+   --root["local"] = "hello"
+   --print(root.local)
+
+
+   local T = a.trans(root.pos.x, root.pos.y)
+   local R = a.rotate(root.rotation or 0)
+
+   root.local_trans = T*R
+
    if root.parent then
-      root.world_pos.x = root.parent.world_pos.x + tx
-      root.world_pos.y = root.parent.world_pos.x + ty
+      root.world_trans = root.parent.world_trans * root.local_trans
       root.world_pos.rot = (root.rotation or 0) + root.parent.world_pos.rot
    else
-      root.world_pos.x = tx
-      root.world_pos.y = ty
-      root.world_pos.rot = 0-- root.rotation
+      root.world_trans = root.local_trans
+      root.world_pos.rot = root.rotation or 0
    end
    --if root.dirty then
-      if root.type then
-         local shape = shapes.makeShape(root)
-         if root.type=="simplerect" then
-            print(root.id)
+   if root.type then
 
-            shape = shapes.transformShape(root.parent.world_pos.x, root.parent.world_pos.y, shape)
-         end
-         --print(root.world_pos.rot)
+      local shape = shapes.makeShape({type="simplerect",pos={x=0,y=0},data=root.data})
+
+------------------------
+
          if root.rotation or root.world_pos.rot then
-            shape = shapes.rotateShape(root.parent.world_pos.x, root.parent.world_pos.y, shape, root.world_pos.rot)
+            shape = shapes.rotateShape(0, 0, shape, root.world_pos.rot)
+         end
+         if root.type=="simplerect" then
+            local x,y = root.world_trans(0,0)
+            shape = shapes.transformShape(x,y,shape)
          end
 
          root.triangles = poly.triangulate(root.type, shape)
@@ -109,37 +125,6 @@ function updateSceneGraph(init, root)
 
    return
 
-   -- if root.children then
-   --    for i=1, #root.children do
-   --       local c = root.children[i]
-   --       local tx,ty = localToParent(root, c.pos.x, c.pos.y)
-   --       root.children[i].world_pos.x = root.world_pos.x
-   --       root.children[i].world_pos.y = root.world_pos.y
-   --       root.children[i].world_pos.rot = root.rotation + root.world_pos.rot
-   --       print(i, c.world_pos.x, c.world_pos.y)
-   --       if (root.children[i].dirty or init or true) then
-   --          root.children[i].dirty = false
-
-   --          local shape = shapes.makeShape(c)
-   --          if c.type=="simplerect" then
-   --             shape = shapes.transformShape(c.world_pos.x, c.world_pos.y, shape)
-   --          end
-
-   --          shape = shapes.rotateShape(c.world_pos.x, c.world_pos.y, shape, c.world_pos.rot + c.rotation)
-
-   --          c.triangles = poly.triangulate(c.type, shape)
-   --       end
-
-   --       root.children[i].world_pos.x = root.children[i].world_pos.x + tx
-   --       root.children[i].world_pos.y = root.children[i].world_pos.y + ty
-
-   --       if root.children[i].children then
-   --          updateSceneGraph(true, root.children[i])
-   --       end
-
-   --    end
-
-   -- end
 end
 
 
@@ -150,6 +135,9 @@ function love.load()
    helvetica = love.graphics.newFont("resources/helvetica_bold.ttf", 18)
    love.graphics.setFont(helvetica)
    Hammer.pointers = pointers
+
+
+
 
    world = {
       world_pos={x=0,y=0,z=0,rot=0},
@@ -172,7 +160,7 @@ function love.load()
                   pos={x=150,y=0,z=0},
                   data={w=200, h=200},
                   world_pos={x=0,y=0,z=0,rot=0},
-                  rotation=0 ,--math.pi/3,
+                  rotation=math.pi/3 ,
 
                   children={
                      {
