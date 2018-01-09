@@ -16,6 +16,7 @@ ItemMode = require "modes.edit_item"
 PolygonMode = require "modes.edit_polygon"
 PolyLineMode = require "modes.edit_polyline"
 Mesh3dMode = require "modes.edit_mesh3d"
+RectMode = require "modes.edit_rect"
 
 RopeMode = require "modes.edit_rope"
 Hammer = require "hammer"
@@ -40,6 +41,106 @@ test = {
    children={},
 }
 
+
+
+
+
+function parentize(root)
+   if root.children then
+      for i=1, #root.children do
+         root.children[i].parent = root
+         parentize(root.children[i]);
+      end
+   end
+end
+
+function updateGraph(root)
+
+   local tx,ty = localToParent(root.parent, root.pos.x, root.pos.y)
+   print(root.pos.x, root.pos.y, "8===>",tx,ty)
+   if root.parent then
+      root.world_pos.x = root.parent.world_pos.x + tx
+      root.world_pos.y = root.parent.world_pos.x + ty
+      root.world_pos.rot = (root.rotation or 0) + root.parent.world_pos.rot
+   else
+      root.world_pos.x = tx
+      root.world_pos.y = ty
+      root.world_pos.rot = 0-- root.rotation
+   end
+   --if root.dirty then
+      if root.type then
+         local shape = shapes.makeShape(root)
+         if root.type=="simplerect" then
+            print(root.id)
+
+            shape = shapes.transformShape(root.parent.world_pos.x, root.parent.world_pos.y, shape)
+         end
+         --print(root.world_pos.rot)
+         if root.rotation or root.world_pos.rot then
+            shape = shapes.rotateShape(root.parent.world_pos.x, root.parent.world_pos.y, shape, root.world_pos.rot)
+         end
+
+         root.triangles = poly.triangulate(root.type, shape)
+
+      end
+      --root.dirty = false
+   --end
+
+   if root.children then
+      for i=1, #root.children do
+         updateGraph(root.children[i])
+      end
+   end
+end
+
+
+
+
+
+
+
+
+
+
+function updateSceneGraph(init, root)
+
+   parentize(root)
+   updateGraph(root)
+
+   return
+
+   -- if root.children then
+   --    for i=1, #root.children do
+   --       local c = root.children[i]
+   --       local tx,ty = localToParent(root, c.pos.x, c.pos.y)
+   --       root.children[i].world_pos.x = root.world_pos.x
+   --       root.children[i].world_pos.y = root.world_pos.y
+   --       root.children[i].world_pos.rot = root.rotation + root.world_pos.rot
+   --       print(i, c.world_pos.x, c.world_pos.y)
+   --       if (root.children[i].dirty or init or true) then
+   --          root.children[i].dirty = false
+
+   --          local shape = shapes.makeShape(c)
+   --          if c.type=="simplerect" then
+   --             shape = shapes.transformShape(c.world_pos.x, c.world_pos.y, shape)
+   --          end
+
+   --          shape = shapes.rotateShape(c.world_pos.x, c.world_pos.y, shape, c.world_pos.rot + c.rotation)
+
+   --          c.triangles = poly.triangulate(c.type, shape)
+   --       end
+
+   --       root.children[i].world_pos.x = root.children[i].world_pos.x + tx
+   --       root.children[i].world_pos.y = root.children[i].world_pos.y + ty
+
+   --       if root.children[i].children then
+   --          updateSceneGraph(true, root.children[i])
+   --       end
+
+   --    end
+
+   -- end
+end
 
 
 function love.load()
@@ -68,20 +169,19 @@ function love.load()
                {
                   type="simplerect",
                   id="papa",
-                  pos={x=100,y=0,z=0},
+                  pos={x=150,y=0,z=0},
                   data={w=200, h=200},
                   world_pos={x=0,y=0,z=0,rot=0},
-                  rotation=0,
+                  rotation=0 ,--math.pi/3,
 
                   children={
                      {
                         type="simplerect",
                         id="jongen",
-                        pos={x=100,y=100,z=0},
+                        pos={x=100,y=0,z=0},
                         data={w=100, h=100},
                         world_pos={x=0,y=0,z=0,rot=0},
                         rotation=0,
-
                      }
                   }
                }
@@ -150,6 +250,9 @@ function love.load()
             State = Mesh3dMode
          elseif state == "edit-rope" then
             State = RopeMode
+         elseif state == "edit-rect" then
+            State = RectMode
+
          end
          Gamestate.switch(State, data)
       end
@@ -181,6 +284,7 @@ end
 
 
 function localToParent(parent, x, y)
+   if not parent then return x,y end
    local px, py = x, y
    -- scale
    --px, py = px*parent.world_transform.scale.x, py*parent.world_transform.scale.y
@@ -196,48 +300,11 @@ function localToParent(parent, x, y)
    return px, py
 end
 
-function updateSceneGraph(init, root)
-
-   -- first
-
-
-   if root.children then
-   for i=1, #root.children do
-      root.children[i].world_pos.x = root.world_pos.x + root.pos.x
-      root.children[i].world_pos.y = root.world_pos.y + root.pos.y
-      root.children[i].world_pos.rot = root.rotation + root.world_pos.rot
-
-      if (root.children[i].dirty or init) then
-         root.children[i].dirty = false
-         local c = root.children[i]
-         c.world_pos.x = root.pos.x + root.world_pos.x
-         c.world_pos.y = root.pos.y + root.world_pos.y
-         c.world_pos.rot = root.rotation + root.world_pos.rot
-         local shape = shapes.makeShape(c)
-         if c.type=="simplerect" then
-            shape = shapes.transformShape(c.world_pos.x, c.world_pos.y, shape)
-            --local tx,ty = localToParent(c, c.pos.x, c.pos.y)
-            --shape = shapes.transformShape(tx, ty, shape)
-            print(c.id)
-         end
-         if c.rotation then
-            shape = shapes.rotateShape(c.world_pos.x, c.world_pos.y, shape, c.world_pos.rot + c.rotation)
-         end
-         c.triangles = poly.triangulate(c.type, shape)
-      end
-      if root.children[i].children then
-         updateSceneGraph(true, root.children[i])
-      end
-
-   end
-
-   end
-end
 function drawSceneGraph(root)
    local triangle_count = 0
    for i=1, #root.children do
       if root.children[i].children then
-         drawSceneGraph(root.children[i])
+         triangle_count = triangle_count +  drawSceneGraph(root.children[i])
       end
 
       if root.children[i].triangles  then

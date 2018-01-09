@@ -39,7 +39,8 @@ function mode:pointerreleased()
          Signal.emit("switch-state", "edit-polyline", self.child)
       elseif (self.child.type == "mesh3d") then
          Signal.emit("switch-state", "edit-mesh3d", self.child)
-
+      elseif (self.child.type == "simplerect") then
+         Signal.emit("switch-state", "edit-rect", self.child)
       elseif (self.child.type == "star" or self.child.type == "rect" or self.child.type == "circle") then
          Signal.emit("switch-state", "edit-item", self.child)
       else
