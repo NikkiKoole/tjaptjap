@@ -358,9 +358,21 @@ function rotateShape(cx, cy, shape, theta)
    return result
 end
 
+function scaleShape(shape, factor)
+   local result = {}
+   local x,y,nx,ny
+
+
+   for i=1, #shape do
+      result[i] = shape[i]*factor
+   end
+   return result
+end
+
 return {
    makeShape=makeShape,
    rotateShape=rotateShape,
+   scaleShape=scaleShape,
    getShapeBBox=getShapeBBox,
    transformShape=transformShape
 }

@@ -157,7 +157,6 @@ function mode:pointerpressed(x, y, id)
 
       elseif o.triangles then
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
-         print(o.type, "hittest: ", hit)
       else
          print("dont know how to hittest : ", o.type, hit)
       end

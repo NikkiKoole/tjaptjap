@@ -66,11 +66,12 @@ function updateGraph(root)
 
       local shape = shapes.makeShape({type="simplerect",pos={x=0,y=0},data=root.data})
 
-------------------------
+      ------------------------
 
          if root.rotation or root.world_pos.rot then
             shape = shapes.rotateShape(0, 0, shape, root.world_pos.rot)
          end
+
          if root.type=="simplerect" then
             local x,y = root.world_trans(0,0)
             shape = shapes.transformShape(x,y,shape)
