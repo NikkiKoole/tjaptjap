@@ -1,4 +1,5 @@
 local mode = {}
+local utils = require "utils"
 
 function mode:enter(from,data)
 
@@ -9,21 +10,18 @@ end
 
 function mode:pointermoved(x,y,dx,dy)
 
+   --local x3 =0
+   --local y3=0
    if self.child.world_trans then
-      --print("do yo thing mofo!")
-      local x,y = self.child.parent.world_trans(dx,dy)
-      local x2,y2 = self.child.parent.world_trans(0,0)
 
---      print(dx,x-x2,dy,y-y2)
-      dx = x-x2
-      dy = y-y2
-
-      --print(x2-x,y2-y, dx,dy,"->",x,y,"->",self.child.pos.x,self.child.pos.y)
+      if self.child.parent then
+         local theta = self.child.parent.world_pos.rot
+         dx,dy = utils.rotatePoint(dx,dy,0,0,-theta)
+      end
    end
 
-
-   self.child.pos.x =    self.child.pos.x + dx--(dx/camera.scale)
-   self.child.pos.y =    self.child.pos.y + dy--(dy/camera.scale)
+   self.child.pos.x =    self.child.pos.x + (dx/camera.scale)
+   self.child.pos.y =    self.child.pos.y + (dy/camera.scale)
    self.child.dirty = true
    --print(self.child.type, "dragging", self.child.pos.x, self.child.pos.y)
 end

@@ -137,7 +137,7 @@ function love.load()
             type="simplerect",
             id="opa",
             pos={x=0,y=0,z=0},
-            rotation=0,
+            rotation=math.pi/2,
             data={w=300, h=300},
             world_pos={x=0,y=0,z=0,rot=0},
 
@@ -148,7 +148,7 @@ function love.load()
                   pos={x=150,y=0,z=0},
                   data={w=200, h=200},
                   world_pos={x=0,y=0,z=0,rot=0},
-                  rotation=math.pi/3 ,
+                  rotation=math.pi/13 ,
 
                   children={
                      {
