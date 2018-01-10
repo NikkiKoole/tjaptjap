@@ -33,16 +33,6 @@ local a = require "vendor.affine"
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
 
-test = {
-   type="something",
-   id="my unique name",
-   anchor={x=0.5, y=0.5},
-   transform={x=0,y=0,z=0,scaleX=1,scaleY=1,rotation=0},
-   data={value1=12, value2=23},
-   children={},
-}
-
-
 
 
 
@@ -57,16 +47,6 @@ end
 
 function updateGraph(root)
 
- --local T1 = a.trans(150,0)
-   --local T1rot = a.rotate(math.pi/3)
-   --local T2 = a.trans(100,0)
-
-   --local TT = T1 * T1rot * T2
-
-   --print(TT(0,0))
-
-   --root["local"] = "hello"
-   --print(root.local)
 
 
    local T = a.trans(root.pos.x, root.pos.y)
@@ -145,6 +125,14 @@ function love.load()
       rotation=0,
       id="world",
       children={
+         {
+            type="simplerect",
+            id="opa-oom",
+            pos={x=500,y=0,z=0},
+            rotation=0,
+            data={w=100, h=100},
+            world_pos={x=0,y=0,z=0,rot=0},
+         },
          {
             type="simplerect",
             id="opa",

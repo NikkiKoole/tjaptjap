@@ -353,7 +353,7 @@ function rotateShape(cx, cy, shape, theta)
       ny = sintheta * (x-cx) + costheta * (y-cy) + cy
       result[i+0] = nx
       result[i+1] = ny
-   end
+   end--
 
    return result
 end
