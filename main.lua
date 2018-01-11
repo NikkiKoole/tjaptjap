@@ -48,11 +48,21 @@ end
 function updateGraph(root)
 
 
+   if root.pivot then
+      local T = a.trans(root.pos.x, root.pos.y)
 
-   local T = a.trans(root.pos.x, root.pos.y)
-   local R = a.rotate(root.rotation or 0)
+      local P = a.trans(-root.pivot.x, -root.pivot.y)
+      local R = a.rotate(root.rotation or 0)
 
-   root.local_trans = T*R
+      root.local_trans = T*R*P
+
+   else
+
+      local T = a.trans(root.pos.x, root.pos.y)
+      local R = a.rotate(root.rotation or 0)
+
+      root.local_trans = T*R
+   end
 
    if root.parent then
       root.world_trans = root.parent.world_trans * root.local_trans
@@ -137,6 +147,7 @@ function love.load()
          {
             type="simplerect",
             id="opa",
+            pivot={x=-150,y=150},
             pos={x=0,y=0,z=0},
             rotation=math.pi/2,
             data={w=300, h=300},
