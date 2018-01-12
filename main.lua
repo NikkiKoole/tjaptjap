@@ -147,9 +147,9 @@ function love.load()
          {
             type="simplerect",
             id="opa",
-            pivot={x=-150,y=150},
+            pivot={x=0,y=0},
             pos={x=0,y=0,z=0},
-            rotation=math.pi/2,
+            rotation=0,
             data={w=300, h=300},
             world_pos={x=0,y=0,z=0,rot=0},
 

@@ -4,11 +4,22 @@ local utils = require "utils"
 
 function mode:enter(from,data)
    self.child = data
+   self.setPivot = false
 end
 
 function mode:update(dt)
-   Hammer:reset(0,0)
 
+   Hammer:reset(10,200)
+   local n = Hammer:labelbutton("next click = set pivot", 120,40)
+
+
+   if n.released then
+      --self.setPivot = not self.setPivot
+
+      print("set pivot = ", self.setPivot)
+   end
+
+   Hammer:pos(0,0)
    local child = self.child
    local wx,wy = self.child.world_trans(child.data.w/2,0)
 
@@ -16,9 +27,8 @@ function mode:update(dt)
    --local rx1, ry1 = camera:cameraCoords(wx,wy)
    local p = self.child.pivot
 
-   local rx1, ry1 = camera:cameraCoords(self.child.world_trans((p and p.x or 0)+ child.data.w/2,p and p.y or 0))
-
-   local rx2, ry2 = camera:cameraCoords(self.child.world_trans(p and p.x or 0,p and p.y or 0))
+   local rx1, ry1 = camera:cameraCoords(  self.child.world_trans(  (p and p.x or 0)+ child.data.w/2,  (p and p.y or 0))  )
+   local rx2, ry2 = camera:cameraCoords(self.child.world_trans(p and p.x or 0, p and p.y or 0))
 
    local pivot = Hammer:rectangle( "pivot", 30, 30,{x=rx2-15, y=ry2-15, color=color})
    if pivot.dragging then
@@ -26,24 +36,17 @@ function mode:update(dt)
       local moved = Hammer.pointers.moved[p]
 
       if moved then
+         local wx,wy = self.child.world_trans(0,0)
          local wxr,wyr = camera:worldCoords(moved.x-pivot.dx, moved.y-pivot.dy)
+         wxr,wyr = camera:worldCoords(moved.x, moved.y)
+         wxr,wyr = utils.rotatePoint(wxr, wyr, 0, 0, -self.child.world_pos.rot)
 
-         local x2, y2 = self.child.world_trans(0,0)
-         local wxt, wyt = camera:worldCoords(x2,y2)
-         print(wxr, wyr,x2,y2,wxt,wyt)
-
-         --local wxr2,wyr2 = camera:worldCoords(self.child.world_trans(0,0))
-         --local rx3, ry3 = camera:cameraCoords(self.child.world_trans(0,0))
-
-         --local wxr,wyr = camera:worldCoords(rx2, ry2)
-         --print(wxr,wyr,rx3,ry3)
-         wxr,wyr = utils.rotatePoint(wxr, wyr,0,0, -self.child.world_pos.rot)
          if not self.child.pivot then
             self.child.pivot = {x=0,y=0}
          end
 
-         self.child.pivot.x = -wxr
-         self.child.pivot.y = -wyr
+         self.child.pivot.x = wxr
+         self.child.pivot.y = wyr
       end
 
    end
@@ -82,6 +85,14 @@ function mode:update(dt)
             isDirty = true
          end
       end
+
+      if self.setPivot then
+         print("ok here i go!")
+         self.setPivot=false
+      end
+
+
+
 
       local wx, wy = camera:worldCoords(Hammer.pointers.pressed[1].x, Hammer.pointers.pressed[1].y)
       local hit = pointInPoly({x=wx,y=wy}, self.child.triangles)
