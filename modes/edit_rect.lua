@@ -26,9 +26,17 @@ function mode:update(dt)
       local moved = Hammer.pointers.moved[p]
 
       if moved then
-         --local wxr,wyr = camera:worldCoords(moved.x-pivot.dx, moved.y-pivot.dy)
-         local wxr,wyr = camera:worldCoords(rx2, ry2)
-         print(wxr,wyr)
+         local wxr,wyr = camera:worldCoords(moved.x-pivot.dx, moved.y-pivot.dy)
+
+         local x2, y2 = self.child.world_trans(0,0)
+         local wxt, wyt = camera:worldCoords(x2,y2)
+         print(wxr, wyr,x2,y2,wxt,wyt)
+
+         --local wxr2,wyr2 = camera:worldCoords(self.child.world_trans(0,0))
+         --local rx3, ry3 = camera:cameraCoords(self.child.world_trans(0,0))
+
+         --local wxr,wyr = camera:worldCoords(rx2, ry2)
+         --print(wxr,wyr,rx3,ry3)
          wxr,wyr = utils.rotatePoint(wxr, wyr,0,0, -self.child.world_pos.rot)
          if not self.child.pivot then
             self.child.pivot = {x=0,y=0}
