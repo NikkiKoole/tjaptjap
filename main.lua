@@ -297,7 +297,7 @@ function drawSceneGraph(root)
 
       if root.children[i].triangles  then
          for j=1, #root.children[i].triangles do
-            love.graphics.setColor(math.random()*200 + 100, 155+ math.random()*0 + 20,55, 155)
+            love.graphics.setColor(math.random()*0 + 100, 155+ math.random()*0 + 20,55, 155)
             love.graphics.polygon("fill", root.children[i].triangles[j])
             triangle_count = triangle_count + 1
          end

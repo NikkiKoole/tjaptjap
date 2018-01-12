@@ -7,17 +7,60 @@ function mode:enter(from,data)
    self.setPivot = false
 end
 
+function getXValueOfParent(obj,  parentId)
+   local result = 0
+   if (obj.id == parentId) then
+      print(obj.id, parentId)
+      result = obj.world_pos.x
+      return result
+   else
+      if obj.parent then
+         result = getXValueOfParent(obj.parent, parentId)
+      end
+   end
+   return result
+end
+function getYValueOfParent(obj,  parentId)
+   local result =0
+
+   if (obj.id == parentId) then
+      print(obj.id, parentId)
+      result = obj.world_pos.y
+      return result
+   else
+      if obj.parent then
+         result = getYValueOfParent(obj.parent, parentId)
+      end
+   end
+   return result
+end
+function getWorldTransform(obj, id)
+   if obj.id == id then
+      return obj.world_trans
+   else
+      if obj.parent then
+         return getWorldTransform(obj.parent)
+      else
+         print("PROBLEMS!")
+      end
+
+      return 0
+   end
+
+end
+
+
 function mode:update(dt)
 
    Hammer:reset(10,200)
-   local n = Hammer:labelbutton("next click = set pivot", 120,40)
+   -- local n = Hammer:labelbutton("next click = set pivot", 120,40)
 
 
-   if n.released then
-      --self.setPivot = not self.setPivot
+   -- if n.released then
+   --    self.setPivot = true
 
-      print("set pivot = ", self.setPivot)
-   end
+   --    print("set pivot = ", self.setPivot)
+   -- end
 
    Hammer:pos(0,0)
    local child = self.child
@@ -31,22 +74,49 @@ function mode:update(dt)
    local rx2, ry2 = camera:cameraCoords(self.child.world_trans(p and p.x or 0, p and p.y or 0))
 
    local pivot = Hammer:rectangle( "pivot", 30, 30,{x=rx2-15, y=ry2-15, color=color})
+   if pivot.startpress then
+      print("start press")
+   end
+
    if pivot.dragging then
       local p = getWithID(Hammer.pointers.moved, pivot.pointerID)
       local moved = Hammer.pointers.moved[p]
 
       if moved then
+
+
          local wx,wy = self.child.world_trans(0,0)
          local wxr,wyr = camera:worldCoords(moved.x-pivot.dx, moved.y-pivot.dy)
-         wxr,wyr = camera:worldCoords(moved.x, moved.y)
-         wxr,wyr = utils.rotatePoint(wxr, wyr, 0, 0, -self.child.world_pos.rot)
+
+
+         local a = getWorldTransform(self.child, "opa")
+         print(a)
+--         print(wx,wxr)
+         --wxr = wxr - wx
+         --wyr = wyr - wy
+
+         --wxr,wyr = camera:worldCoords(moved.x, moved.y)
+
+         --wxr,wyr = utils.rotatePoint(wxr, wyr, 0, 0, -self.child.world_pos.rot)
 
          if not self.child.pivot then
             self.child.pivot = {x=0,y=0}
          end
+         --print(wxr, wyr)
 
-         self.child.pivot.x = wxr
-         self.child.pivot.y = wyr
+         local xx2,yy2 = getWorldTransform(self.child, "opa")(0,0)
+         --local xx2 = getXValueOfParent(self.child,'opa')
+         --local yy2 = getYValueOfParent(self.child,'opa')
+         print("stuff", xx2,yy2)
+         local wxr2,wyr2 = camera:worldCoords(xx2, yy2)
+         --local kkx,kky = camera:worldCoords(xx2,yy2)
+         --local kxr,kyr = utils.rotatePoint(xx2, yy2, 0, 0, -self.child.world_pos.rot)
+         --local kx2,ky2 = utils.rotatePoint(xx2, yy2, 0, 0, -self.child.world_pos.rot)
+         --print(xx2, yy2)
+         self.child.pivot.x = wxr - xx2 -- - xx2
+
+--self.child.pos.x
+         self.child.pivot.y = wyr - yy2-- - getYValueOfParent(self.child,'opa')
       end
 
    end
@@ -86,10 +156,28 @@ function mode:update(dt)
          end
       end
 
-      if self.setPivot then
-         print("ok here i go!")
-         self.setPivot=false
-      end
+      -- if self.setPivot  and not isDirty then
+      --    print("ok here i go!")
+      --    local pressed = Hammer.pointers.pressed[1]
+      --    print(pressed.x, pressed.y)
+
+
+      --    local wx,wy = self.child.world_trans(0,0)
+      --    local wxr,wyr = camera:worldCoords(pressed.x, pressed.y)
+      --    --wxr,wyr = camera:worldCoords(moved.x, moved.y)
+      --    wxr,wyr = utils.rotatePoint(wxr, wyr, 0, 0, -self.child.world_pos.rot)
+
+      --    if not self.child.pivot then
+      --       self.child.pivot = {x=0,y=0}
+      --    end
+
+      --    self.child.pivot.x = wxr-wx
+      --    self.child.pivot.y = wyr-wy
+
+
+      --    self.setPivot=false
+      --    isDirty = true
+      -- end
 
 
 
