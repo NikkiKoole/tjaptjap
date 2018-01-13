@@ -72,6 +72,41 @@ function mode:update(dt)
 
    local pivot = Hammer:rectangle( "pivot", 30, 30,{x=rx2-15, y=ry2-15, color=color})
 
+   if pivot.dragging then
+      local p = getWithID(Hammer.pointers.moved, pivot.pointerID)
+      local moved = Hammer.pointers.moved[p]
+
+      if moved then
+         --local pressed = Hammer.pointers.pressed[1]
+         local wxr,wyr = camera:worldCoords(moved.x - pivot.dx, moved.y -pivot.dy)
+         local tx,ty = child.world_trans(0,0)
+         local diffx = wxr - tx
+         local diffy = wyr - ty
+         --t2x = diffx
+         --t2y = diffy
+         local t2x, t2y = utils.rotatePoint(diffx, diffy, 0, 0, -child.world_pos.rot)
+         if not self.child.pivot then
+            self.child.pivot = {x=0,y=0}
+         end
+
+         local pivotdx = t2x - self.child.pivot.x
+         local pivotdy = t2y - self.child.pivot.y
+         pivotdx,pivotdy = utils.rotatePoint(pivotdx, pivotdy, 0, 0, child.world_pos.rot)
+
+
+         if math.abs(pivotdx) + math.abs(pivotdy) > 1 then
+            self.child.pos.x = self.child.pos.x + pivotdx
+            self.child.pos.y = self.child.pos.y + pivotdy
+            self.child.pivot.x = t2x
+            self.child.pivot.y = t2y
+         end
+
+      end
+
+
+   end
+
+
 
 
    local rotator = Hammer:rectangle( "rotator", 30, 30,{x=rx1-15, y=ry1-15, color=color})
@@ -117,6 +152,12 @@ function mode:update(dt)
          if not self.child.pivot then
             self.child.pivot = {x=0,y=0}
          end
+
+         local pivotdx = t2x - self.child.pivot.x
+         local pivotdy = t2y - self.child.pivot.y
+         pivotdx,pivotdy = utils.rotatePoint(pivotdx, pivotdy, 0, 0, child.world_pos.rot)
+         self.child.pos.x = self.child.pos.x + pivotdx
+         self.child.pos.y = self.child.pos.y + pivotdy
 
          self.child.pivot.x = t2x
          self.child.pivot.y = t2y
