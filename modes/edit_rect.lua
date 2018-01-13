@@ -56,8 +56,6 @@ function mode:update(dt)
 
    if n.released then
       self.setPivot = true
-
-      print("set pivot = ", self.setPivot)
    end
 
    Hammer:pos(0,0)
@@ -82,35 +80,28 @@ function mode:update(dt)
       local moved = Hammer.pointers.moved[p]
 
       if moved then
-         local wxr,wyr = camera:worldCoords(moved.x - pivot.dx, moved.y -pivot.dy)
-         local tx,ty = child.world_trans(0 ,0)
-         --wxr,wyr=
-         local diffx = wxr - tx
-         local diffy = wyr - ty
-         local t2x = diffx
-         local t2y = diffy
-         local inverted = a.inverse(child.world_trans)
-         --t2x,t2y = child.local_trans(t2x,t2y)
-         --print(wxr,wyr,inverted(wxr,wyr))
-         --it2x,it2y = inverted(t2x,t2y)
-         local t2x, t2y = utils.rotatePoint(diffx, diffy, 0, 0, -child.world_pos.rot)
 
-         local pivotdx = t2x - self.child.pivot.x
-         local pivotdy = t2y - self.child.pivot.y
+         --THIS CODE IS TOO BUGGY, instead just use side menu for setting pivot
 
-         --pivotdx,pivotdy = inverted(pivotdx, pivotdy)
-         --local ltx,lty = child.world_trans(t2x,t2y)
-         --print(pivotdx, pivotdy,ltx,lty)
-         pivotdx,pivotdy = utils.rotatePoint(pivotdx, pivotdy, 0, 0, child.world_pos.rot)
-        -- pivotdx,pivotdy = inverted(pivotdx, pivotdy)
-         --t2x,t2y = utils.rotatePoint(t2x, t2y, 0, 0, child.world_pos.rot)
+         -- local wxr,wyr = camera:worldCoords(moved.x - pivot.dx, moved.y -pivot.dy)
+         -- local tx,ty = child.world_trans(0 ,0)
+         -- local diffx = wxr - tx
+         -- local diffy = wyr - ty
+         -- local t2x = diffx
+         -- local t2y = diffy
+         -- t2x, t2y = utils.rotatePoint(diffx, diffy, 0, 0, -child.world_pos.rot)
+
+         -- local pivotdx = t2x - self.child.pivot.x
+         -- local pivotdy = t2y - self.child.pivot.y
+
+         -- pivotdx,pivotdy = utils.rotatePoint(pivotdx, pivotdy, 0, 0, child.world_pos.rot)
 
 
-         self.child.pos.x = self.child.pos.x + pivotdx
-         self.child.pos.y = self.child.pos.y + pivotdy
-         self.child.pivot.x = t2x
-         self.child.pivot.y = t2y
-         self.child.dirty = true
+         -- self.child.pos.x = self.child.pos.x + pivotdx
+         -- self.child.pos.y = self.child.pos.y + pivotdy
+         -- self.child.pivot.x = t2x
+         -- self.child.pivot.y = t2y
+         -- self.child.dirty = true
       end
 
 
