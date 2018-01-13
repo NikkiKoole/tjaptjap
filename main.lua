@@ -146,6 +146,31 @@ function love.load()
          },
          {
             type="simplerect",
+            id="opa-oom2",
+            pos={x=-500,y=0,z=0},
+            rotation=0,
+            data={w=100, h=100},
+            world_pos={x=0,y=0,z=0,rot=0},
+         },
+         {
+            type="simplerect",
+            id="opa-oom3",
+            pos={x=-500,y=-500,z=0},
+            rotation=0,
+            data={w=100, h=100},
+            world_pos={x=0,y=0,z=0,rot=0},
+         },
+         {
+            type="simplerect",
+            id="opa-oom4",
+            pos={x=500,y=500,z=0},
+            rotation=0,
+            data={w=100, h=100},
+            world_pos={x=0,y=0,z=0,rot=0},
+         },
+
+         {
+            type="simplerect",
             id="opa",
             pivot={x=0,y=0},
             pos={x=0,y=0,z=0},
