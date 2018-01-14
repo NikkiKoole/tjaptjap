@@ -128,12 +128,8 @@ end
 
 
 function updateSceneGraph(init, root)
-
    parentize(root)
    updateGraph(root)
-
-   return
-
 end
 
 
@@ -144,9 +140,6 @@ function love.load()
    helvetica = love.graphics.newFont("resources/helvetica_bold.ttf", 18)
    love.graphics.setFont(helvetica)
    Hammer.pointers = pointers
-
-
-
 
    world = {
       world_pos={x=0,y=0,z=0,rot=0},
