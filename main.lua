@@ -64,6 +64,11 @@ function updateGraph(root)
       root.local_trans = T*R
    end
 
+   if not root.world_pos then
+      root.world_pos = {{x=0,y=0,z=0,rot=0}}
+   end
+
+
    if root.parent then
       root.world_trans = root.parent.world_trans * root.local_trans
       root.world_pos.rot = (root.rotation or 0) + root.parent.world_pos.rot
@@ -74,21 +79,34 @@ function updateGraph(root)
    --if root.dirty then
    if root.type then
 
-      local shape = shapes.makeShape({type="simplerect",pos={x=0,y=0},data=root.data})
-
-      ------------------------
-
+      --local shape = shapes.makeShape({type="simplerect",pos={x=0,y=0},data=root.data})
+      local shape
+      if root.type=="simplerect" then
+         shape = shapes.makeShape({type=root.type, pos={x=0,y=0},data=root.data})
          if root.rotation or root.world_pos.rot then
             shape = shapes.rotateShape(0, 0, shape, root.world_pos.rot)
          end
 
+      else
+
+         --print(root.type, root.pos, root.data)
+         shape = shapes.makeShape(root)
+         --print(shape)
+      end
+
+      ------------------------
+
+
          if root.type=="simplerect" then
             local x,y = root.world_trans(0,0)
             shape = shapes.transformShape(x,y,shape)
+         else
+            --print(root.type)
          end
 
-         root.triangles = poly.triangulate(root.type, shape)
 
+         root.triangles = poly.triangulate(root.type, shape)
+         --print(#root.triangles, "triangles made", root.type)
       end
       --root.dirty = false
    --end
@@ -201,39 +219,40 @@ function love.load()
             }
          },
 
-         -- {
-         --    type="mesh3d",
-         --    pos={x=0,y=0,z=0},
-         --    data={width=3, height=10, cellwidth=50, cellheight=50}
-         -- },
-         -- {
-         --    type="rope",
-         --    pos={x=100,y=100,z=0},
-         --    data={
-         --       join="miter",
-         --       relative_rotation = true,
-         --       rotations={0, 0, 0, 0, 0, 0,0,0,0},
-         --       lengths={120,120,100,100,100,100,100,100 },
-         --       thicknesses={20,50,60,70,70,70,70,60,20},
-         --    }
-         -- },
-         -- {type="rope",
-         --  pos={x=-100,y=100,z=0},
-         --  data={
-         --     join="miter",
-         --     relative_rotation = false,
-         --     rotations={-math.pi/2,-0.8,-0.8,0.8},
-         --     lengths={120,120,100,50},
-         --     thicknesses={40,40,30,20,20},
-         --  }
-         -- },
+         {
+            type="mesh3d",
+            pos={x=0,y=0,z=0},
+            data={width=3, height=10, cellwidth=50, cellheight=50}
+         },
+         {
+            type="rope",
+            pos={x=100,y=100,z=0},
+            rotation=0,
+            data={
+               join="miter",
+               relative_rotation = true,
+               rotations={0, 0, 0, 0, 0, 0,0,0,0},
+               lengths={120,120,100,100,100,100,100,100 },
+               thicknesses={20,50,60,70,70,70,70,60,20},
+            }
+         },
+         {type="rope",
+          pos={x=-100,y=100,z=0},
+          data={
+             join="miter",
+             relative_rotation = false,
+             rotations={-math.pi/2,-0.8,-0.8,0.8},
+             lengths={120,120,100,50},
+             thicknesses={40,40,30,20,20},
+          }
+         },
 
 
-         -- {type="polyline", pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200}, join="miter", half_width=50, thicknesses={10,20,30,40,50}  }},
-         -- {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
-         -- {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
-         -- {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
-         --{type="polygon", pos={x=0, y=0, z=0}, data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
+         {type="polyline", pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200}, join="miter", half_width=50, thicknesses={10,20,30,40,50}  }},
+         {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
+         {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
+         {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
+         {type="polygon", pos={x=0, y=0, z=0}, data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
       },
    }
 
@@ -315,6 +334,7 @@ end
 
 function drawSceneGraph(root)
    local triangle_count = 0
+   --print(root.type)
    for i=1, #root.children do
       if root.children[i].children then
          triangle_count = triangle_count +  drawSceneGraph(root.children[i])
@@ -327,7 +347,7 @@ function drawSceneGraph(root)
             triangle_count = triangle_count + 1
          end
       else
-         --print("child at index "..i.." has no triangles.")
+         print("child at index "..i.." has no triangles.")
       end
    end
    return triangle_count
