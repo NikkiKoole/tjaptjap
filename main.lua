@@ -50,18 +50,19 @@ function updateGraph(root)
 
    if root.pivot then
       local T = a.trans(root.pos.x, root.pos.y)
-
       local P = a.trans(-root.pivot.x, -root.pivot.y)
       local R = a.rotate(root.rotation or 0)
+      local S = a.scale(root.scale and root.scale.x or 1, root.scale and root.scale.y or 1)
 
-      root.local_trans = T*R*P
+      root.local_trans = T*R*S*P
 
    else
 
       local T = a.trans(root.pos.x, root.pos.y)
       local R = a.rotate(root.rotation or 0)
+      local S = a.scale(root.scale and root.scale.x or 1, root.scale and root.scale.y or 1)
 
-      root.local_trans = T*R
+      root.local_trans = T*R*S
    end
 
    if not root.world_pos then
@@ -72,44 +73,45 @@ function updateGraph(root)
    if root.parent then
       root.world_trans = root.parent.world_trans * root.local_trans
       root.world_pos.rot = (root.rotation or 0) + root.parent.world_pos.rot
+      if root.scale then
+         root.world_pos.scaleX = root.parent.world_pos.scaleX * root.scale.x or 1
+         root.world_pos.scaleY = root.parent.world_pos.scaleY * root.scale.y or 1
+      else
+         root.world_pos.scaleX = root.parent.world_pos.scaleX
+         root.world_pos.scaleY = root.parent.world_pos.scaleY
+      end
+
+
+
    else
       root.world_trans = root.local_trans
       root.world_pos.rot = root.rotation or 0
+      root.world_pos.scaleX = (root.scale and root.scale.x) or 1
+      root.world_pos.scaleY = (root.scale and root.scale.y) or 1
+
+
    end
    --if root.dirty then
    if root.type then
 
       --local shape = shapes.makeShape({type="simplerect",pos={x=0,y=0},data=root.data})
       local shape
-      if root.type=="simplerect" then
-         shape = shapes.makeShape({type=root.type, pos={x=0,y=0},data=root.data})
-         if root.rotation or root.world_pos.rot then
-            shape = shapes.rotateShape(0, 0, shape, root.world_pos.rot)
-         end
 
-      else
+      shape = shapes.makeShape({type=root.type, pos={x=0,y=0},data=root.data})
 
-         --print(root.type, root.pos, root.data)
-         shape = shapes.makeShape(root)
-         --print(shape)
+      shape = shapes.scaleShape(shape, root.world_pos.scaleX, root.world_pos.scaleY)
+      if root.rotation or root.world_pos.rot then
+         shape = shapes.rotateShape(0, 0, shape, root.world_pos.rot)
       end
 
-      ------------------------
+      local x,y = root.world_trans(0,0)
+      shape = shapes.transformShape(x,y,shape,root)
 
 
-         if root.type=="simplerect" then
-            local x,y = root.world_trans(0,0)
-            shape = shapes.transformShape(x,y,shape)
-         else
-            --print(root.type)
-         end
+      root.triangles = poly.triangulate(root.type, shape)
 
+   end
 
-         root.triangles = poly.triangulate(root.type, shape)
-         --print(#root.triangles, "triangles made", root.type)
-      end
-      --root.dirty = false
-   --end
 
    if root.children then
       for i=1, #root.children do
@@ -147,55 +149,53 @@ function love.load()
       rotation=0,
       id="world",
       children={
-         {
-            type="simplerect",
-            id="opa-oom",
-            pos={x=500,y=0,z=0},
-            rotation=0,
-            data={w=100, h=100},
-            world_pos={x=0,y=0,z=0,rot=0},
-         },
-         {
-            type="simplerect",
-            id="opa-oom2",
-            pos={x=-500,y=0,z=0},
-            rotation=0,
-            data={w=100, h=100},
-            world_pos={x=0,y=0,z=0,rot=0},
-         },
-         {
-            type="simplerect",
-            id="opa-oom3",
-            pos={x=-500,y=-500,z=0},
-            rotation=0,
-            data={w=100, h=100},
-            world_pos={x=0,y=0,z=0,rot=0},
-         },
-         {
-            type="simplerect",
-            id="opa-oom4",
-            pos={x=500,y=500,z=0},
-            rotation=0,
-            data={w=100, h=100},
-            world_pos={x=0,y=0,z=0,rot=0},
-         },
-
+         -- {
+         --    type="simplerect",
+         --    id="opa-oom",
+         --    pos={x=500,y=0,z=0},
+         --    rotation=0,
+         --    data={w=100, h=100},
+         --    world_pos={x=0,y=0,z=0,rot=0},
+         -- },
+         -- {
+         --    type="simplerect",
+         --    id="opa-oom2",
+         --    pos={x=-500,y=0,z=0},
+         --    rotation=0,
+         --    data={w=100, h=100},
+         --    world_pos={x=0,y=0,z=0,rot=0},
+         -- },
+         -- {
+         --    type="simplerect",
+         --    id="opa-oom3",
+         --    pos={x=-500,y=-500,z=0},
+         --    rotation=0,
+         --    data={w=100, h=100},
+         --    world_pos={x=0,y=0,z=0,rot=0},
+         -- },
+         -- {
+         --    type="simplerect",
+         --    id="opa-oom4",
+         --    pos={x=500,y=500,z=0},
+         --    rotation=0,
+         --    data={w=100, h=100},
+         --    world_pos={x=0,y=0,z=0,rot=0},
+         -- },
          {
             type="simplerect",
             id="opa",
-            pivot={x=0,y=0},
+            pivot={x=-150,y=-150},
             pos={x=0,y=0,z=0},
+            scale={x=1, y=1},
             rotation=0,
             data={w=300, h=300},
-            world_pos={x=0,y=0,z=0,rot=0},
-
             children={
                {
                   type="simplerect",
                   id="papa",
                   pos={x=150,y=0,z=0},
+                  scale={x=1, y=1},
                   data={w=200, h=200},
-                  world_pos={x=0,y=0,z=0,rot=0},
                   rotation=math.pi/13 ,
 
                   children={
@@ -204,7 +204,6 @@ function love.load()
                         id="jongen",
                         pos={x=100,y=0,z=0},
                         data={w=100, h=100},
-                        world_pos={x=0,y=0,z=0,rot=0},
                         rotation=0,
                      }
                   }
@@ -212,40 +211,51 @@ function love.load()
             }
          },
 
-         {
-            type="mesh3d",
-            pos={x=0,y=0,z=0},
-            data={width=3, height=10, cellwidth=50, cellheight=50}
-         },
-         {
-            type="rope",
-            pos={x=100,y=100,z=0},
-            rotation=0,
-            data={
-               join="miter",
-               relative_rotation = true,
-               rotations={0, 0, 0, 0, 0, 0,0,0,0},
-               lengths={120,120,100,100,100,100,100,100 },
-               thicknesses={20,50,60,70,70,70,70,60,20},
-            }
-         },
-         {type="rope",
-          pos={x=-100,y=100,z=0},
-          data={
-             join="miter",
-             relative_rotation = false,
-             rotations={-math.pi/2,-0.8,-0.8,0.8},
-             lengths={120,120,100,50},
-             thicknesses={40,40,30,20,20},
-          }
-         },
+         -- {
+         --    type="mesh3d",
+         --    pos={x=0,y=0,z=0},
+         --    data={width=3, height=10, cellwidth=50, cellheight=50}
+         -- },
+         -- {
+         --    type="rope",
+         --    pos={x=100,y=100,z=0},
+         --    rotation=0,
+         --    data={
+         --       join="miter",
+         --       relative_rotation = true,
+         --       rotations={0, 0, 0, 0, 0, 0,0,0,0},
+         --       lengths={120,120,100,100,100,100,100,100 },
+         --       thicknesses={20,50,60,70,70,70,70,60,20},
+         --    }
+         -- },
+         -- {type="rope",
+         --  pos={x=-100,y=100,z=0},
+         --  data={
+         --     join="miter",
+         --     relative_rotation = false,
+         --     rotations={-math.pi/2,-0.8,-0.8,0.8},
+         --     lengths={120,120,100,50},
+         --     thicknesses={40,40,30,20,20},
+         --  },
+         --  children={
+         --     {type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}}
+         --  }
+         -- },
+         -- {
+         --    type="polygon", pos={x=0, y=0, z=0},
+         --    data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
+         --    children={
+         --       {type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
+         --       {type="polyline", pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200}, join="miter", half_width=50, thicknesses={10,20,30,40,50}  }},
 
 
-         {type="polyline", pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200}, join="miter", half_width=50, thicknesses={10,20,30,40,50}  }},
-         {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
-         {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
-         {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
-         {type="polygon", pos={x=0, y=0, z=0}, data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }}
+         --    }
+         --},
+
+
+         -- {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
+         -- {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
+         -- {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
       },
    }
 
@@ -340,7 +350,7 @@ function drawSceneGraph(root)
             triangle_count = triangle_count + 1
          end
       else
-         print("child at index "..i.." has no triangles.")
+         print("child at index "..i.." has no triangles.", root.children[i].type)
       end
    end
    return triangle_count

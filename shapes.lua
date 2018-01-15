@@ -313,8 +313,19 @@ function makeShape(meta)
    return result
 end
 
-function transformShape(tx,ty, shape)
+function transformShape(tx,ty, shape, meta)
    local result = {}
+
+   if meta.type == "rope" then
+      result = makeRope(meta.pos.x, meta.pos.y, meta.data.join or 'none', meta.data.lengths, meta.data.rotations or {}, meta.data.thicknesses or {}, meta.data.relative_rotation)
+      return result
+   elseif meta.type == "polyline" then
+      result = makePolyLine(meta.pos.x+tx, meta.pos.y+ty,
+                            meta.data.join or 'none', meta.data.coords,
+                            meta.data.thicknesses or meta.data.half_width)
+      return result
+   end
+
    for i=1, #shape, 2 do
       result[i+0] = shape[i+0] + tx
       result[i+1] = shape[i+1] + ty
@@ -358,13 +369,15 @@ function rotateShape(cx, cy, shape, theta)
    return result
 end
 
-function scaleShape(shape, factor)
+function scaleShape(shape, xfactor, yfactor)
    local result = {}
    local x,y,nx,ny
 
 
-   for i=1, #shape do
-      result[i] = shape[i]*factor
+   for i=1, #shape, 2 do
+      result[i] = shape[i]*xfactor
+      result[i+1] = shape[i+1]*yfactor
+
    end
    return result
 end

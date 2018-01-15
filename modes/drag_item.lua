@@ -17,11 +17,14 @@ function mode:pointermoved(x,y,dx,dy)
       if self.child.parent then
          local theta = self.child.parent.world_pos.rot
          dx,dy = utils.rotatePoint(dx,dy,0,0,-theta)
+         dx = (dx/camera.scale) / self.child.parent.world_pos.scaleX
+         dy = (dy/camera.scale) / self.child.parent.world_pos.scaleY
+
       end
    end
 
-   self.child.pos.x =    self.child.pos.x + (dx/camera.scale)
-   self.child.pos.y =    self.child.pos.y + (dy/camera.scale)
+   self.child.pos.x =    self.child.pos.x + dx --(dx/camera.scale)--*self.child.world_pos.scaleX
+   self.child.pos.y =    self.child.pos.y + dy -- (dy/camera.scale)--*self.child.world_pos.scaleY
    self.child.dirty = true
    --print(self.child.type, "dragging", self.child.pos.x, self.child.pos.y)
 end
