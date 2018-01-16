@@ -59,6 +59,7 @@ end
 
 function hammer:reset(x,y)
    self.drawables = {}
+   self.dragging_pointer_ids = {}
    self.x = x
    self.originX = x
    self.y = y
@@ -228,22 +229,27 @@ function hammer:default_pressed(result, width, height)
                       result.y,
                       width, height)) then
 
+         if not self.dragging_pointer_ids[pressed.id]  then
+            self.dragging_pointer_ids[pressed.id] = true
+            result.pressed = true
+            result.dragging = true
+            --result.startdrag = true
+            if not result.pointerID  then
+               result.pointerID = pressed.id
+               result.startpress = true
+            else
+               result.startpress = false
 
-         result.pressed = true
-         result.dragging = true
-         --result.startdrag = true
-         if not result.pointerID  then
-            result.pointerID = pressed.id
-            result.startpress = true
+            end
+
+
+            if result.dx == 0 and result.dy == 0 then
+               result.dx = pressed.x - (result.x + width/2)
+               result.dy = pressed.y - (result.y + height/2)
+            end
+
          else
-            result.startpress = false
-
-         end
-
-
-         if result.dx == 0 and result.dy == 0 then
-            result.dx = pressed.x - (result.x + width/2)
-            result.dy = pressed.y - (result.y + height/2)
+            --print("prohibited multiple pressed items with one pointer")
          end
 
       end

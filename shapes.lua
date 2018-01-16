@@ -20,10 +20,6 @@ function makeCirclePart(cx, cy, radius, angle1, angle2, step)
       table.insert(result, y)
    end
 
-   x = cx + radius * math.cos(angle2)
-   y = cy + radius * math.sin(angle2)
-   table.insert(result, x)
-   table.insert(result, y)
    return result
 end
 
@@ -71,26 +67,26 @@ function makeRoundedRect(cx,cy, w, h, radius, step)
    rounded = makeCirclePart(cx - (w2-radius), cy - (h2-radius), radius, -math.pi, -math.pi/2, step)
    TableConcat(result, rounded)
 
-   table.insert(result, cx + (w2-radius))
-   table.insert(result, cy - (h2))
+  -- table.insert(result, cx + (w2-radius))
+  -- table.insert(result, cy - (h2))
 
    rounded = makeCirclePart(cx + (w2-radius), cy - (h2-radius), radius, -math.pi/2, 0, step)
    TableConcat(result, rounded)
 
-   table.insert(result, cx + (w2))
-   table.insert(result, cy + (h2-radius))
+   --table.insert(result, cx + (w2))
+   --table.insert(result, cy + (h2-radius))
 
    rounded = makeCirclePart(cx + (w2-radius), cy + (h2-radius), radius, 0, math.pi/2, step)
    TableConcat(result, rounded)
 
-   table.insert(result, cx - (w2-radius))
-   table.insert(result, cy + (h2))
+   --table.insert(result, cx - (w2-radius))
+   --table.insert(result, cy + (h2))
 
    rounded = makeCirclePart(cx - (w2-radius), cy + (h2-radius), radius, math.pi/2, math.pi,  step)
    TableConcat(result, rounded)
 
-   table.insert(result, cx - (w2))
-   table.insert(result, cy - (h2-radius))
+   --table.insert(result, cx - (w2))
+   --table.insert(result, cy - (h2-radius))
 
    return result
 end
@@ -313,26 +309,6 @@ function makeShape(meta)
    return result
 end
 
-function transformShape(tx,ty, shape, meta)
-   local result = {}
-
-   if meta.type == "rope" then
-      result = makeRope(meta.pos.x, meta.pos.y, meta.data.join or 'none', meta.data.lengths, meta.data.rotations or {}, meta.data.thicknesses or {}, meta.data.relative_rotation)
-      return result
-   elseif meta.type == "polyline" then
-      result = makePolyLine(meta.pos.x+tx, meta.pos.y+ty,
-                            meta.data.join or 'none', meta.data.coords,
-                            meta.data.thicknesses or meta.data.half_width)
-      return result
-   end
-
-   for i=1, #shape, 2 do
-      result[i+0] = shape[i+0] + tx
-      result[i+1] = shape[i+1] + ty
-   end
-   return result
-end
-
 function getShapeBBox(shape)
    local min={x=math.huge,y=math.huge}
    local max={x=-math.huge,y=-math.huge}
@@ -350,6 +326,27 @@ function getShapeBBox(shape)
    return min.x,min.y,max.x,max.y
 end
 
+function transformShape(tx,ty, shape, meta)
+   local result = {}
+
+   if meta.type == "rope" then
+      result = makeRope(meta.pos.x, meta.pos.y, meta.data.join or 'none', meta.data.lengths, meta.data.rotations or {}, meta.data.thicknesses or {}, meta.data.relative_rotation)
+      return result
+   elseif meta.type == "polyline" then
+      result = makePolyLine(meta.pos.x, meta.pos.y,
+                            meta.data.join or 'none', meta.data.coords,
+                            meta.data.thicknesses or meta.data.half_width)
+      return result
+   end
+
+   for i=1, #shape, 2 do
+      result[i+0] = shape[i+0] + tx
+      result[i+1] = shape[i+1] + ty
+   end
+   return result
+end
+
+
 
 function rotateShape(cx, cy, shape, theta)
    local result = {}
@@ -364,7 +361,7 @@ function rotateShape(cx, cy, shape, theta)
       ny = sintheta * (x-cx) + costheta * (y-cy) + cy
       result[i+0] = nx
       result[i+1] = ny
-   end--
+   end
 
    return result
 end
@@ -375,17 +372,29 @@ function scaleShape(shape, xfactor, yfactor)
 
 
    for i=1, #shape, 2 do
-      result[i] = shape[i]*xfactor
-      result[i+1] = shape[i+1]*yfactor
+      result[i] = shape[i] * xfactor
+      result[i+1] = shape[i+1] * yfactor
 
    end
    return result
 end
+
+function patchShape(shape)
+   -- some shapes have double coords clean that
+   local result = {}
+   for i=1, #shape, 2 do
+      table.insert(result, shape[i])
+      table.insert(result, shape[i+1])
+   end
+   return result
+end
+
 
 return {
    makeShape=makeShape,
    rotateShape=rotateShape,
    scaleShape=scaleShape,
    getShapeBBox=getShapeBBox,
-   transformShape=transformShape
+   transformShape=transformShape,
+   patchShape=patchShape
 }

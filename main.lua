@@ -64,6 +64,8 @@ function updateGraph(root)
 
    if root.parent then
       root.world_trans = root.parent.world_trans * root.local_trans
+      root.inverse = a.inverse(root.world_trans)
+
       root.world_pos.rot = (root.rotation or 0) + root.parent.world_pos.rot
       if root.scale then
          root.world_pos.scaleX = root.parent.world_pos.scaleX * root.scale.x or 1
@@ -79,6 +81,9 @@ function updateGraph(root)
       root.world_pos.scaleY = (root.scale and root.scale.y) or 1
    end
 
+
+
+
    --if root.dirty then
    if root.type then
 
@@ -93,9 +98,8 @@ function updateGraph(root)
       end
 
       local x,y = root.world_trans(0,0)
-
       shape = shapes.transformShape(x,y,shape,root)
-
+      shape = shapes.patchShape(shape)
 
       root.triangles = poly.triangulate(root.type, shape)
    end
@@ -219,24 +223,34 @@ function love.load()
          --     {type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}}
          --  }
          -- },
+         -- {
+         --    type="polygon", pos={x=0, y=0, z=0}, scale={x=2,y=2},
+         --    data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
+         --    children={
+         --       --{type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
+         --       {type="polygon", pos={x=100, y=0, z=0},
+         --       data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
+         --       children={
+         --          --{type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
+         --          --{type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
+         --          {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
+         --          {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
+
+         --       }}
+
+         --    }
+         -- },
+
          {
-            type="polygon", pos={x=0, y=0, z=0}, scale={x=2,y=2},
-            data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
-            children={
-               --{type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
-               {type="polygon", pos={x=100, y=0, z=0},
-               data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
-               children={
-                  --{type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
-               }}
+            type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8},
+            children = {
+               {type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0}, data={w=100, h=100, radius=100, steps=8}},
+               {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
+               {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
 
             }
          },
 
-
-         -- {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
-         -- {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
-         -- {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
       },
    }
 
@@ -309,7 +323,7 @@ function drawSceneGraph(root)
 
       if root.children[i].triangles  then
          for j=1, #root.children[i].triangles do
-            love.graphics.setColor(math.random()*0 + 100, 155+ math.random()*0 + 20,55, 155)
+            love.graphics.setColor(math.random()*0 + 100, 155+ math.random()*00 + 20,55, 155)
             love.graphics.polygon("fill", root.children[i].triangles[j])
             triangle_count = triangle_count + 1
          end

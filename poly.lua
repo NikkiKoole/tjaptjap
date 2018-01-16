@@ -245,6 +245,10 @@ function triangulate(type, poly)
 
       for i=1 , #polys do
          local p = polys[i]
+         --print(type)
+         --printArray(p)
+         --print(#p)
+
          local triangles = love.math.triangulate(p)
          for j = 1, #triangles do
             local t = triangles[j]
@@ -257,6 +261,27 @@ function triangulate(type, poly)
    end
    --print("abba", #result)
    return result
+end
+
+
+function printArray(a)
+   -- just print 10 values on a row
+
+   print("Array: #",#a)
+
+   for i=1, #a, 10 do
+      local str = ""
+      for j=0, math.min((#a-i),9) do
+         --print(i,j,i+j)
+         str = str..a[i+j]
+         str = str..", "
+      end
+      print(str)
+   end
+   print()
+   print()
+
+
 end
 
 return {
