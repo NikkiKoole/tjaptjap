@@ -1,4 +1,6 @@
 local utils = require "utils"
+local a = require "vendor.affine"
+
 local shapes = require "shapes"
 local mode = {}
 
@@ -17,6 +19,7 @@ end
 
 function mode:enter(from, data)
    self.child = data
+   self.setPivot = false
 end
 
 
@@ -112,23 +115,68 @@ function mode:getClosestNodes(x, y)
 end
 
 
+
+
 function mode:update()
    local child = self.child
 
-   if child.dirty then
-      local shape = shapes.makeShape(child)
-      self.child.triangles = poly.triangulate(child.type, shape)
-      self.child.dirty = false
+   -- TODO optimize, make bbox a prop on shapes, now we need to calculate it everyframe
+   local shape = shapes.makeShape(child)
+   local bbminx, bbminy, bbmaxx, bbmaxy= shapes.getShapeBBox(shape)
+
+
+
+   Hammer:reset(10,200)
+   local n = Hammer:labelbutton("next click = set pivot", 120,40)
+   if n.released then
+      self.setPivot = true
    end
 
 
-   Hammer:reset(0,0)
+   Hammer:pos(0,0)
+
+
+   local p = child.pivot
+
+   local rx2, ry2 = camera:cameraCoords(
+      child.world_trans(p and p.x or 0, p and p.y or 0)
+   )
+   local pivot = Hammer:rectangle( "pivot", 30, 30,{x=rx2-15, y=ry2-15, color=color})
+
+   local rx1, ry1 = camera:cameraCoords(
+      child.world_trans(  (p and p.x or 0) + (bbmaxx-bbminx)/2 ,  (p and p.y or 0))
+   )
+   local rotator = Hammer:rectangle( "rotator", 30, 30,{x=rx1-15, y=ry1-15, color=color})
+
+   if rotator.dragging and not pivot.dragging then
+      local p = getWithID(Hammer.pointers.moved, rotator.pointerID)
+      local moved = Hammer.pointers.moved[p]
+
+      if moved then
+         self.child.rotation = math.atan2((moved.y-rotator.dy) - ry2, (moved.x-rotator.dx) - rx2)
+
+         if self.child.parent then
+            if self.child.parent.world_pos.rot then
+               self.child.rotation = self.child.rotation - self.child.parent.world_pos.rot
+            end
+         end
+
+         self.child.dirty = true
+      end
+   end
+
+
+
 
    for i=1, #child.data.points do
       local point = child.data.points[i]
-      local cx2, cy2 = camera:cameraCoords(
-         (point.x or point.cx) + child.pos.x,
-         (point.y or point.cy) + child.pos.y)
+
+      local cx2, cy2 = camera:cameraCoords(child.world_trans((point.x or point.cx), (point.y or point.cy)))
+
+
+      -- local cx2, cy2 = camera:cameraCoords(
+      --    (point.x or point.cx) + child.pos.x,
+      --    (point.y or point.cy) + child.pos.y)
       local color
 
       if point.x and point.y then
@@ -151,9 +199,9 @@ function mode:update()
          local p = getWithID(Hammer.pointers.moved, button.pointerID)
          local moved = Hammer.pointers.moved[p]
          if moved then
-            local wx,wy = camera:worldCoords(moved.x, moved.y)
-            wx = wx - button.dx/camera.scale - child.pos.x
-            wy = wy - button.dy/camera.scale - child.pos.y
+            local wx,wy = camera:worldCoords(moved.x-button.dx, moved.y-button.dy)
+            local inverse = a.inverse(self.child.world_trans)
+            wx,wy = inverse(wx,wy)
 
             if point.x and point.y then
                self.child.data.points[i].x = wx
@@ -262,13 +310,50 @@ function mode:update()
 
 
    if #Hammer.pointers.pressed == 1 then
-      local isDirty = false
-      for i=1, #Hammer.drawables do
-         local it = Hammer.drawables[i]
-         if it.over or it.pressed or it.dragging then
-            isDirty = true
+      local wx, wy = camera:worldCoords(Hammer.pointers.pressed[1].x, Hammer.pointers.pressed[1].y)
+
+      local isDirty = Hammer:isDirty()
+
+      if self.setPivot  and not isDirty then
+         setPivot(self)
+         -- local pressed = Hammer.pointers.pressed[1]
+         -- local wxr,wyr = camera:worldCoords(pressed.x, pressed.y)
+         -- local tx,ty = child.world_trans(0,0)
+         -- local diffx = (wxr - tx)/child.world_pos.scaleX
+         -- local diffy = (wyr - ty)/child.world_pos.scaleY
+         -- local t2x, t2y = utils.rotatePoint(diffx, diffy, 0, 0, -child.world_pos.rot)
+         -- if not self.child.pivot then
+         --    self.child.pivot = {x=0,y=0}
+         -- end
+
+         -- local pivotdx = t2x - (self.child.pivot.x)
+         -- local pivotdy = t2y - (self.child.pivot.y)
+         -- pivotdx,pivotdy = utils.rotatePoint(pivotdx, pivotdy, 0, 0, child.world_pos.rot)
+         -- self.child.pos.x = self.child.pos.x + pivotdx
+         -- self.child.pos.y = self.child.pos.y + pivotdy
+
+         -- self.child.pivot.x = t2x
+         -- self.child.pivot.y = t2y
+
+         -- self.setPivot=false
+         isDirty = true
+      end
+
+
+      if not isDirty then
+      -- if hit test children (if any) try and drag them
+         if self.child.children then
+            for i=1,#self.child.children do
+               local hit = pointInPoly({x=wx,y=wy}, self.child.children[i].triangles)
+               if hit then
+                  Signal.emit("switch-state", "drag-item", {child=self.child.children[i], pointerID=Hammer.pointers.pressed[1].id})
+                  isDirty=true
+               end
+
+            end
          end
       end
+
       if not isDirty then
          Signal.emit("switch-state", "stage")
       end

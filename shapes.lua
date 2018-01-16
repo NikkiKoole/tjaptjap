@@ -339,12 +339,12 @@ function getShapeBBox(shape)
 
    local x,y
    for i=1, #shape, 2 do
-      x = shape[i +0]
-      y = shape[i+1]
-      if math.min(x, min.x) then min.x = x end
-      if math.min(y, min.y) then min.y = y end
-      if math.max(x, max.x) then max.x = x end
-      if math.max(y, max.y) then max.y = y end
+      x = shape[i + 0]
+      y = shape[i + 1]
+      if math.min(x, min.x) == x then min.x = x end
+      if math.min(y, min.y) == y then min.y = y end
+      if math.max(x, max.x) == x then max.x = x end
+      if math.max(y, max.y) == y then max.y = y end
    end
 
    return min.x,min.y,max.x,max.y

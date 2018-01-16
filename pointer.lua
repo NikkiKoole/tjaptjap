@@ -5,8 +5,6 @@ local pointers = {
    released = {},
 }
 
-
-
 function removeItemWithIDFromList(id, list)
    if (list) then
       for i=#list,1 ,-1 do

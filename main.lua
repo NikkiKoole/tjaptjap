@@ -1,8 +1,4 @@
---[[
 
-]]--
-
---local suit = require 'vendor.suit'
 Signal = require 'vendor.signal'
 Gamestate = require "vendor.gamestate"
 Camera = require "vendor.camera"
@@ -47,7 +43,6 @@ end
 
 function updateGraph(root)
 
-
    if root.pivot then
       local T = a.trans(root.pos.x, root.pos.y)
       local P = a.trans(-root.pivot.x, -root.pivot.y)
@@ -55,9 +50,7 @@ function updateGraph(root)
       local S = a.scale(root.scale and root.scale.x or 1, root.scale and root.scale.y or 1)
 
       root.local_trans = T*R*S*P
-
    else
-
       local T = a.trans(root.pos.x, root.pos.y)
       local R = a.rotate(root.rotation or 0)
       local S = a.scale(root.scale and root.scale.x or 1, root.scale and root.scale.y or 1)
@@ -69,7 +62,6 @@ function updateGraph(root)
       root.world_pos = {{x=0,y=0,z=0,rot=0}}
    end
 
-
    if root.parent then
       root.world_trans = root.parent.world_trans * root.local_trans
       root.world_pos.rot = (root.rotation or 0) + root.parent.world_pos.rot
@@ -80,17 +72,13 @@ function updateGraph(root)
          root.world_pos.scaleX = root.parent.world_pos.scaleX
          root.world_pos.scaleY = root.parent.world_pos.scaleY
       end
-
-
-
    else
       root.world_trans = root.local_trans
       root.world_pos.rot = root.rotation or 0
       root.world_pos.scaleX = (root.scale and root.scale.x) or 1
       root.world_pos.scaleY = (root.scale and root.scale.y) or 1
-
-
    end
+
    --if root.dirty then
    if root.type then
 
@@ -105,11 +93,11 @@ function updateGraph(root)
       end
 
       local x,y = root.world_trans(0,0)
+
       shape = shapes.transformShape(x,y,shape,root)
 
 
       root.triangles = poly.triangulate(root.type, shape)
-
    end
 
 
@@ -119,14 +107,6 @@ function updateGraph(root)
       end
    end
 end
-
-
-
-
-
-
-
-
 
 
 function updateSceneGraph(init, root)
@@ -144,19 +124,17 @@ function love.load()
    Hammer.pointers = pointers
 
    world = {
-      world_pos={x=0,y=0,z=0,rot=0},
       pos={x=0,y=0,z=0},
-      rotation=0,
       id="world",
       children={
-         -- {
-         --    type="simplerect",
-         --    id="opa-oom",
-         --    pos={x=500,y=0,z=0},
-         --    rotation=0,
-         --    data={w=100, h=100},
-         --    world_pos={x=0,y=0,z=0,rot=0},
-         -- },
+         {
+            type="simplerect",
+            id="opa-oom",
+            pos={x=500,y=0,z=0},
+            rotation=0,
+            data={w=100, h=100},
+            world_pos={x=0,y=0,z=0,rot=0},
+         },
          -- {
          --    type="simplerect",
          --    id="opa-oom2",
@@ -181,35 +159,35 @@ function love.load()
          --    data={w=100, h=100},
          --    world_pos={x=0,y=0,z=0,rot=0},
          -- },
-         {
-            type="simplerect",
-            id="opa",
-            pivot={x=-150,y=-150},
-            pos={x=0,y=0,z=0},
-            scale={x=1, y=1},
-            rotation=0,
-            data={w=300, h=300},
-            children={
-               {
-                  type="simplerect",
-                  id="papa",
-                  pos={x=150,y=0,z=0},
-                  scale={x=1, y=1},
-                  data={w=200, h=200},
-                  rotation=math.pi/13 ,
+         -- {
+         --    type="simplerect",
+         --    id="opa",
+         --    pivot={x=-150,y=-150},
+         --    pos={x=0,y=0,z=0},
+         --    scale={x=1.2, y=1.2},
+         --    rotation=0,
+         --    data={w=300, h=300},
+         --    children={
+         --       {
+         --          type="simplerect",
+         --          id="papa",
+         --          pos={x=150,y=0,z=0},
+         --          scale={x=1, y=1},
+         --          data={w=200, h=200},
+         --          rotation=math.pi/13 ,
 
-                  children={
-                     {
-                        type="simplerect",
-                        id="jongen",
-                        pos={x=100,y=0,z=0},
-                        data={w=100, h=100},
-                        rotation=0,
-                     }
-                  }
-               }
-            }
-         },
+         --          children={
+         --             {
+         --                type="simplerect",
+         --                id="jongen",
+         --                pos={x=100,y=0,z=0},
+         --                data={w=100, h=100},
+         --                rotation=0,
+         --             }
+         --          }
+         --       }
+         --    }
+         -- },
 
          -- {
          --    type="mesh3d",
@@ -241,16 +219,19 @@ function love.load()
          --     {type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}}
          --  }
          -- },
-         -- {
-         --    type="polygon", pos={x=0, y=0, z=0},
-         --    data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
-         --    children={
-         --       {type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
-         --       {type="polyline", pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200}, join="miter", half_width=50, thicknesses={10,20,30,40,50}  }},
+         {
+            type="polygon", pos={x=0, y=0, z=0}, scale={x=2,y=2},
+            data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
+            children={
+               --{type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
+               {type="polygon", pos={x=100, y=0, z=0},
+               data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
+               children={
+                  --{type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
+               }}
 
-
-         --    }
-         --},
+            }
+         },
 
 
          -- {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
@@ -318,23 +299,6 @@ function love.filedropped(file)
 end
 
 
-function localToParent(parent, x, y)
-   if not parent then return x,y end
-   local px, py = x, y
-   -- scale
-   --px, py = px*parent.world_transform.scale.x, py*parent.world_transform.scale.y
-   -- rotate
-   local ca = math.cos(parent.world_pos.rot)
-   local sa = math.sin(parent.world_pos.rot)
-   local tx = ca*px - sa*py
-   local ty = sa*px + ca*py
-   px, py = tx, ty
-   -- translate
-   px = px + parent.world_pos.x
-   py = py + parent.world_pos.y
-   return px, py
-end
-
 function drawSceneGraph(root)
    local triangle_count = 0
    --print(root.type)
@@ -371,4 +335,28 @@ function love.draw()
    love.graphics.print("camera " .. math.floor(camera.x) .. ", " .. math.floor(camera.y) .. "," .. tonumber(string.format("%.3f", camera.scale)).." pointers : ["..(#pointers.moved)..","..(#pointers.pressed)..","..(#pointers.released).."]")
    love.graphics.print("#tris "..triangle_count, 10, 30)
    Hammer:draw()
+end
+
+function setPivot(me)
+   local pressed = Hammer.pointers.pressed[1]
+   local wxr,wyr = camera:worldCoords(pressed.x, pressed.y)
+   local tx,ty = me.child.world_trans(0,0)
+   local diffx = (wxr - tx)/me.child.world_pos.scaleX
+   local diffy = (wyr - ty)/me.child.world_pos.scaleY
+   local t2x, t2y = utils.rotatePoint(diffx, diffy, 0, 0, -me.child.world_pos.rot)
+   if not me.child.pivot then
+      me.child.pivot = {x=0,y=0}
+   end
+
+   local pivotdx = t2x - (me.child.pivot.x)
+   local pivotdy = t2y - (me.child.pivot.y)
+   pivotdx,pivotdy = utils.rotatePoint(pivotdx, pivotdy, 0, 0, me.child.world_pos.rot)
+   me.child.pos.x = me.child.pos.x + pivotdx
+   me.child.pos.y = me.child.pos.y + pivotdy
+
+   me.child.pivot.x = t2x
+   me.child.pivot.y = t2y
+
+   me.setPivot=false
+
 end
