@@ -44,10 +44,10 @@ function mode:update(dt)
 
          child.pivot.x = wx
          child.pivot.y = wy
-         --local sx,sy = child.world_pos.scaleX, child.world_pos.scaleY
-         local sx,sy = child.scale and child.scale.x or 1, child.scale and child.scale.y or 1
-         local t2x, t2y = utils.rotatePoint(dx*sx, dy*sy, 0, 0, child.rotation)
 
+         local sx = child.scale and child.scale.x or 1
+         local sy = child.scale and child.scale.y or 1
+         local t2x, t2y = utils.rotatePoint(dx*sx, dy*sy, 0, 0, child.rotation)
 
          child.pos.x = child.pos.x + t2x
          child.pos.y = child.pos.y + t2y

@@ -99,7 +99,7 @@ function updateGraph(root)
 
       local x,y = root.world_trans(0,0)
       shape = shapes.transformShape(x,y,shape,root)
-      shape = shapes.patchShape(shape)
+      --shape = shapes.patchShape(shape)
 
       root.triangles = poly.triangulate(root.type, shape)
    end
@@ -184,6 +184,7 @@ function love.load()
                      {
                         type="simplerect",
                         id="jongen",
+                        scale={x=1.5, y=1.5},
                         pos={x=100,y=0,z=0},
                         data={w=100, h=100},
                         rotation=0,
