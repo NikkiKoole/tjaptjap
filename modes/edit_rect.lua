@@ -28,6 +28,36 @@ function mode:update(dt)
    local p = child.pivot
    local rx2, ry2 = camera:cameraCoords( child.world_trans(p and p.x or 0, p and p.y or 0))
    local pivot = Hammer:rectangle( "pivot", 30, 30,{x=rx2-15, y=ry2-15, color=color})
+   if pivot.dragging then
+      local p = getWithID(Hammer.pointers.moved, pivot.pointerID)
+      local moved = Hammer.pointers.moved[p]
+
+      if moved then
+         local wx,wy = camera:worldCoords(moved.x-pivot.dx, moved.y-pivot.dy)
+         wx,wy = child.inverse(wx,wy)
+         if not child.pivot then
+            child.pivot = {x=0,y=0}
+         end
+
+         local dx = wx - child.pivot.x
+         local dy = wy - child.pivot.y
+
+         child.pivot.x = wx
+         child.pivot.y = wy
+         --local sx,sy = child.world_pos.scaleX, child.world_pos.scaleY
+         local sx,sy = child.scale and child.scale.x or 1, child.scale and child.scale.y or 1
+         local t2x, t2y = utils.rotatePoint(dx*sx, dy*sy, 0, 0, child.rotation)
+
+
+         child.pos.x = child.pos.x + t2x
+         child.pos.y = child.pos.y + t2y
+
+         child.dirty = true
+      end
+   end
+
+
+
    local rx1, ry1 = camera:cameraCoords(  child.world_trans(  (p and p.x or 0) + (child.data.w/2) ,  (p and p.y or 0))  )
    --local rx1, ry1 = camera:cameraCoords(  child.world_trans( (child.data.w/2) , 0)  )
 

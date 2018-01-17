@@ -131,14 +131,14 @@ function love.load()
       pos={x=0,y=0,z=0},
       id="world",
       children={
-         {
-            type="simplerect",
-            id="opa-oom",
-            pos={x=500,y=0,z=0},
-            rotation=0,
-            data={w=100, h=100},
-            world_pos={x=0,y=0,z=0,rot=0},
-         },
+         -- {
+         --    type="simplerect",
+         --    id="opa-oom",
+         --    pos={x=500,y=0,z=0},
+         --    rotation=0,
+         --    data={w=100, h=100},
+         --    world_pos={x=0,y=0,z=0,rot=0},
+         -- },
          -- {
          --    type="simplerect",
          --    id="opa-oom2",
@@ -163,35 +163,35 @@ function love.load()
          --    data={w=100, h=100},
          --    world_pos={x=0,y=0,z=0,rot=0},
          -- },
-         -- {
-         --    type="simplerect",
-         --    id="opa",
-         --    pivot={x=-150,y=-150},
-         --    pos={x=0,y=0,z=0},
-         --    scale={x=1.2, y=1.2},
-         --    rotation=0,
-         --    data={w=300, h=300},
-         --    children={
-         --       {
-         --          type="simplerect",
-         --          id="papa",
-         --          pos={x=150,y=0,z=0},
-         --          scale={x=1, y=1},
-         --          data={w=200, h=200},
-         --          rotation=math.pi/13 ,
+         {
+            type="simplerect",
+            id="opa",
+            pivot={x=-150,y=-150},
+            pos={x=0,y=0,z=0},
+            scale={x=2, y=2},
+            rotation=0,
+            data={w=300, h=300},
+            children={
+               {
+                  type="simplerect",
+                  id="papa",
+                  pos={x=150,y=0,z=0},
+                  scale={x=1.5, y=1.5},
+                  data={w=200, h=200},
+                  rotation=math.pi/13 ,
 
-         --          children={
-         --             {
-         --                type="simplerect",
-         --                id="jongen",
-         --                pos={x=100,y=0,z=0},
-         --                data={w=100, h=100},
-         --                rotation=0,
-         --             }
-         --          }
-         --       }
-         --    }
-         -- },
+                  children={
+                     {
+                        type="simplerect",
+                        id="jongen",
+                        pos={x=100,y=0,z=0},
+                        data={w=100, h=100},
+                        rotation=0,
+                     }
+                  }
+               }
+            }
+         },
 
          -- {
          --    type="mesh3d",
@@ -240,16 +240,21 @@ function love.load()
 
          --    }
          -- },
+         -- {
+         -- {
+         --    type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0},
+         --    data={w=200, h=200, radius=50, steps=8}
+         -- },
 
-         {
-            type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8},
-            children = {
-               {type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0}, data={w=100, h=100, radius=100, steps=8}},
-               {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
-               {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
+         -- {
+         --    type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8},
+         --    children = {
+         --       {type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0}, data={w=100, h=100, radius=100, steps=8}},
+         --       {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
+         --       {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
 
-            }
-         },
+         --    }
+         -- },
 
       },
    }
