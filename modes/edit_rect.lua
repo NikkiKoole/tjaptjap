@@ -79,6 +79,27 @@ function mode:update(dt)
       end
    end
 
+   local rescaler_x, rescaler_y = camera:cameraCoords(  child.world_trans(  ( 0) + (child.data.w/2) ,  (0) + (child.data.h/2))  )
+   local rescaler = Hammer:rectangle( "rescaler", 30, 30,{x=rescaler_x-15, y=rescaler_y-15, color=color})
+   if rescaler.dragging then
+      local p = getWithID(Hammer.pointers.moved, rescaler.pointerID)
+      local moved = Hammer.pointers.moved[p]
+
+      if moved then
+         local wx,wy = camera:worldCoords(moved.x-rescaler.dx, moved.y-rescaler.dy)
+         wx,wy = child.inverse(wx,wy)
+         --print(wx, wy)
+         --print(self.child.data.w, self.child.data.h)
+         wx,wy = wx+self.child.data.w/2, wy+self.child.data.h/2
+         print(wx,wy)
+         self.child.scale = {x=wx/self.child.data.w, y=wy/self.child.data.h }
+         --self.child.data.w = wx
+
+         self.child.dirty = true
+      end
+   end
+
+
    -- if clicked outside any of the UI elements or the actual shape go back to the stage mode
    if #Hammer.pointers.pressed == 1 then
       local isDirty = Hammer:isDirty()
