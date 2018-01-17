@@ -85,7 +85,7 @@ function updateGraph(root)
 
 
    --if root.dirty then
-   if root.type then
+   if root.type and root.dirty then
 
       --local shape = shapes.makeShape({type="simplerect",pos={x=0,y=0},data=root.data})
       local shape
@@ -116,6 +116,16 @@ end
 function updateSceneGraph(init, root)
    parentize(root)
    updateGraph(root)
+end
+
+
+function initWorld(world)
+   world.dirty = true
+   if world.children then
+      for i=1, #world.children do
+         initWorld(world.children[i])
+      end
+   end
 end
 
 
@@ -259,7 +269,7 @@ function love.load()
 
       },
    }
-
+   initWorld(world)
    updateSceneGraph(true, world)
 
    camera = Camera(0, 0)
