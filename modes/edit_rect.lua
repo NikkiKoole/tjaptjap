@@ -58,7 +58,7 @@ function mode:update(dt)
 
 
 
-   local rx1, ry1 = camera:cameraCoords(  child.world_trans(  (p and p.x or 0) + (child.data.w/2) ,  (p and p.y or 0))  )
+   local rx1, ry1 = camera:cameraCoords( child.world_trans(  (p and p.x or 0) + (child.data.w/2 ) ,  (p and p.y or 0))  )
    --local rx1, ry1 = camera:cameraCoords(  child.world_trans( (child.data.w/2) , 0)  )
 
    local rotator = Hammer:rectangle( "rotator", 30, 30,{x=rx1-15, y=ry1-15, color=color})
@@ -75,6 +75,9 @@ function mode:update(dt)
             end
          end
 
+
+
+
          self.child.dirty = true
       end
    end
@@ -88,12 +91,19 @@ function mode:update(dt)
       if moved then
          local wx,wy = camera:worldCoords(moved.x-rescaler.dx, moved.y-rescaler.dy)
          wx,wy = child.inverse(wx,wy)
-         --print(wx, wy)
-         --print(self.child.data.w, self.child.data.h)
          wx,wy = wx+self.child.data.w/2, wy+self.child.data.h/2
-         print(wx,wy)
-         self.child.scale = {x=wx/self.child.data.w, y=wy/self.child.data.h }
-         --self.child.data.w = wx
+         local sx = child.scale and child.scale.x or 1
+         local sy = child.scale and child.scale.y or 1
+         local t2x, t2y = utils.rotatePoint((wx/child.data.w)*sx,
+                                            (wy/child.data.h)*sy, 0, 0, 0)
+
+
+
+         -- to keep aspect ratio
+         --t2x,t2y = math.min(t2x,t2y),math.min(t2x,t2y)
+         --
+         self.child.scale = {x=t2x, y=t2y}
+
 
          self.child.dirty = true
       end

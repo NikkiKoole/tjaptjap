@@ -72,6 +72,11 @@ function mode:update(dt)
                local wx,wy = camera:worldCoords(moved.x-pivot.dx, moved.y-pivot.dy)
                wx,wy = child.inverse(wx,wy)
 
+               if not child.pivot then
+                  child.pivot = {x=0,y=0}
+               end
+
+
                local dx = wx - child.pivot.x
                local dy = wy - child.pivot.y
 

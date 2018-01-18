@@ -59,7 +59,7 @@ function updateGraph(root)
    end
 
    if not root.world_pos then
-      root.world_pos = {{x=0,y=0,z=0,rot=0}}
+      root.world_pos = {{x=0,y=0,z=0,rot=0,scaleX=1,scaleY=1}}
    end
 
    if root.parent then
@@ -68,8 +68,8 @@ function updateGraph(root)
 
       root.world_pos.rot = (root.rotation or 0) + root.parent.world_pos.rot
       if root.scale then
-         root.world_pos.scaleX = root.parent.world_pos.scaleX * root.scale.x or 1
-         root.world_pos.scaleY = root.parent.world_pos.scaleY * root.scale.y or 1
+         root.world_pos.scaleX = root.parent.world_pos.scaleX * root.scale.x
+         root.world_pos.scaleY = root.parent.world_pos.scaleY * root.scale.y
       else
          root.world_pos.scaleX = root.parent.world_pos.scaleX
          root.world_pos.scaleY = root.parent.world_pos.scaleY
@@ -80,6 +80,9 @@ function updateGraph(root)
       root.world_pos.scaleX = (root.scale and root.scale.x) or 1
       root.world_pos.scaleY = (root.scale and root.scale.y) or 1
    end
+
+
+
 
 
 
