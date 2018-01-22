@@ -393,6 +393,11 @@ function hammer:draw()
       end
       if it.type == "label" or it.type=="labelbutton" then
          love.graphics.setColor(55,55,55)
+
+         if (it.pressed) then
+            love.graphics.setColor(170,150,130)
+         end
+
          love.graphics.rectangle("fill", it.x, it.y, it.w, it.h)
          local w = (love.graphics.getFont():getWidth(it.text))
          local h = (love.graphics.getFont():getHeight())
@@ -401,7 +406,7 @@ function hammer:draw()
          --local yOff = (it.h - h) -- vertical bottom
          local xOff = (it.w - w)/2
 
-         love.graphics.setColor(155,155,155, 100)
+         --love.graphics.setColor(155,155,155, 100)
          --love.graphics.rectangle("fill", it.x + xOff, it.y + yOff, w, h)
 
 

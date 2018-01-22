@@ -330,7 +330,7 @@ function transformShape(tx,ty, shape, meta)
    local result = {}
 
    if meta.type == "rope" then
-      result = makeRope(meta.pos.x, meta.pos.y, meta.data.join or 'none', meta.data.lengths, meta.data.rotations or {}, meta.data.thicknesses or {}, meta.data.relative_rotation)
+      result = makeRope(meta.pos.x+tx, meta.pos.y+ty, meta.data.join or 'none', meta.data.lengths, meta.data.rotations or {}, meta.data.thicknesses or {}, meta.data.relative_rotation)
       return result
    elseif meta.type == "polyline" then
       result = makePolyLine(meta.pos.x, meta.pos.y,
@@ -367,6 +367,13 @@ function rotateShape(cx, cy, shape, theta)
 end
 
 function scaleShape(shape, xfactor, yfactor)
+   print(shape.type)
+   if shape.type == "rope" then
+      print("Uh oh scaling a rop cant go right")
+   end
+
+
+
    local result = {}
    local x,y,nx,ny
 

@@ -17,18 +17,14 @@ function mode:update(dt)
 
       if child.type == "rect" then
 
-
          local color = {200,100,100}
          Hammer:reset(0,0)
 
-         local resizer_x, resizer_y = camera:cameraCoords(
-            child.world_trans(child.data.w/2, child.data.h/2)
-         )
+         local resizer_x, resizer_y = camera:cameraCoords(child.world_trans(child.data.w/2, child.data.h/2))
          local resizer = Hammer:rectangle( "resizer", 30, 30,{x=resizer_x-15, y=resizer_y-15, color=color})
          if resizer.dragging then
             local p = getWithID(Hammer.pointers.moved, resizer.pointerID)
             local moved = Hammer.pointers.moved[p]
-
             if moved then
                local wx,wy = camera:worldCoords(moved.x-resizer.dx, moved.y-resizer.dy)
                wx,wy = child.inverse(wx,wy)
@@ -38,18 +34,11 @@ function mode:update(dt)
             end
          end
 
-
-
-
-
-         local radius_x, radius_y = camera:cameraCoords(
-            child.world_trans(child.data.w/2 - child.data.radius, -child.data.h/2)
-         )
+         local radius_x, radius_y = camera:cameraCoords(child.world_trans(child.data.w/2 - child.data.radius, -child.data.h/2))
          local radius = Hammer:rectangle( "radius", 30, 30,{x=radius_x-15, y=radius_y-15, color=color})
          if radius.dragging then
             local p = getWithID(Hammer.pointers.moved, radius.pointerID)
             local moved = Hammer.pointers.moved[p]
-
             if moved then
                local wx,wy = camera:worldCoords(moved.x-radius.dx, moved.y-radius.dy)
                wx,wy = child.inverse(wx,wy)
@@ -60,29 +49,22 @@ function mode:update(dt)
 
 
          local p = child.pivot
-         local pivot_x, pivot_y = camera:cameraCoords(
-            child.world_trans(p and p.x or 0, p and p.y or 0)
-         )
+         local pivot_x, pivot_y = camera:cameraCoords(child.world_trans(p and p.x or 0, p and p.y or 0))
          local pivot = Hammer:rectangle( "pivot", 30, 30,{x=pivot_x-15, y=pivot_y-15, color=color})
          if pivot.dragging then
             local p = getWithID(Hammer.pointers.moved, pivot.pointerID)
             local moved = Hammer.pointers.moved[p]
-
             if moved then
                local wx,wy = camera:worldCoords(moved.x-pivot.dx, moved.y-pivot.dy)
                wx,wy = child.inverse(wx,wy)
-
                if not child.pivot then
                   child.pivot = {x=0,y=0}
                end
 
-
                local dx = wx - child.pivot.x
                local dy = wy - child.pivot.y
-
                child.pivot.x = wx
                child.pivot.y = wy
-
                child.pos.x = child.pos.x + dx
                child.pos.y = child.pos.y + dy
                child.dirty = true
@@ -92,12 +74,10 @@ function mode:update(dt)
 
 
 
-         local shape = shapes.makeShape(child)
-         local bbminx, bbminy, bbmaxx, bbmaxy= shapes.getShapeBBox(shape)
+         --local shape = shapes.makeShape(child)
+         --local bbminx, bbminy, bbmaxx, bbmaxy= shapes.getShapeBBox(shape)
 
-         local rx1, ry1 = camera:cameraCoords(
-            child.world_trans(  (p and p.x or 0) + (child.data.w)/2 ,  (p and p.y or 0))
-         )
+         local rx1, ry1 = camera:cameraCoords(child.world_trans(  (p and p.x or 0) + (child.data.w)/2 ,  (p and p.y or 0)))
          rx2, ry2 = camera:cameraCoords(
             child.world_trans(p and p.x or 0, p and p.y or 0)
          )

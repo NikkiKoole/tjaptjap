@@ -4,6 +4,8 @@ Gamestate = require "vendor.gamestate"
 Camera = require "vendor.camera"
 local inspect = require "vendor.inspect"
 
+InterActiveMovieMode = require "modes.interactive_movie"
+
 StageMode = require "modes.stage"
 DragMode = require "modes.drag_item"
 DrawMode = require "modes.draw_item"
@@ -41,7 +43,7 @@ function parentize(root)
    end
 end
 
-function updateGraph(root)
+function updateGraph(root, dt)
 
    if root.pivot then
       local T = a.trans(root.pos.x, root.pos.y)
@@ -89,36 +91,55 @@ function updateGraph(root)
 
    --if root.dirty then
    if root.type and root.dirty then
+      print(root.type.." ("..(root.id or "?")..") is dirty at :"..(spent_time+dt))
+      if root.dirty_types then
+         for i=1, #root.dirty_types do
+            print(root.dirty_types[i])
+         end
+
+         --print(#root.dirty_types)
+      else
+         print("no root dirty_types")
+      end
+
 
       --local shape = shapes.makeShape({type="simplerect",pos={x=0,y=0},data=root.data})
       local shape
 
       shape = shapes.makeShape({type=root.type, pos={x=0,y=0},data=root.data})
 
-      shape = shapes.scaleShape(shape, root.world_pos.scaleX, root.world_pos.scaleY)
+     shape = shapes.scaleShape(shape, root.world_pos.scaleX, root.world_pos.scaleY)
       if root.rotation or root.world_pos.rot then
          shape = shapes.rotateShape(0, 0, shape, root.world_pos.rot)
       end
 
       local x,y = root.world_trans(0,0)
       shape = shapes.transformShape(x,y,shape,root)
-      --shape = shapes.patchShape(shape)
 
       root.triangles = poly.triangulate(root.type, shape)
+      root.dirty = false
+
+      -- to your children get updated too!
+      if root.children then
+         for i=1,#root.children do
+            root.children[i].dirty = true
+         end
+      end
+
    end
 
 
    if root.children then
       for i=1, #root.children do
-         updateGraph(root.children[i])
+         updateGraph(root.children[i], dt)
       end
    end
 end
 
 
-function updateSceneGraph(init, root)
+function updateSceneGraph(init, root, dt)
    parentize(root)
-   updateGraph(root)
+   updateGraph(root, dt)
 end
 
 
@@ -137,6 +158,8 @@ function love.load()
    love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT, {resizable=true, vsync=true, fullscreen=false})
 
    helvetica = love.graphics.newFont("resources/helvetica_bold.ttf", 18)
+   --helvetica = love.graphics.newFont("resources/sansmono.ttf", 14)
+
    love.graphics.setFont(helvetica)
    Hammer.pointers = pointers
 
@@ -147,7 +170,7 @@ function love.load()
          -- {
          --    type="simplerect",
          --    id="opa-oom",
-         --    pos={x=500,y=0,z=0},
+         --    pos={x=0,y=0,z=0},
          --    rotation=0,
          --    data={w=100, h=100},
          --    world_pos={x=0,y=0,z=0,rot=0},
@@ -155,7 +178,7 @@ function love.load()
          -- {
          --    type="simplerect",
          --    id="opa-oom2",
-         --    pos={x=-500,y=0,z=0},
+         --    pos={x=500,y=0,z=0},
          --    rotation=0,
          --    data={w=100, h=100},
          --    world_pos={x=0,y=0,z=0,rot=0},
@@ -163,7 +186,7 @@ function love.load()
          -- {
          --    type="simplerect",
          --    id="opa-oom3",
-         --    pos={x=-500,y=-500,z=0},
+         --    pos={x=0,y=600,z=0},
          --    rotation=0,
          --    data={w=100, h=100},
          --    world_pos={x=0,y=0,z=0,rot=0},
@@ -171,41 +194,41 @@ function love.load()
          -- {
          --    type="simplerect",
          --    id="opa-oom4",
-         --    pos={x=500,y=500,z=0},
+         --    pos={x=10,y=600,z=0},
          --    rotation=0,
          --    data={w=100, h=100},
          --    world_pos={x=0,y=0,z=0,rot=0},
          -- },
-         {
-            type="simplerect",
-            id="opa",
-            pivot={x=-150,y=-150},
-            pos={x=0,y=0,z=0},
-            scale={x=2, y=2},
-            rotation=0,
-            data={w=300, h=300},
-            children={
-               {
-                  type="simplerect",
-                  id="papa",
-                  pos={x=150,y=0,z=0},
-                  scale={x=1.5, y=1.5},
-                  data={w=200, h=200},
-                  rotation=math.pi/13 ,
+         -- {
+         --    type="simplerect",
+         --    id="opa",
+         --    pivot={x=-150,y=-150},
+         --    pos={x=0,y=0,z=0},
+         --    scale={x=2, y=2},
+         --    rotation=0,
+         --    data={w=300, h=300},
+         --    children={
+         --       {
+         --          type="simplerect",
+         --          id="papa",
+         --          pos={x=150,y=0,z=0},
+         --          scale={x=1.5, y=1.5},
+         --          data={w=200, h=200},
+         --          rotation=math.pi/13 ,
 
-                  children={
-                     {
-                        type="simplerect",
-                        id="jongen",
-                        scale={x=1.5, y=1.5},
-                        pos={x=100,y=0,z=0},
-                        data={w=100, h=100},
-                        rotation=0,
-                     }
-                  }
-               }
-            }
-         },
+         --          children={
+         --             {
+         --                type="simplerect",
+         --                id="jongen",
+         --                scale={x=1.5, y=1.5},
+         --                pos={x=100,y=0,z=0},
+         --                data={w=100, h=100},
+         --                rotation=0,
+         --             }
+         --          }
+         --       }
+         --    }
+         -- },
 
          -- {
          --    type="mesh3d",
@@ -237,23 +260,23 @@ function love.load()
          --     {type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}}
          --  }
          -- },
-         -- {
-         --    type="polygon", pos={x=0, y=0, z=0}, scale={x=2,y=2},
-         --    data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
-         --    children={
-         --       --{type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
-         --       {type="polygon", pos={x=100, y=0, z=0},
-         --       data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
-         --       children={
-         --          --{type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
-         --          --{type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}},
-         --          {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
-         --          {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
-
-         --       }}
-
-         --    }
-         -- },
+         {
+            type="polygon", pos={x=0, y=0, z=0},
+            data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
+            children={
+               --{type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
+               {type="rope",
+               pos={x=100,y=100,z=0},
+               rotation=0,
+               data={
+                  join="miter",
+                  relative_rotation = true,
+                  rotations={0, 0, 0, 0, 0, 0,0,0,0},
+                  lengths={120,120,100,100,100,100,100,100 },
+                  thicknesses={20,50,60,70,70,70,70,60,20},
+               }}
+            },
+         },
          -- {
          -- {
          --    type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0},
@@ -273,17 +296,20 @@ function love.load()
       },
    }
    initWorld(world)
-   updateSceneGraph(true, world)
+   spent_time = 0
 
+   updateSceneGraph(true, world, 0)
    camera = Camera(0, 0)
    Gamestate.registerEvents()
    Gamestate.switch(StageMode)
+   --Gamestate.switch(InteractiveMovieMode)
 
    Signal.register(
       'switch-state',
       function(state, data)
          local State = nil
          if state == "stage" then
+            --State = InteractiveMovieMode
             State = StageMode
          elseif state == "drag-item" then
             State = DragMode
@@ -301,7 +327,8 @@ function love.load()
             State = RopeMode
          elseif state == "edit-rect" then
             State = RectMode
-
+         elseif state == "interactive-movie" then
+            State = InterActiveMovieMode
          end
          Gamestate.switch(State, data)
       end
@@ -355,8 +382,9 @@ end
 
 
 function love.update(dt)
+   spent_time = spent_time + dt
    if love.keyboard.isDown("escape") then love.event.quit() end
-   updateSceneGraph(false, world)
+   updateSceneGraph(false, world, dt)
 end
 
 function love.draw()

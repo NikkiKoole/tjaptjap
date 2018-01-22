@@ -2,31 +2,24 @@ local mode = {}
 local utils = require "utils"
 
 function mode:enter(from,data)
-
    self.child = data.child
    self.pointerID = (data.pointerID)
    self.start_time = love.timer.getTime()
 end
 
 function mode:pointermoved(x,y,dx,dy)
-
-   --local x3 =0
-   --local y3=0
    if self.child.world_trans then
-
       if self.child.parent then
          local theta = self.child.parent.world_pos.rot
          dx,dy = utils.rotatePoint(dx,dy,0,0,-theta)
          dx = (dx/camera.scale) / self.child.parent.world_pos.scaleX
          dy = (dy/camera.scale) / self.child.parent.world_pos.scaleY
-
       end
    end
 
-   self.child.pos.x =    self.child.pos.x + dx --(dx/camera.scale)--*self.child.world_pos.scaleX
-   self.child.pos.y =    self.child.pos.y + dy -- (dy/camera.scale)--*self.child.world_pos.scaleY
+   self.child.pos.x =    self.child.pos.x + dx
+   self.child.pos.y =    self.child.pos.y + dy
    self.child.dirty = true
-   --print(self.child.type, "dragging", self.child.pos.x, self.child.pos.y)
 end
 
 function mode:mousemoved(x,y,dx,dy,istouch)

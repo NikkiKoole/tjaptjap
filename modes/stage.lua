@@ -5,9 +5,11 @@ local mode = {}
 
 function mode:init()
    self.touches = {}
+
 end
 
 function mode:update(dt)
+
    function dragger(ui)
       local p = getWithID(Hammer.pointers.moved, ui.pointerID)
       local moved = Hammer.pointers.moved[p]
@@ -31,7 +33,17 @@ function mode:update(dt)
    end
 
 
-   Hammer:reset(10,love.graphics.getHeight()- 120)
+   Hammer:reset(10, 100)
+
+   local movie_mode = Hammer:labelbutton("movie mode", 130,40)
+   if movie_mode.released then
+      self.touches = {}
+      Signal.emit("switch-state", "interactive-movie", {pointerID=id})
+   end
+
+
+
+   Hammer:pos(10,love.graphics.getHeight()- 120)
    local add_shape = Hammer:labelbutton("draw shape", 130,40)
    if add_shape.released then
       self.touches = {}
@@ -126,7 +138,7 @@ function mode:update(dt)
       dragger(add_rect)
    end
    if add_rect.released then
-      local result = {type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}}
+      local result = {dirty=true, id="...", type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}}
       releaser(add_rect, result)
    end
 end

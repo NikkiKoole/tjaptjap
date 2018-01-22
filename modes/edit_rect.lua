@@ -1,16 +1,15 @@
 local mode = {}
 local a = require "vendor.affine"
-
 local utils = require "utils"
 
 function mode:enter(from,data)
+   data.dirty_types = {}
    self.child = data
    self.setPivot = false
 end
 
-
-
 function mode:update(dt)
+   self.child.dirty_types = {}
 
    Hammer:reset(10,200)
    local n = Hammer:labelbutton("next click = set pivot", 120,40)
@@ -23,8 +22,7 @@ function mode:update(dt)
    local child = self.child
    local wx,wy = self.child.world_trans(child.data.w/2,0)
 
-   --local rx1, ry1 = camera:cameraCoords(utils.rotatePoint(child.pos.x + child.data.w/2, child.pos.y, child.pos.x, child.pos.y, child.rotation))
-   --local rx1, ry1 = camera:cameraCoords(wx,wy)
+
    local p = child.pivot
    local rx2, ry2 = camera:cameraCoords( child.world_trans(p and p.x or 0, p and p.y or 0))
    local pivot = Hammer:rectangle( "pivot", 30, 30,{x=rx2-15, y=ry2-15, color=color})
@@ -53,16 +51,18 @@ function mode:update(dt)
          child.pos.y = child.pos.y + t2y
 
          child.dirty = true
+         table.insert(child.dirty_types, "pivot")
+         table.insert(child.dirty_types, "pos")
+
       end
    end
 
 
 
    local rx1, ry1 = camera:cameraCoords( child.world_trans(  (p and p.x or 0) + (child.data.w/2 ) ,  (p and p.y or 0))  )
-   --local rx1, ry1 = camera:cameraCoords(  child.world_trans( (child.data.w/2) , 0)  )
 
    local rotator = Hammer:rectangle( "rotator", 30, 30,{x=rx1-15, y=ry1-15, color=color})
-   if rotator.dragging and not pivot.dragging then
+   if rotator.dragging then
       local p = getWithID(Hammer.pointers.moved, rotator.pointerID)
       local moved = Hammer.pointers.moved[p]
 
@@ -77,6 +77,7 @@ function mode:update(dt)
 
 
 
+         table.insert(child.dirty_types, "rotation")
 
          self.child.dirty = true
       end
@@ -100,10 +101,11 @@ function mode:update(dt)
 
 
          -- to keep aspect ratio
-         --t2x,t2y = math.min(t2x,t2y),math.min(t2x,t2y)
+         t2x,t2y = math.min(t2x,t2y),math.min(t2x,t2y)
          --
          self.child.scale = {x=t2x, y=t2y}
 
+         table.insert(child.dirty_types, "scale")
 
          self.child.dirty = true
       end
