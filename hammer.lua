@@ -67,15 +67,15 @@ function hammer:reset(x,y)
 
    self.margin = 10
    self.rowHeight = 40
-
 end
+
 function hammer:pos(x,y)
    self.x = x
    self.originX = x
    self.y = y
    self.originY = y
-
 end
+
 function hammer:ret()
    self.x = self.originX
    self.y = self.y + self.rowHeight + self.margin
@@ -86,14 +86,9 @@ function hammer:circle(id, radius, opt_pos)
                     x=opt_pos.x or self.x,
                     y=opt_pos.y or self.y,
                     r=radius}
-
    table.insert(self.drawables, result)
-   --self.x = self.x + radius*2 + self.margin
    return result
-
 end
-
-
 
 function hammer:label(id, text, width, height, opt_pos)
    local result =  {type="label",text=text,id=id,
@@ -105,16 +100,17 @@ function hammer:label(id, text, width, height, opt_pos)
    return result
 end
 
-
 function hammer:handle_history(id, result)
    if (self.history) then
       local  hi = listGetPointerIndex(self.history, id)
       if hi > -1 then
-         if self.history[hi].startdrag or self.history[hi].dragging then
-            result.dragging = true
-            result.pointerID = self.history[hi].pointerID
-            result.dx = self.history[hi].dx
-            result.dy = self.history[hi].dy
+         if (self.dragging_pointer_ids[self.history[hi].pointerID] == nil) then
+            if self.history[hi].startdrag or self.history[hi].dragging then
+               result.dragging = true
+               result.pointerID = self.history[hi].pointerID
+               result.dx = self.history[hi].dx
+               result.dy = self.history[hi].dy
+            end
          end
       end
    end
@@ -212,7 +208,6 @@ function hammer:slider(id, width, height, props)
       end
    end
 
-
    table.insert(self.drawables, result)
    self.x = self.x + width + self.margin
    return result
@@ -231,6 +226,7 @@ function hammer:default_pressed(result, width, height)
 
          if not self.dragging_pointer_ids[pressed.id]  then
             self.dragging_pointer_ids[pressed.id] = true
+
             result.pressed = true
             result.dragging = true
             --result.startdrag = true
@@ -239,9 +235,7 @@ function hammer:default_pressed(result, width, height)
                result.startpress = true
             else
                result.startpress = false
-
             end
-
 
             if result.dx == 0 and result.dy == 0 then
                result.dx = pressed.x - (result.x + width/2)

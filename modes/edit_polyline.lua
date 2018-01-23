@@ -216,7 +216,6 @@ function mode:update(dt)
          local it = Hammer.drawables[i]
          if it.over or it.pressed or it.dragging then
             isDirty = true
-            print("hammer dirty")
          end
       end
 
@@ -224,7 +223,7 @@ function mode:update(dt)
       local hit = pointInPoly({x=wx,y=wy}, self.child.triangles)
       if hit then
          isDirty = true
-         print("point in poly dirty")
+         --print("point in poly dirty")
 
       end
 

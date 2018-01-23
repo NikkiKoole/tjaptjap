@@ -204,8 +204,8 @@ function triangulate(type, poly)
          end
       end
 
-   elseif type=="polyline" or type=="rope" then
-
+   elseif type=="polyline" or type=="rope" or type=="smartline" then
+      assert(poly.draw_mode)
       if (poly.draw_mode == "triangles") then
          for i=1, #poly.indices, 3 do
             local i1 = poly.indices[i]
@@ -238,8 +238,6 @@ function triangulate(type, poly)
          end
 
       end
-      --print("yabba", #result)
-
    else
       local polys = decompose_complex_poly(poly, {})
 

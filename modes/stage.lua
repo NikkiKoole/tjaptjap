@@ -165,8 +165,6 @@ function mode:pointerpressed(x, y, id)
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
       elseif o.type=="polyline" then
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
-         --print("polyline?", #o.triangles, hit)
-
       elseif o.triangles then
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
       else

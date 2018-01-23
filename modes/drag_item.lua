@@ -16,9 +16,9 @@ function mode:pointermoved(x,y,dx,dy)
          dy = (dy/camera.scale) / self.child.parent.world_pos.scaleY
       end
    end
-
    self.child.pos.x =    self.child.pos.x + dx
    self.child.pos.y =    self.child.pos.y + dy
+
    self.child.dirty = true
 end
 
@@ -49,6 +49,8 @@ function mode:pointerreleased()
          Signal.emit("switch-state", "edit-mesh3d", self.child)
       elseif (self.child.type == "simplerect") then
          Signal.emit("switch-state", "edit-rect", self.child)
+      elseif (self.child.type == "smartline") then
+         Signal.emit("switch-state", "edit-smartline", self.child)
       elseif (self.child.type == "star" or self.child.type == "rect" or self.child.type == "circle") then
          Signal.emit("switch-state", "edit-item", self.child)
       else

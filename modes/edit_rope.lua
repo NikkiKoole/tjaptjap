@@ -84,16 +84,16 @@ end
 
 
 function mode:update(dt)
-   local child = self.child
-   Hammer:reset(0,0)
-   local color={200,100,100}
 
+   local child      = self.child
+   local color      = {200,100,100}
    local rotation   = 0
    local cx, cy     = child.pos.x, child.pos.y
    local rx,ry      = camera:cameraCoords(cx, cy)
    local root       = Hammer:rectangle( "root", 30, 30,{x=rx-15, y=ry-15, color=color})
    local positions  = {{cx,cy}}
 
+   Hammer:reset(0,0)
 
    if root.dragging then
       local p = getWithID(Hammer.pointers.moved, root.pointerID)

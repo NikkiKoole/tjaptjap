@@ -2,7 +2,7 @@
 Signal = require 'vendor.signal'
 Gamestate = require "vendor.gamestate"
 Camera = require "vendor.camera"
-local inspect = require "vendor.inspect"
+inspect = require "vendor.inspect"
 
 InterActiveMovieMode = require "modes.interactive_movie"
 
@@ -13,13 +13,15 @@ DrawMode = require "modes.draw_item"
 ItemMode = require "modes.edit_item"
 PolygonMode = require "modes.edit_polygon"
 PolyLineMode = require "modes.edit_polyline"
+SmartLineMode = require "modes.edit_smartline"
+
 Mesh3dMode = require "modes.edit_mesh3d"
 RectMode = require "modes.edit_rect"
 
 RopeMode = require "modes.edit_rope"
 Hammer = require "hammer"
 
-local utils = require "utils"
+utils = require "utils"
 local shapes = require "shapes"
 poly = require 'poly'
 
@@ -62,10 +64,12 @@ function updateGraph(root, dt)
 
    if not root.world_pos then
       root.world_pos = {{x=0,y=0,z=0,rot=0,scaleX=1,scaleY=1}}
+
    end
 
    if root.parent then
       root.world_trans = root.parent.world_trans * root.local_trans
+
       root.inverse = a.inverse(root.world_trans)
 
       root.world_pos.rot = (root.rotation or 0) + root.parent.world_pos.rot
@@ -91,35 +95,33 @@ function updateGraph(root, dt)
 
    --if root.dirty then
    if root.type and root.dirty then
-      print(root.type.." ("..(root.id or "?")..") is dirty at :"..(spent_time+dt))
+      --print(root.type.." ("..(root.id or "?")..") is dirty at :"..(spent_time+dt))
       if root.dirty_types then
          for i=1, #root.dirty_types do
-            print(root.dirty_types[i])
+            --print(root.dirty_types[i])
          end
-
-         --print(#root.dirty_types)
       else
-         print("no root dirty_types")
       end
-
 
       --local shape = shapes.makeShape({type="simplerect",pos={x=0,y=0},data=root.data})
       local shape
 
       shape = shapes.makeShape({type=root.type, pos={x=0,y=0},data=root.data})
 
-     shape = shapes.scaleShape(shape, root.world_pos.scaleX, root.world_pos.scaleY)
+      shape = shapes.scaleShape(shape, root.world_pos.scaleX, root.world_pos.scaleY)
       if root.rotation or root.world_pos.rot then
          shape = shapes.rotateShape(0, 0, shape, root.world_pos.rot)
       end
-
+      --print(inspect(root.world_pos))
       local x,y = root.world_trans(0,0)
+      --print(x,y, root.pos.x, root.pos.y)
+
       shape = shapes.transformShape(x,y,shape,root)
 
       root.triangles = poly.triangulate(root.type, shape)
       root.dirty = false
 
-      -- to your children get updated too!
+      -- your children get updated too!
       if root.children then
          for i=1,#root.children do
             root.children[i].dirty = true
@@ -260,23 +262,50 @@ function love.load()
          --     {type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}}
          --  }
          -- },
+
+
          {
-            type="polygon", pos={x=0, y=0, z=0},
-            data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
-            children={
-               --{type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
-               {type="rope",
-               pos={x=100,y=100,z=0},
-               rotation=0,
-               data={
-                  join="miter",
-                  relative_rotation = true,
-                  rotations={0, 0, 0, 0, 0, 0,0,0,0},
-                  lengths={120,120,100,100,100,100,100,100 },
-                  thicknesses={20,50,60,70,70,70,70,60,20},
-               }}
-            },
+            type="smartline",
+            pos={x=0,y=0,z=0},
+            data={
+               join="miter",
+               use_relative_rotation = true,
+               coords={0,0,250,0,250,400,500,700},
+               world_rotations={},
+               relative_rotations={},
+               lengths={},
+               thicknesses={20,10,30,20,20, 10}
+            }
          },
+
+
+         -- {
+         --    type="polygon", pos={x=0, y=0, z=0},
+         --    data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
+         --    children={
+         --       --{type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
+         --       {type="rope",
+         --       pos={x=100,y=100,z=0},
+         --       rotation=0,
+         --       data={
+         --          join="miter",
+         --          relative_rotation = true,
+         --          rotations={0, 0, 0, 0, 0, 0,0,0,0},
+         --          lengths={120,120,100,100,100,100,100,100 },
+         --          thicknesses={20,50,60,70,70,70,70,60,20},
+         --       }},
+         --       {
+         --          type="polyline",
+         --          pos={x=0,y=0,z=0},
+         --          data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200}, join="miter", half_width=50, thicknesses={10,20,30,40,50}  }
+
+         --       },
+         --       {
+         --          type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}
+         --       },
+
+         --    },
+         -- },
          -- {
          -- {
          --    type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0},
@@ -327,6 +356,8 @@ function love.load()
             State = RopeMode
          elseif state == "edit-rect" then
             State = RectMode
+         elseif state == "edit-smartline" then
+            State = SmartLineMode
          elseif state == "interactive-movie" then
             State = InterActiveMovieMode
          end
@@ -362,6 +393,7 @@ end
 function drawSceneGraph(root)
    local triangle_count = 0
    --print(root.type)
+
    for i=1, #root.children do
       if root.children[i].children then
          triangle_count = triangle_count +  drawSceneGraph(root.children[i])

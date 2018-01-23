@@ -1,5 +1,4 @@
 local utils = require "utils"
-local a = require "vendor.affine"
 
 local shapes = require "shapes"
 local mode = {}
@@ -200,8 +199,8 @@ function mode:update()
          local moved = Hammer.pointers.moved[p]
          if moved then
             local wx,wy = camera:worldCoords(moved.x-button.dx, moved.y-button.dy)
-            local inverse = a.inverse(self.child.world_trans)
-            wx,wy = inverse(wx,wy)
+
+            wx,wy = self.child.inverse(wx,wy)
 
             if point.x and point.y then
                self.child.data.points[i].x = wx
