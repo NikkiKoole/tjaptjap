@@ -22,7 +22,7 @@ function calculateAllPropsFromCoords(coords)
       local d = utils.distance( thisX, thisY, nextX, nextY)
 
       table.insert(result.relative_rotations, angleToRelative(a)  )
-      table.insert(result.world_rotations, angleToWorld(a) - mode:getNestedRotation((i+1)/2) )
+      table.insert(result.world_rotations,  angleToWorld(a) + world_rotation)
       table.insert(result.lengths, d)
 
       world_rotation = world_rotation - angleToWorld(a)
@@ -58,12 +58,10 @@ function calculateCoordsFromRotationsAndLengths(relative, data)
       end
    else
       for i=1,  #data.world_rotations do
-
          cx, cy = utils.moveAtAngle(cx, cy, data.world_rotations[i]  +  rotation , data.lengths[i])
          table.insert(result, round(cx))
          table.insert(result, round(cy))
          rotation = data.world_rotations[i] + rotation
-
       end
    end
 
@@ -75,6 +73,11 @@ end
 function mode:enter(from, data)
    self.child = data
    self.rot = 0
+
+   local props = calculateAllPropsFromCoords(self.child.data.coords)
+   self.child.data.relative_rotations = props.relative_rotations
+   self.child.data.world_rotations = props.world_rotations
+   self.child.data.lengths = props.lengths
 end
 
 function mode:getNestedRotation(index)
@@ -90,13 +93,13 @@ end
 
 
 function mode:update(dt)
+
+
    local child = self.child
    Hammer:reset(0,0)
 
 
-   -- now i want to drag a node and move the rest with it
-
-   local recipe = 'world' --'relative'
+   local recipe = 'world' --'relative' ''
 
 
    for i=1, #child.data.coords, 2 do
@@ -117,6 +120,11 @@ function mode:update(dt)
             if recipe == 'coords' then
                child.data.coords[i  ] = wx
                child.data.coords[i+1] = wy
+               local props = calculateAllPropsFromCoords(child.data.coords)
+               child.data.relative_rotations = props.relative_rotations
+               child.data.world_rotations = props.world_rotations
+               child.data.lengths = props.lengths
+
             elseif recipe == 'relative' then
                if i > 1 then
                   local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
@@ -132,12 +140,10 @@ function mode:update(dt)
                if i > 1 then
                   local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
                   local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
-                  --local startAngle = mode:getNestedRotation(i-1)
-                  local startAngle = mode:getNestedRotation(((i+1)/2)- 2)
-
+                  local startAngle = mode:getNestedRotation(((i+1)/2)-2)
 
                   child.data.world_rotations[-1 + (i+1)/2] = angleToWorld(ap) - startAngle
-                  child.data.lengths[-1 + (i+1)/2] = dp
+                  --child.data.lengths[-1 + (i+1)/2] = dp
 
                   local new_coords = calculateCoordsFromRotationsAndLengths(false, child.data)
                   child.data.coords = new_coords
@@ -151,16 +157,7 @@ function mode:update(dt)
       end
    end
 
-   local props = calculateAllPropsFromCoords(child.data.coords)
-   child.data.relative_rotations = props.relative_rotations
-   child.data.world_rotations = props.world_rotations
-   child.data.lengths = props.lengths
 
-
-   local new_coords = calculateCoordsFromRotationsAndLengths(false, child.data)
-   print(inspect(new_coords))
-   print(inspect(child.data.coords))
-   child.data.coords = new_coords
 end
 
 
