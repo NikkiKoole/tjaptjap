@@ -58,10 +58,12 @@ function calculateCoordsFromRotationsAndLengths(relative, data)
       end
    else
       for i=1,  #data.world_rotations do
-         cx, cy = utils.moveAtAngle(cx, cy, data.world_rotations[i] , data.lengths[i])
+
+         cx, cy = utils.moveAtAngle(cx, cy, data.world_rotations[i]  +  rotation , data.lengths[i])
          table.insert(result, round(cx))
          table.insert(result, round(cy))
          rotation = data.world_rotations[i] + rotation
+
       end
    end
 
@@ -94,7 +96,7 @@ function mode:update(dt)
 
    -- now i want to drag a node and move the rest with it
 
-   local recipe = 'relative' --'relative'
+   local recipe = 'world' --'relative'
 
 
    for i=1, #child.data.coords, 2 do
@@ -131,7 +133,7 @@ function mode:update(dt)
                   local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
                   local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
                   --local startAngle = mode:getNestedRotation(i-1)
-                  local startAngle = mode:getNestedRotation(((i+1)/2)-1)
+                  local startAngle = mode:getNestedRotation(((i+1)/2)- 2)
 
 
                   child.data.world_rotations[-1 + (i+1)/2] = angleToWorld(ap) - startAngle
@@ -155,7 +157,7 @@ function mode:update(dt)
    child.data.lengths = props.lengths
 
 
-   local new_coords = calculateCoordsFromRotationsAndLengths(true, child.data)
+   local new_coords = calculateCoordsFromRotationsAndLengths(false, child.data)
    print(inspect(new_coords))
    print(inspect(child.data.coords))
    child.data.coords = new_coords
