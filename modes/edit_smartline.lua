@@ -95,6 +95,8 @@ function mode:enter(from, data)
    self.child = data
    self.rot = 0
 
+   --  , rope
+
    -- TODO remove this
    local props = calculateAllPropsFromCoords(self.child.data.coords)
    self.child.data.relative_rotations = props.relative_rotations
@@ -123,7 +125,6 @@ function mode:update(dt)
 
    local child = self.child
    Hammer:reset(10,200)
-
 
    if Hammer:labelbutton(self.lineOptions[self.lineOptionIndex], 100, 40).released then
       self.lineOptionIndex = self.lineOptionIndex + 1
@@ -170,6 +171,11 @@ function mode:update(dt)
 
                   local new_coords = calculateCoordsFromRotationsAndLengths(true, child.data)
                   child.data.coords = new_coords
+
+                  local props = calculateAllPropsFromCoords(child.data.coords)
+                  child.data.relative_rotations = props.relative_rotations
+                  child.data.world_rotations = props.world_rotations
+
                end
             elseif recipe == "world" then
                if i > 1 then
@@ -183,6 +189,11 @@ function mode:update(dt)
 
                   local new_coords = calculateCoordsFromRotationsAndLengths(false, child.data)
                   child.data.coords = new_coords
+
+
+                  local props = calculateAllPropsFromCoords(child.data.coords)
+                  child.data.relative_rotations = props.relative_rotations
+                  child.data.world_rotations = props.world_rotations
                end
 
 
@@ -200,21 +211,36 @@ function mode:update(dt)
    -- child.data.world_rotations = props.world_rotations
    -- child.data.lengths = props.lengths
 
-   print("relative rotations")
-   print(inspect(child.data.relative_rotations))
-   print("world rotations")
-   print(inspect(child.data.world_rotations))
+   -- print("relative rotations")
+   -- print(inspect(child.data.relative_rotations))
+   -- print("world rotations")
+   -- print(inspect(child.data.world_rotations))
 
-   local relative = calculateCoordsFromRotationsAndLengths(true, child.data)
-   local world    = calculateCoordsFromRotationsAndLengths(false, child.data)
-   print("the next three coords must be identical")
-   print(inspect(child.data.coords))
-   print(inspect(relative))
-   print(inspect(world))
-
-
+   -- local relative = calculateCoordsFromRotationsAndLengths(true, child.data)
+   -- local world    = calculateCoordsFromRotationsAndLengths(false, child.data)
+   -- print("the next three coords must be identical")
+   -- print(inspect(child.data.coords))
+   -- print(inspect(relative))
+   -- print(inspect(world))
 
 
+
+   if #Hammer.pointers.pressed == 1 then
+      local isDirty = false
+      isDirty = Hammer:isDirty()
+
+      local wx, wy = camera:worldCoords(Hammer.pointers.pressed[1].x, Hammer.pointers.pressed[1].y)
+      local hit = pointInPoly({x=wx,y=wy}, self.child.triangles)
+      if hit then
+         isDirty = true
+         --print("point in poly dirty")
+
+      end
+
+      if not isDirty then
+         Signal.emit("switch-state", "stage")
+      end
+   end
 
 
 

@@ -212,12 +212,7 @@ function mode:update(dt)
 
    if #Hammer.pointers.pressed == 1 then
       local isDirty = false
-      for i=1, #Hammer.drawables do
-         local it = Hammer.drawables[i]
-         if it.over or it.pressed or it.dragging then
-            isDirty = true
-         end
-      end
+      isDirty = Hammer:isDirty()
 
       local wx, wy = camera:worldCoords(Hammer.pointers.pressed[1].x, Hammer.pointers.pressed[1].y)
       local hit = pointInPoly({x=wx,y=wy}, self.child.triangles)

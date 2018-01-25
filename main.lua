@@ -201,36 +201,36 @@ function love.load()
          --    data={w=100, h=100},
          --    world_pos={x=0,y=0,z=0,rot=0},
          -- },
-         -- {
-         --    type="simplerect",
-         --    id="opa",
-         --    pivot={x=-150,y=-150},
-         --    pos={x=0,y=0,z=0},
-         --    scale={x=2, y=2},
-         --    rotation=0,
-         --    data={w=300, h=300},
-         --    children={
-         --       {
-         --          type="simplerect",
-         --          id="papa",
-         --          pos={x=150,y=0,z=0},
-         --          scale={x=1.5, y=1.5},
-         --          data={w=200, h=200},
-         --          rotation=math.pi/13 ,
+         {
+            type="simplerect",
+            id="opa",
+            pivot={x=-150,y=-150},
+            pos={x=0,y=0,z=0},
+            scale={x=2, y=2},
+            rotation=0,
+            data={w=300, h=300},
+            children={
+               {
+                  type="simplerect",
+                  id="papa",
+                  pos={x=150,y=0,z=0},
+                  scale={x=1.5, y=1.5},
+                  data={w=200, h=200},
+                  rotation=math.pi/13 ,
 
-         --          children={
-         --             {
-         --                type="simplerect",
-         --                id="jongen",
-         --                scale={x=1.5, y=1.5},
-         --                pos={x=100,y=0,z=0},
-         --                data={w=100, h=100},
-         --                rotation=0,
-         --             }
-         --          }
-         --       }
-         --    }
-         -- },
+                  children={
+                     {
+                        type="simplerect",
+                        id="jongen",
+                        scale={x=1.5, y=1.5},
+                        pos={x=100,y=0,z=0},
+                        data={w=100, h=100},
+                        rotation=0,
+                     }
+                  }
+               }
+            }
+         },
 
          -- {
          --    type="mesh3d",
