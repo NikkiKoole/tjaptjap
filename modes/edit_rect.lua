@@ -24,8 +24,8 @@ function mode:update(dt)
 
 
    local p = child.pivot
-   local rx2, ry2 = camera:cameraCoords( child.world_trans(p and p.x or 0, p and p.y or 0))
-   local pivot = Hammer:rectangle( "pivot", 30, 30,{x=rx2-15, y=ry2-15, color=color})
+   local pivot_x, pivot_y = camera:cameraCoords( child.world_trans(p and p.x or 0, p and p.y or 0))
+   local pivot = Hammer:rectangle( "pivot", 30, 30,{x=pivot_x-15, y=pivot_y-15, color=color})
    if pivot.dragging then
       local p = getWithID(Hammer.pointers.moved, pivot.pointerID)
       local moved = Hammer.pointers.moved[p]
@@ -67,7 +67,7 @@ function mode:update(dt)
       local moved = Hammer.pointers.moved[p]
 
       if moved then
-         self.child.rotation = math.atan2((moved.y-rotator.dy) - ry2, (moved.x-rotator.dx) - rx2)
+         self.child.rotation = math.atan2((moved.y-rotator.dy) - pivot_y, (moved.x-rotator.dx) - pivot_x)
 
          if self.child.parent then
             if self.child.parent.world_pos.rot then

@@ -60,7 +60,7 @@ function mode:update(dt)
       local result = {
          type="polygon",
          pos={x=0, y=0, z=0},
-         data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }
+         data={ steps=3,  points={{x=0,y=-100}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }
       }
       releaser(add_polygon, result)
    end

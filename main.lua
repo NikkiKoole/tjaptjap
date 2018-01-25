@@ -25,6 +25,7 @@ utils = require "utils"
 local shapes = require "shapes"
 poly = require 'poly'
 
+
 local pointers = require "pointer"
 
 local a = require "vendor.affine"
@@ -481,4 +482,34 @@ function setPivot(me)
 
    me.setPivot=false
 
+end
+
+function makePivotBehaviour(pivot, child)
+   if pivot.dragging then
+      local p = getWithID(Hammer.pointers.moved, pivot.pointerID)
+      local moved = Hammer.pointers.moved[p]
+
+      if moved then
+         local wx,wy = camera:worldCoords(moved.x-pivot.dx, moved.y-pivot.dy)
+         wx,wy = child.inverse(wx,wy)
+         if not child.pivot then
+            child.pivot = {x=0,y=0}
+         end
+
+         local dx = wx - child.pivot.x
+         local dy = wy - child.pivot.y
+
+         child.pivot.x = wx
+         child.pivot.y = wy
+
+         local sx = child.scale and child.scale.x or 1
+         local sy = child.scale and child.scale.y or 1
+         local t2x, t2y = utils.rotatePoint(dx*sx, dy*sy, 0, 0, child.rotation)
+
+         child.pos.x = child.pos.x + t2x
+         child.pos.y = child.pos.y + t2y
+
+         child.dirty = true
+      end
+   end
 end

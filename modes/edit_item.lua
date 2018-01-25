@@ -51,26 +51,7 @@ function mode:update(dt)
          local p = child.pivot
          local pivot_x, pivot_y = camera:cameraCoords(child.world_trans(p and p.x or 0, p and p.y or 0))
          local pivot = Hammer:rectangle( "pivot", 30, 30,{x=pivot_x-15, y=pivot_y-15, color=color})
-         if pivot.dragging then
-            local p = getWithID(Hammer.pointers.moved, pivot.pointerID)
-            local moved = Hammer.pointers.moved[p]
-            if moved then
-               local wx,wy = camera:worldCoords(moved.x-pivot.dx, moved.y-pivot.dy)
-               wx,wy = child.inverse(wx,wy)
-               if not child.pivot then
-                  child.pivot = {x=0,y=0}
-               end
-
-               local dx = wx - child.pivot.x
-               local dy = wy - child.pivot.y
-               child.pivot.x = wx
-               child.pivot.y = wy
-               child.pos.x = child.pos.x + dx
-               child.pos.y = child.pos.y + dy
-               child.dirty = true
-            end
-         end
-
+         makePivotBehaviour(pivot, child)
 
 
 
@@ -84,7 +65,7 @@ function mode:update(dt)
 
          local rotator = Hammer:rectangle( "rotator", 30, 30,{x=rx1-15, y=ry1-15, color=color})
 
-         if rotator.dragging  then
+         if rotator.dragging and not pivot.dragging then
             local p = getWithID(Hammer.pointers.moved, rotator.pointerID)
             local moved = Hammer.pointers.moved[p]
 
@@ -94,6 +75,7 @@ function mode:update(dt)
                if self.child.parent then
                   if self.child.parent.world_pos.rot then
                      self.child.rotation = self.child.rotation - self.child.parent.world_pos.rot
+
                   end
                end
 
@@ -105,11 +87,21 @@ function mode:update(dt)
 
 
       if child.type == "circle" then
-         local rx,ry      = camera:cameraCoords(child.pos.x + child.data.radius/1.4,
-                                                child.pos.y + child.data.radius/1.4)
+         local rx,ry      = camera:cameraCoords(child.world_trans(child.data.radius/1.4,
+                                                                  child.data.radius/1.4))
          local color = {200,100,100}
 
          Hammer:reset(10,300)
+
+
+         local p = child.pivot
+         local pivot_x, pivot_y = camera:cameraCoords(child.world_trans(p and p.x or 0, p and p.y or 0))
+         local pivot = Hammer:rectangle( "pivot", 30, 30,{x=pivot_x-15, y=pivot_y-15, color=color})
+         makePivotBehaviour(pivot, child)
+
+
+
+
 
          local radius = Hammer:rectangle( "circle_radius_handle", 30, 30,{x=rx-15, y=ry-15, color=color})
          if radius.dragging then

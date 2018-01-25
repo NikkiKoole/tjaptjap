@@ -3,6 +3,10 @@ local utils = require "utils"
 local shapes = require "shapes"
 local mode = {}
 
+
+
+
+
 function getWithID(list, id)
    if (list) then
       for i=#list,1 ,-1 do
@@ -126,10 +130,6 @@ function mode:update()
 
 
    Hammer:reset(10,200)
-   local n = Hammer:labelbutton("next click = set pivot", 120,40)
-   if n.released then
-      self.setPivot = true
-   end
 
 
    Hammer:pos(0,0)
@@ -141,6 +141,12 @@ function mode:update()
       child.world_trans(p and p.x or 0, p and p.y or 0)
    )
    local pivot = Hammer:rectangle( "pivot", 30, 30,{x=rx2-15, y=ry2-15, color=color})
+   makePivotBehaviour(pivot, child)
+
+
+
+
+
 
    local rx1, ry1 = camera:cameraCoords(
       child.world_trans(  (p and p.x or 0) + (bbmaxx-bbminx)/2 ,  (p and p.y or 0))
@@ -312,32 +318,6 @@ function mode:update()
       local wx, wy = camera:worldCoords(Hammer.pointers.pressed[1].x, Hammer.pointers.pressed[1].y)
 
       local isDirty = Hammer:isDirty()
-
-      if self.setPivot  and not isDirty then
-         setPivot(self)
-         -- local pressed = Hammer.pointers.pressed[1]
-         -- local wxr,wyr = camera:worldCoords(pressed.x, pressed.y)
-         -- local tx,ty = child.world_trans(0,0)
-         -- local diffx = (wxr - tx)/child.world_pos.scaleX
-         -- local diffy = (wyr - ty)/child.world_pos.scaleY
-         -- local t2x, t2y = utils.rotatePoint(diffx, diffy, 0, 0, -child.world_pos.rot)
-         -- if not self.child.pivot then
-         --    self.child.pivot = {x=0,y=0}
-         -- end
-
-         -- local pivotdx = t2x - (self.child.pivot.x)
-         -- local pivotdy = t2y - (self.child.pivot.y)
-         -- pivotdx,pivotdy = utils.rotatePoint(pivotdx, pivotdy, 0, 0, child.world_pos.rot)
-         -- self.child.pos.x = self.child.pos.x + pivotdx
-         -- self.child.pos.y = self.child.pos.y + pivotdy
-
-         -- self.child.pivot.x = t2x
-         -- self.child.pivot.y = t2y
-
-         -- self.setPivot=false
-         isDirty = true
-      end
-
 
       if not isDirty then
       -- if hit test children (if any) try and drag them

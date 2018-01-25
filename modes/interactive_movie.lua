@@ -28,6 +28,12 @@ function mode:update(dt)
       Signal.emit("switch-state", "stage", {pointerID=id})
    end
 
+   Hammer:pos(10,10)
+   Hammer:labelbutton("00:00:00", 130,40)
+
+
+
+
 
 end
 
