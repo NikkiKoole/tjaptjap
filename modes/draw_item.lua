@@ -50,7 +50,7 @@ function mode:update(dt)
    if self.use_thickness_func>0 then
       thick_label = "use thickness func"..self.use_thickness_func
    end
-   if Hammer:labelbutton(thick_label, 250,40).released then
+   if Hammer:labelbutton(thick_label, 250,40).pressed then
       self.use_thickness_func = self.use_thickness_func+1
       if self.use_thickness_func > 2 then
          self.use_thickness_func = 0

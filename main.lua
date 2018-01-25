@@ -103,33 +103,27 @@ function updateGraph(root, dt)
       else
       end
 
-      --local shape = shapes.makeShape({type="simplerect",pos={x=0,y=0},data=root.data})
-      local shape
 
-      shape = shapes.makeShape({type=root.type, pos={x=0,y=0},data=root.data})
-
+      local shape = shapes.makeShape({type=root.type, pos={x=0,y=0},data=root.data})
       shape = shapes.scaleShape(shape, root.world_pos.scaleX, root.world_pos.scaleY)
+
       if root.rotation or root.world_pos.rot then
          shape = shapes.rotateShape(0, 0, shape, root.world_pos.rot)
       end
-      --print(inspect(root.world_pos))
+
       local x,y = root.world_trans(0,0)
-      --print(x,y, root.pos.x, root.pos.y)
 
       shape = shapes.transformShape(x,y,shape,root)
 
       root.triangles = poly.triangulate(root.type, shape)
       root.dirty = false
 
-      -- your children get updated too!
       if root.children then
          for i=1,#root.children do
             root.children[i].dirty = true
          end
       end
-
    end
-
 
    if root.children then
       for i=1, #root.children do
@@ -366,18 +360,53 @@ function love.load()
    )
 end
 
+
+
+
+function serializeRecursive(root)
+   local blacklist = {"dirty", "local_trans", "world_trans", "world_pos", "parent", "inverse", "triangles", "children"}
+
+
+   local result = {}
+   for k,_ in pairs(root) do
+      local isBlacklisted = false
+
+      for bi=1, #blacklist do
+         if blacklist[bi] == k then
+            isBlacklisted = true
+         end
+      end
+      if not isBlacklisted then
+         result[k] = (_)
+      end
+   end
+
+   if root.children then
+      result.children = {}
+      for i=1, #root.children do
+         result.children[i] = serializeRecursive(root.children[i])
+      end
+   end
+
+   return result;
+
+end
+
 function love.keypressed(key)
    if key == "s" then
-      --serializedString = bitser.dumps(world)
-      --love.filesystem.write("filename.bin", serializedString)
-      local serialized = inspect(world)
-      love.filesystem.write("filename.txt", serialized)
+
+      local serialized = serializeRecursive(world)
+      love.filesystem.write("filename.txt", inspect(serialized))
    end
    if key == "o" then
       --love.system.openURL("file://"..love.filesystem.getSaveDirectory())
 
       local data = love.filesystem.newFileData("filename.txt")
       world = loadstring("return "..data:getString())()
+
+      initWorld(world)
+      updateSceneGraph(true, world, 0)
+      camera = Camera(0, 0)
    end
    	--suit.keypressed(key)
 
@@ -406,7 +435,7 @@ function drawSceneGraph(root)
             triangle_count = triangle_count + 1
          end
       else
-         print("child at index "..i.." has no triangles.", root.children[i].type)
+         --print("child at index "..i.." has no triangles.", root.children[i].type)
       end
    end
    return triangle_count
@@ -425,8 +454,8 @@ function love.draw()
    camera:detach()
 
    love.graphics.setColor(255,255,255)
-   love.graphics.print("camera " .. math.floor(camera.x) .. ", " .. math.floor(camera.y) .. "," .. tonumber(string.format("%.3f", camera.scale)).." pointers : ["..(#pointers.moved)..","..(#pointers.pressed)..","..(#pointers.released).."]")
-   love.graphics.print("#tris "..triangle_count, 10, 30)
+   --love.graphics.print("camera " .. math.floor(camera.x) .. ", " .. math.floor(camera.y) .. "," .. tonumber(string.format("%.3f", camera.scale)).." pointers : ["..(#pointers.moved)..","..(#pointers.pressed)..","..(#pointers.released).."]")
+   love.graphics.print("#tris "..triangle_count,  SCREEN_WIDTH - 100, 10)
    Hammer:draw()
 end
 

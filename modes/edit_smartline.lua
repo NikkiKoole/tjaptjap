@@ -67,21 +67,21 @@ function calculateCoordsFromRotationsAndLengths(relative, data)
    local cx = data.coords[1]
    local cy = data.coords[2]
 
-   table.insert(result, round(cx))
-   table.insert(result, round(cy))
+   table.insert(result, (cx))
+   table.insert(result, (cy))
 
    if relative then
       for i=1,  #data.relative_rotations do
          cx, cy = utils.moveAtAngle(cx, cy, data.relative_rotations[i] , data.lengths[i])
-         table.insert(result, round(cx))
-         table.insert(result, round(cy))
+         table.insert(result, (cx))
+         table.insert(result, (cy))
       end
    else
       for i=1,  #data.world_rotations do
          rotation = data.world_rotations[i] + rotation
          cx, cy = utils.moveAtAngle(cx, cy, rotation , data.lengths[i])
-         table.insert(result, round(cx))
-         table.insert(result, round(cy))
+         table.insert(result, (cx))
+         table.insert(result, (cy))
 
       end
    end

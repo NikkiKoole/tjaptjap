@@ -21,11 +21,14 @@ end
 
 function mode:update(dt)
    Hammer:reset(10, 100)
+
    local stage_mode = Hammer:labelbutton("stage mode", 130,40)
    if stage_mode.released then
       self.touches = {}
       Signal.emit("switch-state", "stage", {pointerID=id})
    end
+
+
 end
 
 function testHit(x,y, obj)
