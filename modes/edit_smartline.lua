@@ -10,22 +10,42 @@ function angleToWorld(a)
 end
 
 
+
 function calculateAllPropsFromCoords(coords)
    local result = {relative_rotations={}, world_rotations={}, lengths={}}
    local world_rotation = 0
+   local counter = 1
    for i=1, #coords-2, 2 do
       local thisX = coords[i+0]
       local thisY = coords[i+1]
       local nextX = coords[i+2]
       local nextY =  coords[i+3]
       local a = utils.angle(  nextX, nextY,thisX, thisY)
+      --local a2 = utils.angle(  thisX, thisY,nextX, nextY)
+      --print(a,a2)
+
       local d = utils.distance( thisX, thisY, nextX, nextY)
 
+      local wa = angleToWorld(a)
+      --print(i, wa, world_rotation )
+
       table.insert(result.relative_rotations, angleToRelative(a)  )
-      table.insert(result.world_rotations,  angleToWorld(a) + world_rotation)
+      --table.insert(result.relative_rotations, wa )
+
+
+      if counter > 1 then
+         local diff = (result.relative_rotations[counter]-  result.relative_rotations[counter-1] )
+         table.insert(result.world_rotations, diff  )
+      else
+         table.insert(result.world_rotations, result.relative_rotations[1])
+
+      end
+      world_rotation = wa + world_rotation
+
       table.insert(result.lengths, d)
 
-      world_rotation = world_rotation - angleToWorld(a)
+
+      counter = counter + 1
    end
 
 
@@ -58,10 +78,11 @@ function calculateCoordsFromRotationsAndLengths(relative, data)
       end
    else
       for i=1,  #data.world_rotations do
-         cx, cy = utils.moveAtAngle(cx, cy, data.world_rotations[i]  +  rotation , data.lengths[i])
+         rotation = data.world_rotations[i] + rotation
+         cx, cy = utils.moveAtAngle(cx, cy, rotation , data.lengths[i])
          table.insert(result, round(cx))
          table.insert(result, round(cy))
-         rotation = data.world_rotations[i] + rotation
+
       end
    end
 
@@ -74,10 +95,15 @@ function mode:enter(from, data)
    self.child = data
    self.rot = 0
 
+   -- TODO remove this
    local props = calculateAllPropsFromCoords(self.child.data.coords)
    self.child.data.relative_rotations = props.relative_rotations
-   self.child.data.world_rotations = props.world_rotations
-   self.child.data.lengths = props.lengths
+   self.child.data.world_rotations    = props.world_rotations
+   self.child.data.lengths            = props.lengths
+
+
+   self.lineOptions = {"coords", "relative", "world"}
+   self.lineOptionIndex = 1
 end
 
 function mode:getNestedRotation(index)
@@ -96,10 +122,19 @@ function mode:update(dt)
 
 
    local child = self.child
-   Hammer:reset(0,0)
+   Hammer:reset(10,200)
 
 
-   local recipe = 'world' --'relative' ''
+   if Hammer:labelbutton(self.lineOptions[self.lineOptionIndex], 100, 40).released then
+      self.lineOptionIndex = self.lineOptionIndex + 1
+      if self.lineOptionIndex > #self.lineOptions then
+         self.lineOptionIndex = 1
+      end
+   end
+
+
+   Hammer:pos(0,0)
+   local recipe = self.lineOptions[self.lineOptionIndex]
 
 
    for i=1, #child.data.coords, 2 do
@@ -142,8 +177,9 @@ function mode:update(dt)
                   local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
                   local startAngle = mode:getNestedRotation(((i+1)/2)-2)
 
-                  child.data.world_rotations[-1 + (i+1)/2] = angleToWorld(ap) - startAngle
                   --child.data.lengths[-1 + (i+1)/2] = dp
+                  child.data.world_rotations[-1+(i+1)/2] = angleToWorld(ap) - startAngle
+
 
                   local new_coords = calculateCoordsFromRotationsAndLengths(false, child.data)
                   child.data.coords = new_coords
@@ -156,6 +192,30 @@ function mode:update(dt)
          end
       end
    end
+
+
+--DEBUGGING PART
+   -- local props = calculateAllPropsFromCoords(child.data.coords)
+   -- child.data.relative_rotations = props.relative_rotations
+   -- child.data.world_rotations = props.world_rotations
+   -- child.data.lengths = props.lengths
+
+   print("relative rotations")
+   print(inspect(child.data.relative_rotations))
+   print("world rotations")
+   print(inspect(child.data.world_rotations))
+
+   local relative = calculateCoordsFromRotationsAndLengths(true, child.data)
+   local world    = calculateCoordsFromRotationsAndLengths(false, child.data)
+   print("the next three coords must be identical")
+   print(inspect(child.data.coords))
+   print(inspect(relative))
+   print(inspect(world))
+
+
+
+
+
 
 
 end

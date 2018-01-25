@@ -270,11 +270,11 @@ function love.load()
             data={
                join="miter",
                use_relative_rotation = true,
-               coords={0,0,250,0,250,400,500,700},
+               coords={0,0,150,100,250,400,500,700,600,800,750,900,810,1000},
                world_rotations={},
                relative_rotations={},
                lengths={},
-               thicknesses={20,10,30,20,20, 10}
+               thicknesses={20,10,30,20,20, 10,20,20,20}
             }
          },
 
