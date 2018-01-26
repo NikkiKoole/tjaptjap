@@ -98,10 +98,24 @@ function updateGraph(root, dt)
    if root.type and root.dirty then
       --print(root.type.." ("..(root.id or "?")..") is dirty at :"..(spent_time+dt))
       if root.dirty_types then
-         for i=1, #root.dirty_types do
-            --print(root.dirty_types[i])
+         if not root.animation then
+            root.animation = {}
          end
+
+
+         for i=1, #root.dirty_types do
+            --root.animation[#root.animation] = root.dirty_types[i]
+            table.insert(root.animation, root.dirty_types[i])--root.animation[root.dirty_types[i].time] = root.dirty_types[i]
+            --print(root.id or "?" ,root.dirty_types[i].type, root.dirty_types[i].time)
+            if (root.dirty_types[i].type == "pos") then
+               print(root.dirty_types[i].x,root.dirty_types[i].y)
+            end
+
+         end
+
+         --print(inspect(root.animation))
       else
+
       end
 
 
@@ -261,6 +275,7 @@ function love.load()
 
          {
             type="smartline",
+            id="TheSmartLine",
             pos={x=0,y=0,z=0},
             data={
                join="miter",
@@ -400,7 +415,7 @@ function love.keypressed(key)
       love.filesystem.write("filename.txt", inspect(serialized))
    end
    if key == "o" then
-      --love.system.openURL("file://"..love.filesystem.getSaveDirectory())
+      love.system.openURL("file://"..love.filesystem.getSaveDirectory())
 
       local data = love.filesystem.newFileData("filename.txt")
       world = loadstring("return "..data:getString())()
@@ -455,7 +470,7 @@ function love.draw()
    camera:detach()
 
    love.graphics.setColor(255,255,255)
-   --love.graphics.print("camera " .. math.floor(camera.x) .. ", " .. math.floor(camera.y) .. "," .. tonumber(string.format("%.3f", camera.scale)).." pointers : ["..(#pointers.moved)..","..(#pointers.pressed)..","..(#pointers.released).."]")
+   love.graphics.print("camera " .. math.floor(camera.x) .. ", " .. math.floor(camera.y) .. "," .. tonumber(string.format("%.3f", camera.scale)).." pointers : ["..(#pointers.moved)..","..(#pointers.pressed)..","..(#pointers.released).."]")
    love.graphics.print("#tris "..triangle_count,  SCREEN_WIDTH - 100, 10)
    Hammer:draw()
 end

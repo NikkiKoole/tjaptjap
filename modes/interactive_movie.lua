@@ -15,11 +15,78 @@
 
 local mode = {}
 
-function mode:enter()
+function compare(a,b)
+  return a.time < b.time
+end
+
+function replayAnimation(time)
+
+
+
+
+
+   for i,o in pairs(world.children) do
+      --print(o.id)
+      --print()
+      if o.animation then
+         --if time==0 then
+         table.sort(o.animation, compare)
+         --end
+
+         --print("whahaa!")
+
+         for i=1, #o.animation-1 do
+            local value = o.animation[i]
+            local nex = o.animation[i+1]
+            print(value.time, nex.time, time)
+            if value.time >=time and nex.time <= time then
+               print(inspect(value))
+            end
+
+
+         end
+
+         --for key,value in pairs(o.animation) do
+         --   if value.time <= time and
+            --print(key, inspect(value))
+         --end
+
+
+         --for frame,_  in pairs(o.animation) do
+         --   print(inspect(frame))
+         --end
+
+
+      end
+   end
+end
+
+
+
+function mode:enter(from, data)
+
    self.selectedItems = {}
+   self.time = 0
+   self.isRecording = false
+   self.isReplaying = false
+end
+
+
+function secondsToClock(seconds)
+  local seconds = tonumber(seconds)
+  if seconds <= 0 then
+     return (math.floor(math.abs(seconds))+1)
+  else
+    hours = string.format("%02.f", math.floor(seconds/3600));
+    mins  = string.format("%02.f", math.floor(seconds/60 - (hours*60)));
+    secs  = string.format("%02.f", math.floor(seconds - hours*3600 - mins *60));
+    ms    = string.format("%03.f", math.floor((seconds - math.floor(seconds)) * 1000));
+    return hours..":"..mins..":"..secs..":"..ms
+  end
 end
 
 function mode:update(dt)
+   self.dirty_types = {}
    Hammer:reset(10, 100)
 
    local stage_mode = Hammer:labelbutton("stage mode", 130,40)
@@ -29,12 +96,41 @@ function mode:update(dt)
    end
 
    Hammer:pos(10,10)
-   Hammer:labelbutton("00:00:00", 130,40)
+
+   local timeStr
+   if self.isRecording then timeStr = secondsToClock(self.time)  else  timeStr = "---"  end
+   Hammer:labelbutton(timeStr, 130,40)
+
+   local recButtonStr
+   if self.isRecording==true then recButtonStr = "STOP" else recButtonStr = "REC"  end
 
 
+   if Hammer:labelbutton(recButtonStr,130,40 ).released then
+      if self.isRecording==true then
+         self.isRecording = false
+      else
+         self.isRecording = true
+         self.time = -3
+      end
+   end
 
 
+   local replayStr
+   if self.isReplaying==true then replayStr = "..." else replayStr = "Replay" end
+   if Hammer:labelbutton(replayStr, 130, 40).released then
+      self.time = 0
+      self.isReplaying = true
+   end
 
+   if self.isReplaying==true then
+      print("Helo!", self.time)
+      replayAnimation(self.time)
+   end
+
+
+   if self.isRecording then
+      self.time = self.time + dt
+   end
 end
 
 function testHit(x,y, obj)
@@ -71,6 +167,9 @@ function mode:pointermoved(id, x, y, dx, dy)
       item.pos.x = item.pos.x + dx/camera.scale
       item.pos.y = item.pos.y + dy/camera.scale
       item.dirty = true
+      if self.isRecording and self.time >= 0 then
+         item.dirty_types = {{type="pos", time=self.time, x=item.pos.x, y=item.pos.y}}
+      end
    end
 
 end
