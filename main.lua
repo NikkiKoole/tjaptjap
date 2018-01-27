@@ -108,7 +108,7 @@ function updateGraph(root, dt)
             table.insert(root.animation, root.dirty_types[i])--root.animation[root.dirty_types[i].time] = root.dirty_types[i]
             --print(root.id or "?" ,root.dirty_types[i].type, root.dirty_types[i].time)
             if (root.dirty_types[i].type == "pos") then
-               print(root.dirty_types[i].x,root.dirty_types[i].y)
+               --print(root.dirty_types[i].x,root.dirty_types[i].y)
             end
 
          end
@@ -437,7 +437,6 @@ end
 
 function drawSceneGraph(root)
    local triangle_count = 0
-   --print(root.type)
 
    for i=1, #root.children do
       if root.children[i].children then
