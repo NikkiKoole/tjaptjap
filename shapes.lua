@@ -242,22 +242,29 @@ function makeSmartLine(x,y, data)
          --print( thisX, thisY, nextX, nextY, "=>", a, a+world_rotation, d )
          world_rotation = world_rotation + a
       end
-
-
-
-
-      local newcoords = {}
-      for i=1, #data.coords, 2 do
-         newcoords[i] = data.coords[i] + x
-         newcoords[i+1] = data.coords[i+1] + y
-      end
-
-      local vertices, indices, draw_mode = polyline(data.join, newcoords, data.thicknesses, 1, false)
-      result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
    else
-      assert(false)
+      if data.use_relative_rotation and #data.relative_rotations > 0 then
+         data.coords = utils.calculateCoordsFromRotationsAndLengths(true, data, x, y)
+      elseif not data.use_relative_rotation and #data.world_rotations > 0 then
+         data.coords = utils.calculateCoordsFromRotationsAndLengths(false, data, x, y)
+      end
       -- hope we have some other data then
    end
+
+   local props = calculateAllPropsFromCoords(data.coords)
+   data.relative_rotations = props.relative_rotations
+   data.world_rotations    = props.world_rotations
+
+
+   local newcoords = {}
+   for i=1, #data.coords, 2 do
+      newcoords[i] = data.coords[i] + x
+      newcoords[i+1] = data.coords[i+1] + y
+   end
+
+   local vertices, indices, draw_mode = polyline(data.join, newcoords, data.thicknesses, 1, false)
+   result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
+
    return result
 end
 

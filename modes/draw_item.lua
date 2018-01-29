@@ -18,30 +18,18 @@ function mode:enter(from,data)
    self.needed_distance = {min=1, max=100, value=20}
 
    self.use_thickness_func = 0
-
+   self.start = false
 end
 
 
 function mode:update(dt)
 
-   Hammer:pos(10,300)
-   Hammer:ret()
-   if Hammer:labelbutton("delete", 100, 40).startpress then
-      for i=#world.children,1,-1 do
-         if world.children[i]==self.child then
-            table.remove(world.children, i)
-         end
-      end
-      Signal.emit("switch-state", "stage")
-
-   end
+   Hammer:reset(10,300)
    Hammer:ret()
 
-   if Hammer:labelbutton("ESCAPE", 100, 40).startpress then
-      Signal.emit("switch-state", "stage")
-      return
+   if Hammer:labelbutton("START", 100, 40).released then
+      self.start = true
    end
-
    Hammer:ret()
    Hammer:label("nd1","req. dist."..math.floor(self.needed_distance.value), 200,40)
    Hammer:ret()
@@ -51,7 +39,7 @@ function mode:update(dt)
    if self.use_thickness_func>0 then
       thick_label = "use thickness func"..self.use_thickness_func
    end
-   if Hammer:labelbutton(thick_label, 250,40).pressed then
+   if Hammer:labelbutton(thick_label, 250,40).released then
 
       self.use_thickness_func = self.use_thickness_func+1
       if self.use_thickness_func > 2 then
@@ -64,7 +52,16 @@ function mode:update(dt)
    if self.use_thickness_func==0 then
       Hammer:slider("next_thickness", 200,40, self.next_thick_value)
    end
+   Hammer:ret()
 
+
+
+   if Hammer:labelbutton("ESCAPE", 100, 40).startpress then
+      Signal.emit("switch-state", "stage")
+      return
+   end
+
+   if not self.start then return end
    local result
 
 

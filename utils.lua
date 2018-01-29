@@ -258,6 +258,34 @@ function moveAtAngle(x,y, angle, distance)
    return x + px, y + py
 end
 
+function calculateCoordsFromRotationsAndLengths(relative, data, x, y)
+   local result = {}
+   local rotation = 0
+   local cx = data.coords[1] or x
+   local cy = data.coords[2] or y
+
+   table.insert(result, (cx))
+   table.insert(result, (cy))
+
+   if relative then
+      for i=1,  #data.relative_rotations do
+         cx, cy = moveAtAngle(cx, cy, data.relative_rotations[i] , data.lengths[i])
+         table.insert(result, (cx))
+         table.insert(result, (cy))
+      end
+   else
+      for i=1,  #data.world_rotations do
+         rotation = data.world_rotations[i] + rotation
+         cx, cy = moveAtAngle(cx, cy, rotation , data.lengths[i])
+         table.insert(result, (cx))
+         table.insert(result, (cy))
+      end
+   end
+
+   return result
+end
+
+
 return {
    HSL=HSL,
    utf8=utf8,
@@ -276,5 +304,7 @@ return {
    angleAtDistance,
    clamp=clamp,
    distancePointSegment=distancePointSegment,
-   moveAtAngle=moveAtAngle
+   moveAtAngle=moveAtAngle,
+   calculateCoordsFromRotationsAndLengths=calculateCoordsFromRotationsAndLengths
+
 }

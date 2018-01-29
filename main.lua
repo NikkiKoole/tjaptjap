@@ -210,36 +210,36 @@ function love.load()
          --    data={w=100, h=100},
          --    world_pos={x=0,y=0,z=0,rot=0},
          -- },
-         {
-            type="simplerect",
-            id="opa",
-            pivot={x=-150,y=-150},
-            pos={x=0,y=0,z=0},
-            scale={x=2, y=2},
-            rotation=0,
-            data={w=300, h=300},
-            children={
-               {
-                  type="simplerect",
-                  id="papa",
-                  pos={x=150,y=0,z=0},
-                  scale={x=1.5, y=1.5},
-                  data={w=200, h=200},
-                  rotation=math.pi/13 ,
+         -- {
+         --    type="simplerect",
+         --    id="opa",
+         --    pivot={x=-150,y=-150},
+         --    pos={x=0,y=0,z=0},
+         --    scale={x=2, y=2},
+         --    rotation=0,
+         --    data={w=300, h=300},
+         --    children={
+         --       {
+         --          type="simplerect",
+         --          id="papa",
+         --          pos={x=150,y=0,z=0},
+         --          scale={x=1.5, y=1.5},
+         --          data={w=200, h=200},
+         --          rotation=math.pi/13 ,
 
-                  children={
-                     {
-                        type="simplerect",
-                        id="jongen",
-                        scale={x=1.5, y=1.5},
-                        pos={x=100,y=0,z=0},
-                        data={w=100, h=100},
-                        rotation=0,
-                     }
-                  }
-               }
-            }
-         },
+         --          children={
+         --             {
+         --                type="simplerect",
+         --                id="jongen",
+         --                scale={x=1.5, y=1.5},
+         --                pos={x=100,y=0,z=0},
+         --                data={w=100, h=100},
+         --                rotation=0,
+         --             }
+         --          }
+         --       }
+         --    }
+         -- },
 
          -- {
          --    type="mesh3d",
@@ -279,6 +279,7 @@ function love.load()
             pos={x=0,y=0,z=0},
             data={
                join="miter",
+               type="coords",
                use_relative_rotation = true,
                coords={0,0,150,100,250,400,500,700,600,800,750,900,810,1000},
                world_rotations={},
@@ -287,6 +288,38 @@ function love.load()
                thicknesses={20,10,30,20,20, 10,20,20,20}
             }
          },
+         {
+            type="smartline",
+            id="TheSmartLine2",
+            pos={x=0,y=0,z=0},
+            data={
+               join="miter",
+               type="relative",
+               use_relative_rotation = true,
+               coords={},
+               world_rotations={},
+               relative_rotations={0, 0, 0, 0, 0, 0,0,0},
+               lengths={120,120,100,100,100,100,100,100 },
+               thicknesses={20,10,30,20,20, 10,20,20,20}
+            }
+         },
+         {
+            type="smartline",
+            id="TheSmartLine3",
+            pos={x=200,y=0,z=0},
+            data={
+               join="miter",
+               type="world",
+
+               use_relative_rotation = false,
+               coords={},
+               world_rotations={-math.pi/2,-0.8,-0.8,0.8},
+               lengths={120,120,100,50},
+               thicknesses={40,40,30,20,20},
+               relative_rotations={},
+            }
+         },
+
 
 
          -- {

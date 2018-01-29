@@ -33,7 +33,7 @@ function mode:update(dt)
    end
 
 
-   Hammer:reset(10, 100)
+   Hammer:reset(10, 30)
 
    local movie_mode = Hammer:labelbutton("movie mode", 130,40)
    if movie_mode.released then
@@ -43,15 +43,10 @@ function mode:update(dt)
 
 
 
-   Hammer:pos(10,love.graphics.getHeight()- 120)
-   local add_shape = Hammer:labelbutton("draw shape", 130,40)
-   if add_shape.released then
-      self.touches = {}
-      Signal.emit("switch-state", "draw-item", {pointerID=id})
-   end
+
 
    Hammer:pos(10,love.graphics.getHeight()- 60)
-   local add_polygon = Hammer:labelbutton("add polygon", 130,40)
+   local add_polygon = Hammer:labelbutton("polygon", 80,40)
 
    if add_polygon.dragging then
       dragger(add_polygon)
@@ -64,7 +59,7 @@ function mode:update(dt)
       }
       releaser(add_polygon, result)
    end
-   local add_polyline =    Hammer:labelbutton( "add polyline", 130, 40)
+   local add_polyline =    Hammer:labelbutton( "polyline", 80, 40)
    if add_polyline.dragging then
       dragger(add_polyline)
    end
@@ -117,7 +112,7 @@ function mode:update(dt)
    end
 
 
-   local add_circle =Hammer:labelbutton( "add circle", 130, 40)
+   local add_circle =Hammer:labelbutton( "circle", 80, 40)
    if add_circle.dragging then
       dragger(add_circle)
    end
@@ -125,7 +120,7 @@ function mode:update(dt)
       local result = {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=8}}
       releaser(add_circle, result)
    end
-   local add_star = Hammer:labelbutton( "add star", 130, 40)
+   local add_star = Hammer:labelbutton( "star", 80, 40)
    if add_star.dragging then
       dragger(add_star)
    end
@@ -133,7 +128,7 @@ function mode:update(dt)
       local result ={type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}}
       releaser(add_star, result)
    end
-   local add_rect =Hammer:labelbutton( "add rect", 130, 40)
+   local add_rect =Hammer:labelbutton( "rect", 80, 40)
    if add_rect.dragging then
       dragger(add_rect)
    end
@@ -141,6 +136,12 @@ function mode:update(dt)
       local result = {dirty=true, id="...", type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}}
       releaser(add_rect, result)
    end
+   local add_shape = Hammer:labelbutton("draw shape", 130,40)
+   if add_shape.released then
+      self.touches = {}
+      Signal.emit("switch-state", "draw-item", {pointerID=id})
+   end
+
 end
 
 

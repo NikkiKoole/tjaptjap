@@ -21,13 +21,8 @@ function calculateAllPropsFromCoords(coords)
       local nextX = coords[i+2]
       local nextY =  coords[i+3]
       local a = utils.angle(  nextX, nextY,thisX, thisY)
-      --local a2 = utils.angle(  thisX, thisY,nextX, nextY)
-      --print(a,a2)
-
       local d = utils.distance( thisX, thisY, nextX, nextY)
-
       local wa = angleToWorld(a)
-      --print(i, wa, world_rotation )
 
       table.insert(result.relative_rotations, angleToRelative(a)  )
       --table.insert(result.relative_rotations, wa )
@@ -41,16 +36,11 @@ function calculateAllPropsFromCoords(coords)
 
       end
       world_rotation = wa + world_rotation
-
       table.insert(result.lengths, d)
-
-
       counter = counter + 1
    end
 
-
    return result
-
 end
 
 function round(value)
@@ -61,33 +51,6 @@ function round(value)
    end
 end
 
-function calculateCoordsFromRotationsAndLengths(relative, data)
-   local result = {}
-   local rotation = 0
-   local cx = data.coords[1]
-   local cy = data.coords[2]
-
-   table.insert(result, (cx))
-   table.insert(result, (cy))
-
-   if relative then
-      for i=1,  #data.relative_rotations do
-         cx, cy = utils.moveAtAngle(cx, cy, data.relative_rotations[i] , data.lengths[i])
-         table.insert(result, (cx))
-         table.insert(result, (cy))
-      end
-   else
-      for i=1,  #data.world_rotations do
-         rotation = data.world_rotations[i] + rotation
-         cx, cy = utils.moveAtAngle(cx, cy, rotation , data.lengths[i])
-         table.insert(result, (cx))
-         table.insert(result, (cy))
-
-      end
-   end
-
-   return result
-end
 
 
 
@@ -95,17 +58,13 @@ function mode:enter(from, data)
    self.child = data
    self.rot = 0
 
-   --  , rope
-
-   -- TODO remove this
-   local props = calculateAllPropsFromCoords(self.child.data.coords)
-   self.child.data.relative_rotations = props.relative_rotations
-   self.child.data.world_rotations    = props.world_rotations
-   self.child.data.lengths            = props.lengths
-
-
    self.lineOptions = {"coords", "relative", "world"}
    self.lineOptionIndex = 1
+   for i=1, #self.lineOptions do
+      if self.lineOptions[i]==data.data.type then
+         self.lineOptionIndex = i
+      end
+   end
 end
 
 function mode:getNestedRotation(index)
@@ -118,11 +77,7 @@ function mode:getNestedRotation(index)
    return result
 end
 
-
-
 function mode:update(dt)
-
-
    local child = self.child
    Hammer:reset(10,200)
 
@@ -131,7 +86,18 @@ function mode:update(dt)
       if self.lineOptionIndex > #self.lineOptions then
          self.lineOptionIndex = 1
       end
+      self.child.data.type = self.lineOptions[self.lineOptionIndex]
    end
+
+   local add_vertex = Hammer:labelbutton("add vertex", 100,60)
+   if add_vertex.dragging then
+      local p = getWithID(Hammer.pointers.moved, add_vertex.pointerID)
+      local moved = Hammer.pointers.moved[p]
+      if moved then
+         Hammer:circle("cursor1", 30, {x=moved.x, y=moved.y})
+      end
+   end
+
 
 
    Hammer:pos(0,0)
@@ -167,9 +133,9 @@ function mode:update(dt)
                   local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
 
                   child.data.relative_rotations[-1 + (i+1)/2] =  angleToRelative(ap)
-                  child.data.lengths[-1 + (i+1)/2] = dp
+                  --child.data.lengths[-1 + (i+1)/2] = dp
 
-                  local new_coords = calculateCoordsFromRotationsAndLengths(true, child.data)
+                  local new_coords = utils.calculateCoordsFromRotationsAndLengths(true, child.data)
                   child.data.coords = new_coords
 
                   local props = calculateAllPropsFromCoords(child.data.coords)
@@ -187,7 +153,7 @@ function mode:update(dt)
                   child.data.world_rotations[-1+(i+1)/2] = angleToWorld(ap) - startAngle
 
 
-                  local new_coords = calculateCoordsFromRotationsAndLengths(false, child.data)
+                  local new_coords = utils.calculateCoordsFromRotationsAndLengths(false, child.data)
                   child.data.coords = new_coords
 
 
@@ -226,28 +192,16 @@ function mode:update(dt)
 
 
    if #Hammer.pointers.pressed == 1 then
-      local isDirty = false
-      isDirty = Hammer:isDirty()
-
+      local isDirty = Hammer:isDirty()
       local wx, wy = camera:worldCoords(Hammer.pointers.pressed[1].x, Hammer.pointers.pressed[1].y)
-      local hit = pointInPoly({x=wx,y=wy}, self.child.triangles)
-      if hit then
+      if pointInPoly({x=wx,y=wy}, self.child.triangles) then
          isDirty = true
-         --print("point in poly dirty")
-
       end
-
       if not isDirty then
          Signal.emit("switch-state", "stage")
       end
    end
-
-
-
 end
-
-
-
 
 
 
