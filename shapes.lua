@@ -269,43 +269,6 @@ function makeSmartLine(x,y, data)
 end
 
 
-function makePolyLine(x,y, join, coords, thicknesses)
-   local newcoords = {}
-
-   for i=1, #coords, 2 do
-      newcoords[i] = coords[i] + x
-      newcoords[i+1] = coords[i+1] + y
-   end
-
-   local vertices, indices, draw_mode = polyline(join, newcoords, thicknesses, 1, false)
-   local result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
-   return result
-end
-
-
-function makeRope(x, y, join_type, lengths, rotations, thicknesses, relative_rotation)
-   local result = {}
-   local cx, cy = x, y
-   local coords = {cx, cy}
-   local rotation = 0
-   for i=1, #lengths do
-      if relative_rotation then
-         rotation = rotation + rotations[i]
-      else
-         rotation = rotations[i]
-      end
-
-      cx, cy = utils.moveAtAngle(cx, cy, rotation or -math.pi/2, lengths[i])
-      table.insert(coords, cx)
-      table.insert(coords, cy)
-   end
-   --print("coords: ", #coords/2)
-   --"miter", "none", "bevel"
-   local vertices, indices, draw_mode = polyline(join_type, coords, thicknesses, 1, false)
-   result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
-
-   return result
-end
 
 
 function makeMesh3d(x,y,data)
@@ -344,15 +307,8 @@ function makeShape(meta)
       result = makeStarPolygon(meta.pos.x, meta.pos.y, meta.data.sides, meta.data.r1, meta.data.r2, meta.data.a1, meta.data.a2)
    elseif meta.type == "polygon" then
       result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points, meta.data.steps)
-   elseif meta.type == "rope" then
-      result = makeRope(meta.pos.x, meta.pos.y, meta.data.join or 'none', meta.data.lengths, meta.data.rotations or {}, meta.data.thicknesses or {}, meta.data.relative_rotation)
-      --print("making rope", meta.pos.x, meta.pos.y)
    elseif meta.type == "smartline" then
       result = makeSmartLine(meta.pos.x, meta.pos.y, meta.data)
-   elseif meta.type == "polyline" then
-      result = makePolyLine(meta.pos.x, meta.pos.y,
-                            meta.data.join or 'none', meta.data.coords,
-                            meta.data.thicknesses or meta.data.half_width)
    elseif meta.type == "mesh3d" then
       result = makeMesh3d(meta.pos.x, meta.pos.y, meta.data)
    else

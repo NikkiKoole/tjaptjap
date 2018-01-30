@@ -65,16 +65,48 @@ function mode:update(dt)
    local result
 
 
+
+
    if #(Hammer.pointers.pressed) > 0 then
 
       if self.firstTime == true then
-         world.children[#world.children+1] = {type="polyline", world_pos={x=0,y=0,z=0}, pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200},join="miter", half_width=10}}
+
+         world.children[#world.children+1] =  {
+            type="smartline",
+            pos={x=0,y=0,z=0},
+            data={
+               join="miter",
+               type="coords",
+               lengths={},
+               thicknesses={},
+               world_rotations={},
+               relative_rotations={},
+               use_relative_rotation = true,
+               coords={}}
+         }
+
          self.thicknesses = {}
          self.firstTime = false
       end
       if self.shapeHasEnded == true then
          self.shapeHasEnded = false
-         world.children[#world.children+1] = {type="polyline", world_pos={x=0,y=0,z=0}, pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200},join="miter", half_width=10}}
+
+         world.children[#world.children+1] =  {
+            type="smartline",
+            pos={x=0,y=0,z=0},
+            data={
+               join="miter",
+               type="coords",
+               lengths={},
+               thicknesses={},
+               world_rotations={},
+               relative_rotations={},
+               use_relative_rotation = true,
+               coords={}}
+         }
+
+
+
          self.thicknesses = {}
          self.coords = {}
 

@@ -59,57 +59,7 @@ function mode:update(dt)
       }
       releaser(add_polygon, result)
    end
-   local add_polyline =    Hammer:labelbutton( "polyline", 80, 40)
-   if add_polyline.dragging then
-      dragger(add_polyline)
-   end
-   if add_polyline.released then
-      local result = {
-         type="polyline",
-         pos={x=0,y=0,z=0},
-         data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200}, join="miter", half_width=50, thicknesses={10,20,30,40,50}  }
-      }
 
-      releaser(add_polyline, result)
-   end
-
-   local add_rope = Hammer:labelbutton( "add rope", 130, 40)
-   if add_rope.dragging then
-      dragger(add_rope)
-   end
-   if add_rope.released then
-      local result = {
-            type="rope",
-            pos={x=100,y=100,z=0},
-            data={
-               join="miter",
-               relative_rotation = true,
-               rotations={0, 0, 0, 0, 0, 0,0,0,0},
-               lengths={120,120,100,100,100,100,100,100 },
-               thicknesses={20,50,60,70,70,70,70,60,20},
-            }
-         }
-      releaser(add_rope, result)
-   end
-   local add_rope2 = Hammer:labelbutton( "add rope2", 130, 40)
-   if add_rope2.dragging then
-      dragger(add_rope2)
-   end
-   if add_rope2.released then
-      local result = {
-         type="rope",
-         pos={x=-100,y=100,z=0},
-         data={
-            join="miter",
-            relative_rotation = false,
-            rotations={-math.pi/2,-0.8,-0.8,0.8},
-            lengths={120,120,100,50},
-            thicknesses={40,40,30,20,20},
-         }
-      }
-
-      releaser(add_rope2, result)
-   end
 
 
    local add_circle =Hammer:labelbutton( "circle", 80, 40)

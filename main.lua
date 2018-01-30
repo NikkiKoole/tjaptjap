@@ -12,13 +12,13 @@ DrawMode = require "modes.draw_item"
 
 ItemMode = require "modes.edit_item"
 PolygonMode = require "modes.edit_polygon"
-PolyLineMode = require "modes.edit_polyline"
+--PolyLineMode = require "modes.edit_polyline"
 SmartLineMode = require "modes.edit_smartline"
 
 Mesh3dMode = require "modes.edit_mesh3d"
 RectMode = require "modes.edit_rect"
 
-RopeMode = require "modes.edit_rope"
+--RopeMode = require "modes.edit_rope"
 Hammer = require "hammer"
 
 utils = require "utils"
@@ -338,12 +338,6 @@ function love.load()
          --          thicknesses={20,50,60,70,70,70,70,60,20},
          --       }},
          --       {
-         --          type="polyline",
-         --          pos={x=0,y=0,z=0},
-         --          data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200}, join="miter", half_width=50, thicknesses={10,20,30,40,50}  }
-
-         --       },
-         --       {
          --          type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}
          --       },
 
@@ -391,12 +385,8 @@ function love.load()
             State = ItemMode
          elseif state == "edit-polygon" then
             State = PolygonMode
-         elseif state == "edit-polyline" then
-            State = PolyLineMode
          elseif state == "edit-mesh3d" then
             State = Mesh3dMode
-         elseif state == "edit-rope" then
-            State = RopeMode
          elseif state == "edit-rect" then
             State = RectMode
          elseif state == "edit-smartline" then
