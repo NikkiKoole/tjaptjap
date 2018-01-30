@@ -64,8 +64,9 @@ function mode:removeLastTouched()
    if (self.lastTouchedIndex) then
       table.remove(self.child.data.points, self.lastTouchedIndex)
       assert(self.child)
-      local shape = shapes.makeShape(self.child)
-      self.child.triangles = poly.triangulate(self.child.type, shape)
+      self.child.dirty = true
+      --local shape = shapes.makeShape(self.child)
+      --self.child.triangles = poly.triangulate(self.child.type, shape)
    end
 end
 
@@ -102,6 +103,30 @@ function mode:getClosestNodes(x, y)
    return si,ni
 end
 
+
+   function dragger(ui)
+      local p = getWithID(Hammer.pointers.moved, ui.pointerID)
+      local moved = Hammer.pointers.moved[p]
+      if moved then
+         Hammer:circle("cursor1", 30, {x=moved.x, y=moved.y})
+      end
+   end
+
+   function mode:releaser(ui, result)
+      local p = getWithID(Hammer.pointers.released, ui.pointerID)
+      local released = Hammer.pointers.released[p]
+      local wx,wy = camera:worldCoords(released.x, released.y)
+
+      result.pos.x = wx
+      result.pos.y = wy
+      result.world_pos={x=0,y=0,z=0}
+
+      local shape = shapes.makeShape(result)
+      result.triangles = poly.triangulate(result.type, shape)
+      if not self.child.children then self.child.children = {} end
+      table.insert(self.child.children, result)
+
+   end
 
 
 
@@ -213,6 +238,22 @@ function mode:update()
       if not self.child.children then self.child.children = {} end
       Signal.emit("switch-state", "draw-item", {pointerID=id, parent=self.child})
    end
+
+   local add_polygon = Hammer:labelbutton("add polygon", 80,40)
+
+   if add_polygon.dragging then
+      dragger(add_polygon)
+   end
+   if add_polygon.released then
+      local result = {
+         type="polygon",
+         pos={x=0, y=0, z=0},
+         data={ steps=3,  points={{x=0,y=-100}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }
+      }
+      self:releaser(add_polygon, result)
+   end
+
+
 
    Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
    Hammer:ret()
