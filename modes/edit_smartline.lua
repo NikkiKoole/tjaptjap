@@ -248,6 +248,7 @@ function mode:update(dt)
             local wx,wy = camera:worldCoords(moved.x-button.dx, moved.y-button.dy)
             wx,wy = child.inverse(wx,wy)
 
+
             if recipe == 'coords' then
                child.data.coords[i  ] = wx
                child.data.coords[i+1] = wy
@@ -262,7 +263,12 @@ function mode:update(dt)
                   local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
 
                   child.data.relative_rotations[-1 + (i+1)/2] =  angleToRelative(ap)
+
+                  local p2 = calculateAllPropsFromCoords(child.data.coords)
+                  child.data.lengths = p2.lengths
+
                   --child.data.lengths[-1 + (i+1)/2] = dp
+
 
                   local new_coords = utils.calculateCoordsFromRotationsAndLengths(true, child.data)
                   child.data.coords = new_coords
@@ -280,6 +286,10 @@ function mode:update(dt)
 
                   --child.data.lengths[-1 + (i+1)/2] = dp
                   child.data.world_rotations[-1+(i+1)/2] = angleToWorld(ap) - startAngle
+
+
+                  local p2 = calculateAllPropsFromCoords(child.data.coords)
+                  child.data.lengths = p2.lengths
 
 
                   local new_coords = utils.calculateCoordsFromRotationsAndLengths(false, child.data)

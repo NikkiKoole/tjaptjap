@@ -107,7 +107,7 @@ function mode:update(dt)
    local add_shape = Hammer:labelbutton("draw shape", 130,40)
    if add_shape.released then
       self.touches = {}
-      Signal.emit("switch-state", "draw-item", {pointerID=id})
+      Signal.emit("switch-state", "draw-item", {pointerID=id, parent=world})
    end
 
 end

@@ -207,6 +207,13 @@ function mode:update()
 
 
    Hammer:pos(10,300)
+   local add_shape = Hammer:labelbutton("draw shape", 130,40)
+   if add_shape.released then
+      self.touches = {}
+      if not self.child.children then self.child.children = {} end
+      Signal.emit("switch-state", "draw-item", {pointerID=id, parent=self.child})
+   end
+
    Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
    Hammer:ret()
    local add_vertex = Hammer:labelbutton("add vertex", 120,40)

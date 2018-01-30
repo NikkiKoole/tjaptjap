@@ -19,6 +19,7 @@ function mode:enter(from,data)
 
    self.use_thickness_func = 0
    self.start = false
+   self.parent = data.parent
 end
 
 
@@ -71,7 +72,7 @@ function mode:update(dt)
 
       if self.firstTime == true then
 
-         world.children[#world.children+1] =  {
+         self.parent.children[#self.parent.children+1] =  {
             type="smartline",
             pos={x=0,y=0,z=0},
             data={
@@ -91,7 +92,11 @@ function mode:update(dt)
       if self.shapeHasEnded == true then
          self.shapeHasEnded = false
 
-         world.children[#world.children+1] =  {
+         if not (#self.coords >= 4) then
+            print(inspect(self.coords))
+         else
+
+         self.parent.children[#self.parent.children+1] =  {
             type="smartline",
             pos={x=0,y=0,z=0},
             data={
@@ -109,14 +114,20 @@ function mode:update(dt)
 
          self.thicknesses = {}
          self.coords = {}
-
+         end
       end
 
 
 
       if Hammer.pointers.pressed[1] and Hammer.pointers.moved[1] then
          if Hammer.pointers.pressed[1].id == Hammer.pointers.moved[1].id then
-               local wx,wy = camera:worldCoords(Hammer.pointers.moved[1].x, Hammer.pointers.moved[1].y)
+            local wx,wy = camera:worldCoords(Hammer.pointers.moved[1].x, Hammer.pointers.moved[1].y)
+
+
+            if self.parent.inverse then
+               wx,wy = self.parent.inverse(wx,wy)
+            end
+
                if #self.coords >= 4 then
                   local distance = (utils.distance(wx,wy,self.coords[#self.coords-1],self.coords[#self.coords]))
                   if distance > self.needed_distance.value then
@@ -159,9 +170,9 @@ function mode:update(dt)
 
 
    if #self.coords >= 4 then
-      world.children[#world.children].data.coords = self.coords
-      world.children[#world.children].data.thicknesses = self.thicknesses
-      world.children[#world.children].dirty = true
+      self.parent.children[#self.parent.children].data.coords = self.coords
+      self.parent.children[#self.parent.children].data.thicknesses = self.thicknesses
+      self.parent.children[#self.parent.children].dirty = true
    end
 
 end

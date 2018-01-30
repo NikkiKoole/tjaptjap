@@ -247,7 +247,10 @@ function makeSmartLine(x,y, data)
          data.coords = utils.calculateCoordsFromRotationsAndLengths(true, data, x, y)
       elseif not data.use_relative_rotation and #data.world_rotations > 0 then
          data.coords = utils.calculateCoordsFromRotationsAndLengths(false, data, x, y)
+      else
+         print("Did i get here? How do i fix this")
       end
+
       -- hope we have some other data then
    end
 
@@ -262,8 +265,9 @@ function makeSmartLine(x,y, data)
       newcoords[i+1] = data.coords[i+1] + y
    end
 
+   assert(#newcoords >= 4)
    local vertices, indices, draw_mode = polyline(data.join, newcoords, data.thicknesses, 1, false)
-   result = {vertices=vertices, indices=indices, draw_mode=draw_mode}
+   result = {vertices=vertices, indices=indices, draw_mode=draw_mode,type="smartline"}
 
    return result
 end
@@ -290,7 +294,7 @@ function makeMesh3d(x,y,data)
    end
 
    result.cells = data.cells
-
+   result.type="mesh3d"
    return result
 end
 
@@ -340,8 +344,16 @@ function transformShape(tx,ty, shape, meta)
    local result = {}
 
    if meta.type == "smartline" then
-      result = makeSmartLine(tx,ty, meta.data)
-      return result
+
+      for i=1, #shape.vertices do
+         local it = shape.vertices[i]
+         shape.vertices[i][1] = it[1] + tx
+         shape.vertices[i][2] = it[2] + ty
+      end
+      return shape
+
+      --result = makeSmartLine(tx,ty, meta.data)
+      --return result
    elseif meta.type == "mesh3d" then
       result = makeMesh3d(tx,ty, meta.data)
       return result
@@ -357,10 +369,28 @@ end
 
 
 function rotateShape(cx, cy, shape, theta)
+   --print(inspect(shape))
    local result = {}
+   local x,y,nx,ny
    local costheta = math.cos(theta)
    local sintheta = math.sin(theta)
-   local x,y,nx,ny
+
+   if shape.type == "smartline" then
+      for i=1, #shape.vertices do
+         local it = shape.vertices[i]
+         x = it[1]
+         y = it[2]
+         nx = costheta * (x-cx) - sintheta * (y-cy) + cx
+         ny = sintheta * (x-cx) + costheta * (y-cy) + cy
+         shape.vertices[i][1] = nx
+         shape.vertices[i][2] = ny
+      end
+      return shape
+   else
+
+
+
+
 
    for i=1, #shape, 2 do
       x = shape[i +0]
@@ -370,13 +400,14 @@ function rotateShape(cx, cy, shape, theta)
       result[i+0] = nx
       result[i+1] = ny
    end
+   end
 
    return result
 end
 
 function scaleShape(shape, xfactor, yfactor)
    assert(shape)
-   if shape.type == "rope" then
+   if shape.type == "smartline" then
       print("Uh oh scaling a rope cant go right")
    end
 

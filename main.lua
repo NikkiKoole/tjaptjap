@@ -101,35 +101,23 @@ function updateGraph(root, dt)
          if not root.animation then
             root.animation = {}
          end
-
-
-         for i=1, #root.dirty_types do
-            --root.animation[#root.animation] = root.dirty_types[i]
-            table.insert(root.animation, root.dirty_types[i])--root.animation[root.dirty_types[i].time] = root.dirty_types[i]
-            --print(root.id or "?" ,root.dirty_types[i].type, root.dirty_types[i].time)
-            if (root.dirty_types[i].type == "pos") then
-               --print(root.dirty_types[i].x,root.dirty_types[i].y)
-            end
-
-         end
-
-         --print(inspect(root.animation))
       else
-
       end
 
 
       local shape = shapes.makeShape({type=root.type, pos={x=0,y=0},data=root.data})
-      shape = shapes.scaleShape(shape, root.world_pos.scaleX, root.world_pos.scaleY)
+
+      if root.type == "smartline" then
+      else
+         shape = shapes.scaleShape(shape, root.world_pos.scaleX, root.world_pos.scaleY)
+      end
 
       if root.rotation or root.world_pos.rot then
          shape = shapes.rotateShape(0, 0, shape, root.world_pos.rot)
       end
 
       local x,y = root.world_trans(0,0)
-
       shape = shapes.transformShape(x,y,shape,root)
-
       root.triangles = poly.triangulate(root.type, shape)
       root.dirty = false
 
