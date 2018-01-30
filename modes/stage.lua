@@ -86,6 +86,24 @@ function mode:update(dt)
       local result = {dirty=true, id="...", type="rect", rotation=0, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}}
       releaser(add_rect, result)
    end
+   local add_srect =Hammer:labelbutton( "srect", 80, 40)
+   if add_srect.dragging then
+      dragger(add_srect)
+   end
+   if add_srect.released then
+      local result = {dirty=true, id="...", type="simplerect", rotation=0, pos={x=0, y=0, z=0}, data={w=100, h=100}}
+      releaser(add_srect, result)
+   end
+
+   local add_mesh =Hammer:labelbutton( "mesh", 80, 40)
+   if add_mesh.dragging then
+      dragger(add_mesh)
+   end
+   if add_mesh.released then
+      local result = {dirty=true, id="...", type="mesh3d", pos={x=0, y=0, z=0}, data={width=3, height=10, cellwidth=50, cellheight=50} }
+      releaser(add_mesh, result)
+   end
+
    local add_shape = Hammer:labelbutton("draw shape", 130,40)
    if add_shape.released then
       self.touches = {}

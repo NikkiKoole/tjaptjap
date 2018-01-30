@@ -339,17 +339,11 @@ end
 function transformShape(tx,ty, shape, meta)
    local result = {}
 
-   if meta.type == "rope" then
-      result = makeRope(tx, ty, meta.data.join or 'none', meta.data.lengths, meta.data.rotations or {}, meta.data.thicknesses or {}, meta.data.relative_rotation)
-
-      return result
-   elseif meta.type == "polyline" then
-      result = makePolyLine(tx, ty,
-                            meta.data.join or 'none', meta.data.coords,
-                            meta.data.thicknesses or meta.data.half_width)
-      return result
-   elseif meta.type == "smartline" then
+   if meta.type == "smartline" then
       result = makeSmartLine(tx,ty, meta.data)
+      return result
+   elseif meta.type == "mesh3d" then
+      result = makeMesh3d(tx,ty, meta.data)
       return result
    end
 

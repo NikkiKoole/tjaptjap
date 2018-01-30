@@ -27,30 +27,15 @@ end
 
 
 function mode:addVertex(x, y)
-   local hx,hy = camera:worldCoords(x, y)
-   hx = hx - self.child.pos.x
-   hy = hy - self.child.pos.y
-
-   local si, ni  = self:getClosestNodes(hx, hy)
-   table.insert(self.child.data.points, ni, {x=hx, y=hy})
-
-   local shape = shapes.makeShape(self.child)
-   local p = poly.triangulate(self.child.type, shape)
-   self.child.triangles = p
-
+   local si, ni  = self:getClosestNodes(x, y)
+   table.insert(self.child.data.points, ni, {x=x, y=y})
+   self.child.dirty=true
 end
 
 function mode:addControlPoint(x,y)
-   local hx,hy = camera:worldCoords(x, y)
-   hx = hx - self.child.pos.x
-   hy = hy - self.child.pos.y
-
-   local si,ni = self:getClosestNodes(hx, hy)
-   table.insert(self.child.data.points, ni, {cx=hx, cy=hy})
-
-   local shape = shapes.makeShape(self.child)
-   self.child.triangles = poly.triangulate(self.child.type, shape)
-
+   local si,ni = self:getClosestNodes(x, y)
+   table.insert(self.child.data.points, ni, {cx=x, cy=y})
+   self.child.dirty = true
 end
 
 
@@ -125,12 +110,10 @@ function mode:update()
 
    -- TODO optimize, make bbox a prop on shapes, now we need to calculate it everyframe
    local shape = shapes.makeShape(child)
+
    local bbminx, bbminy, bbmaxx, bbmaxy= shapes.getShapeBBox(shape)
 
-
-
    Hammer:reset(10,200)
-
 
    Hammer:pos(0,0)
 
@@ -233,30 +216,28 @@ function mode:update()
       if moved then
          Hammer:circle("cursor1", 30, {x=moved.x, y=moved.y})
          local wx,wy = camera:worldCoords(moved.x, moved.y)
-         wx = wx - self.child.pos.x
-         wy = wy - self.child.pos.y
+         wx,wy = child.inverse(wx,wy)
 
          local si,ni =mode:getClosestNodes(wx,wy)
          si = self.child.data.points[si]
          ni = self.child.data.points[ni]
-         local x2,y2 = camera:cameraCoords(
-            (si.x or si.cx) + self.child.pos.x,
-            (si.y or si.cy) + self.child.pos.y )
 
+         local x2, y2 = child.world_trans(si.x or si.cx, si.y or si.cy)
+         x2,y2 = camera:cameraCoords(x2,y2)
          Hammer:circle("si", 10, {x=x2, y=y2})
 
-         x2,y2 = camera:cameraCoords(
-            (ni.x or ni.cx) + self.child.pos.x,
-            (ni.y or ni.cy) + self.child.pos.y )
+         x2, y2 = child.world_trans(ni.x or ni.cx, ni.y or ni.cy)
+         x2,y2 = camera:cameraCoords(x2,y2)
          Hammer:circle("ni", 10, {x=x2, y=y2})
       end
    end
    if add_vertex.enddrag then
-      local p = getWithID(Hammer.pointers.released,
-                          add_vertex.pointerID)
-       local released = Hammer.pointers.released[p]
+      local p = getWithID(Hammer.pointers.released, add_vertex.pointerID)
+      local released = Hammer.pointers.released[p]
+      local wx,wy = camera:worldCoords(released.x, released.y)
+      wx,wy = child.inverse(wx,wy)
 
-      self:addVertex(released.x, released.y)
+      self:addVertex(wx, wy)
    end
 
    Hammer:ret()
@@ -267,31 +248,29 @@ function mode:update()
       if moved then
          Hammer:circle("cursor2", 30, {x=moved.x, y=moved.y})
          local wx,wy = camera:worldCoords(moved.x, moved.y)
-         wx = wx - self.child.pos.x
-         wy = wy - self.child.pos.y
+         wx,wy = child.inverse(wx,wy)
 
          local si,ni =mode:getClosestNodes(wx,wy)
          si = self.child.data.points[si]
          ni = self.child.data.points[ni]
-         local x2,y2 = camera:cameraCoords(
-            (si.x or si.cx) + self.child.pos.x,
-            (si.y or si.cy) + self.child.pos.y )
 
+         local x2, y2 = child.world_trans(si.x or si.cx, si.y or si.cy)
+         x2,y2 = camera:cameraCoords(x2,y2)
          Hammer:circle("si", 10, {x=x2, y=y2})
 
-         x2,y2 = camera:cameraCoords(
-            (ni.x or ni.cx) + self.child.pos.x,
-            (ni.y or ni.cy) + self.child.pos.y )
-
+         x2, y2 = child.world_trans(ni.x or ni.cx, ni.y or ni.cy)
+         x2,y2 = camera:cameraCoords(x2,y2)
          Hammer:circle("ni", 10, {x=x2, y=y2})
+
       end
    end
    if add_cp.enddrag then
-      local p = getWithID(Hammer.pointers.released,
-                          add_cp.pointerID)
+      local p = getWithID(Hammer.pointers.released, add_cp.pointerID)
       local released = Hammer.pointers.released[p]
+      local wx,wy = camera:worldCoords(released.x, released.y)
+      wx,wy = child.inverse(wx,wy)
 
-      self:addControlPoint(released.x, released.y)
+      self:addControlPoint(wx, wy)
    end
    Hammer:ret()
 

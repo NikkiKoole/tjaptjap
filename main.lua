@@ -241,38 +241,6 @@ function love.load()
          --    }
          -- },
 
-         -- {
-         --    type="mesh3d",
-         --    pos={x=0,y=0,z=0},
-         --    data={width=3, height=10, cellwidth=50, cellheight=50}
-         -- },
-         -- {
-         --    type="rope",
-         --    pos={x=100,y=100,z=0},
-         --    rotation=0,
-         --    data={
-         --       join="miter",
-         --       relative_rotation = true,
-         --       rotations={0, 0, 0, 0, 0, 0,0,0,0},
-         --       lengths={120,120,100,100,100,100,100,100 },
-         --       thicknesses={20,50,60,70,70,70,70,60,20},
-         --    }
-         -- },
-         -- {type="rope",
-         --  pos={x=-100,y=100,z=0},
-         --  data={
-         --     join="miter",
-         --     relative_rotation = false,
-         --     rotations={-math.pi/2,-0.8,-0.8,0.8},
-         --     lengths={120,120,100,50},
-         --     thicknesses={40,40,30,20,20},
-         --  },
-         --  children={
-         --     {type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}}
-         --  }
-         -- },
-
-
          {
             type="smartline",
             id="TheSmartLine",
