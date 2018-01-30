@@ -66,11 +66,21 @@ function mode:update(dt)
 
 
    if #(Hammer.pointers.pressed) > 0 then
+
       if self.firstTime == true then
          world.children[#world.children+1] = {type="polyline", world_pos={x=0,y=0,z=0}, pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200},join="miter", half_width=10}}
          self.thicknesses = {}
          self.firstTime = false
       end
+      if self.shapeHasEnded == true then
+         self.shapeHasEnded = false
+         world.children[#world.children+1] = {type="polyline", world_pos={x=0,y=0,z=0}, pos={x=0,y=0,z=0}, data={coords={0,0,-10,-100 , 50, 50, 100,50,10,200},join="miter", half_width=10}}
+         self.thicknesses = {}
+         self.coords = {}
+
+      end
+
+
 
       if Hammer.pointers.pressed[1] and Hammer.pointers.moved[1] then
          if Hammer.pointers.pressed[1].id == Hammer.pointers.moved[1].id then
@@ -108,6 +118,13 @@ function mode:update(dt)
          end
       end
    end
+   if #(Hammer.pointers.released) > 0 then
+      if self.firstTime == false then
+         self.shapeHasEnded = true
+      end
+   end
+
+
 
    if #self.coords >= 4 then
       world.children[#world.children].data.coords = self.coords
