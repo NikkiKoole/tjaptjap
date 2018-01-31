@@ -8,11 +8,11 @@ InterActiveMovieMode = require "modes.interactive_movie"
 
 StageMode = require "modes.stage"
 DragMode = require "modes.drag_item"
-DrawMode = require "modes.draw_item"
+DrawLineMode = require "modes.draw_line"
+DrawPolyMode = require "modes.draw_poly"
 
 ItemMode = require "modes.edit_item"
 PolygonMode = require "modes.edit_polygon"
---PolyLineMode = require "modes.edit_polyline"
 SmartLineMode = require "modes.edit_smartline"
 
 Mesh3dMode = require "modes.edit_mesh3d"
@@ -78,11 +78,19 @@ function updateGraph(root, dt)
          --root.pos.x = x
          --root.pos.y = y
 
-         local P = a.trans(-root.pivot.x or 0, -root.pivot.y or 0)
+         local P
+         if root.pivot then
+            P = a.trans(-root.pivot.x or 0, -root.pivot.y or 0)
+         end
+
          local R = a.rotate(root.rotation or 0)
          local S = a.scale(root.scale and root.scale.x or 1, root.scale and root.scale.y or 1)
 
-         root.local_trans = T*R*S*P
+         root.local_trans = T*R*S
+         if root.pivot then
+            root.local_trans = root.local_trans * P
+         end
+
 
       end
 
@@ -387,8 +395,11 @@ function love.load()
             State = StageMode
          elseif state == "drag-item" then
             State = DragMode
-         elseif state == "draw-item" then
-            State = DrawMode
+         elseif state == "draw-line" then
+            State = DrawLineMode
+         elseif state == "draw-poly" then
+            State = DrawPolyMode
+
          elseif state == "edit-item" then
             State = ItemMode
          elseif state == "edit-polygon" then

@@ -104,10 +104,16 @@ function mode:update(dt)
       releaser(add_mesh, result)
    end
 
-   local add_shape = Hammer:labelbutton("draw shape", 130,40)
+   local add_shape = Hammer:labelbutton("draw line", 130,40)
    if add_shape.released then
       self.touches = {}
-      Signal.emit("switch-state", "draw-item", {pointerID=id, parent=world})
+      Signal.emit("switch-state", "draw-line", {pointerID=id, parent=world})
+   end
+
+   local add_shape2 = Hammer:labelbutton("draw poly", 130,40)
+   if add_shape2.released then
+      self.touches = {}
+      Signal.emit("switch-state", "draw-poly", {pointerID=id, parent=world})
    end
 
 end

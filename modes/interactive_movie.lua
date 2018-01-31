@@ -46,10 +46,12 @@ function replayAnimation(time)
    for i,o in pairs(world.children) do
       if o.animation then
          table.sort(o.animation, compare)
+
          -- reset child
          o.pos.x = o.animationStartFrame and o.animationStartFrame.x or 0
          o.pos.y = o.animationStartFrame and o.animationStartFrame.y or 0
          o.dirty=true
+
          for i=1, #o.animation-1 do
             local value = o.animation[i]
             local nex = o.animation[i+1]

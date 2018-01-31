@@ -316,7 +316,7 @@ function mode:update(dt)
    if add_shape.released then
       self.touches = {}
       if not self.child.children then self.child.children = {} end
-      Signal.emit("switch-state", "draw-item", {pointerID=id, parent=self.child})
+      Signal.emit("switch-state", "draw-line", {pointerID=id, parent=self.child})
    end
 
    local add_polygon = Hammer:labelbutton("add polygon", 80,40)
