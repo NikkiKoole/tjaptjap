@@ -28,6 +28,7 @@ poly = require 'poly'
 
 local pointers = require "pointer"
 
+flux = require "vendor.flux"
 local a = require "vendor.affine"
 --------------------------------
 
@@ -317,6 +318,74 @@ function love.load()
 
       },
    }
+
+   world = {
+      children = { {
+            data = {
+               coords = {  },
+               join = "miter",
+               lengths = { 120, 120, 100, 50 },
+               relative_rotations = { },
+               thicknesses = { 40, 40, 30, 20, 20 },
+               type = "world",
+               use_relative_rotation = false,
+               world_rotations = { 4.7123889803847, 0.10848259561446, -0.081958043518471, -0.26585057575965 }
+            },
+            id = "TheSmartLine3",
+            pos = {
+               x = -106,
+               y = 182,
+               z = 0
+            },
+            type = "smartline"
+      } },
+      id = "world",
+      pos = {
+         x = 0,
+         y = 0,
+         z = 0
+      }
+   }
+
+ --   {
+--   children = { {
+--       data = {
+--         coords = { 0, 0, 118.95652209134, -15.790688773187, 237.00471877442, -37.345810203437, 331.84466689947, -69.053604823048, 370.98784643656, -100.16327366935 },
+--         join = "miter",
+--         lengths = { 120, 120, 100, 49.999999999994 },
+--         relative_rotations = { 6.1512134849629, 6.102579040721, 5.9605384501739, 5.6116439769788 },
+--         thicknesses = { 40, 40, 30, 20, 20 },
+--         type = "world",
+--         use_relative_rotation = false,
+--         world_rotations = { 6.1512134849629, -0.048634444241901, -0.14204059054711, -0.34889447319509 }
+--       },
+--       id = "TheSmartLine3",
+--       pos = {
+--         x = -106,
+--         y = 182,
+--         z = 0
+--       },
+--       type = "smartline"
+--     } },
+--   id = "world",
+--   pos = {
+--     x = 0,
+--     y = 0,
+--     z = 0
+--   }
+-- }
+
+   local child = world.children[1].data.world_rotations
+
+
+   flux.to(child, 4, {[1] = 6.1512134849629,[2]= -2.048634444241901, [3]=-0.14204059054711,[4]= -0.348894473195010}):onupdate(
+      function()
+         world.children[1].data.world_rotations = child;
+         local new_coords = utils.calculateCoordsFromRotationsAndLengths(false, world.children[1].data)
+         world.children[1].data.coords = new_coords;
+         world.children[1].dirty = true; end
+                                         )
+
    initWorld(world)
    spent_time = 0
 
@@ -437,6 +506,7 @@ end
 
 
 function love.update(dt)
+   flux.update(dt)
    spent_time = spent_time + dt
    if love.keyboard.isDown("escape") then love.event.quit() end
    updateSceneGraph(false, world, dt)

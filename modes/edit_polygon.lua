@@ -116,16 +116,15 @@ end
       local p = getWithID(Hammer.pointers.released, ui.pointerID)
       local released = Hammer.pointers.released[p]
       local wx,wy = camera:worldCoords(released.x, released.y)
+      wx,wy = self.child.inverse(wx,wy)
 
       result.pos.x = wx
       result.pos.y = wy
       result.world_pos={x=0,y=0,z=0}
+      result.dirty = true
 
-      local shape = shapes.makeShape(result)
-      result.triangles = poly.triangulate(result.type, shape)
       if not self.child.children then self.child.children = {} end
       table.insert(self.child.children, result)
-
    end
 
 

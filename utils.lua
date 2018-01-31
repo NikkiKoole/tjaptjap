@@ -261,8 +261,8 @@ end
 function calculateCoordsFromRotationsAndLengths(relative, data, x, y)
    local result = {}
    local rotation = 0
-   local cx = data.coords[1] or x
-   local cy = data.coords[2] or y
+   local cx = data.coords and data.coords[1] or x
+   local cy = data.coords and data.coords[2] or y
 
    table.insert(result, (cx))
    table.insert(result, (cy))

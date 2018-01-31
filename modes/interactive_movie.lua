@@ -21,7 +21,7 @@ end
 
 function replayAnimation(time)
    for i,o in pairs(world.children) do
-
+      print(inspect(o.animation))
       if o.animation then
          table.sort(o.animation, compare)
          -- reset child
@@ -33,8 +33,9 @@ function replayAnimation(time)
             local nex = o.animation[i+1]
             if nex.time > time and value.time <= time then
                if value.type == "pos" then
+                  print(inspect(value))
                   o.pos = {x=value.x, y=value.y, z=0}
-                  o.dirty=true
+                  o.dirty = true
                end
             end
          end
@@ -121,7 +122,7 @@ function mode:update(dt)
    Hammer:ret()
    local inspectt = Hammer:labelbutton("inspect", 130,40)
    if inspectt.released then
-      for i,child in pairs(world.children) do
+      for i, child in pairs(world.children) do
          if child.animation then
             for j=1, #child.animation do
                print((child.animation[j].time))
