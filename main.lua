@@ -108,11 +108,11 @@ function updateGraph(root, dt)
 
    --if root.dirty then
    if root.type and root.dirty then
-      --print(root.type.." ("..(root.id or "?")..") is dirty at :"..(spent_time+dt))
       if root.dirty_types then
          if not root.animation then
             root.animation = {}
          end
+         table.insert(root.animation, (root.dirty_types))
       else
       end
 

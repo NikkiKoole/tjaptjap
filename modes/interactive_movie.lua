@@ -15,25 +15,47 @@
 
 local mode = {}
 
+
+
+
+function saveFrame()
+   for i,child in pairs(world.children) do
+      child.animationStartFrame = {x=child.pos.x, y=child.pos.y}
+   end
+end
+function setBackSavedFrame()
+   for i,child in pairs(world.children) do
+      child.pos.x = child.animationStartFrame.x
+      child.pos.y = child.animationStartFrame.y
+   end
+end
+function clearAllAnimations()
+   for i,child in pairs(world.children) do
+      child.animation = {}
+   end
+
+end
+
+
+
 function compare(a,b)
   return a.time < b.time
 end
 
 function replayAnimation(time)
    for i,o in pairs(world.children) do
-      print(inspect(o.animation))
       if o.animation then
          table.sort(o.animation, compare)
          -- reset child
-         o.pos.x = o.animation.startFrame and o.animatiomStartFrame.x or 0
-         o.pos.y = o.animation.startFrame and o.animatiomStartFrame.y or 0
+         o.pos.x = o.animationStartFrame and o.animationStartFrame.x or 0
+         o.pos.y = o.animationStartFrame and o.animationStartFrame.y or 0
          o.dirty=true
          for i=1, #o.animation-1 do
             local value = o.animation[i]
             local nex = o.animation[i+1]
             if nex.time > time and value.time <= time then
                if value.type == "pos" then
-                  print(inspect(value))
+                  --print(inspect(value))
                   o.pos = {x=value.x, y=value.y, z=0}
                   o.dirty = true
                end
@@ -51,6 +73,7 @@ function mode:enter(from, data)
    self.time = 0
    self.isRecording = false
    self.isReplaying = false
+   clearAllAnimations()
 end
 
 
@@ -94,7 +117,8 @@ function mode:update(dt)
          self.isRecording = false
       else
          self.isRecording = true
-         self.time = -3
+         self.time = -1
+         saveFrame()
       end
    end
 
@@ -106,7 +130,6 @@ function mode:update(dt)
       self.time = 0
       self.isReplaying = true
       if self.duration == 0 then
-         print("no animation found to replay")
          self.isReplaying = false
       end
    end
@@ -116,6 +139,8 @@ function mode:update(dt)
          replayAnimation(self.time)
       else
          self.isReplaying = false
+         --setBackSavedFrame()
+
       end
    end
 
@@ -136,14 +161,6 @@ function mode:update(dt)
    if self.isRecording or self.isReplaying then
       self.time = self.time + dt
    end
-end
-
-function saveFrame()
-   for child in pairs(world.children) do
-      child.animationStartFrame = {x=child.pos.x, y=child.pos.y}
-   end
-
-
 end
 
 
@@ -182,7 +199,7 @@ function mode:pointermoved(id, x, y, dx, dy)
       item.pos.y = item.pos.y + dy/camera.scale
       item.dirty = true
       if self.isRecording and self.time >= 0 then
-         item.dirty_types = {{type="pos", time=self.time, x=item.pos.x, y=item.pos.y}}
+         item.dirty_types = {type="pos", time=self.time, x=item.pos.x, y=item.pos.y}
       end
    end
 
