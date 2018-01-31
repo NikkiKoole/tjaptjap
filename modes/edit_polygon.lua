@@ -150,11 +150,6 @@ function mode:update()
    local pivot = Hammer:rectangle( "pivot", 30, 30,{x=rx2-15, y=ry2-15, color=color})
    makePivotBehaviour(pivot, child)
 
-
-
-
-
-
    local rx1, ry1 = camera:cameraCoords(
       child.world_trans(  (p and p.x or 0) + (bbmaxx-bbminx)/2 ,  (p and p.y or 0))
    )
@@ -330,14 +325,19 @@ function mode:update()
    Hammer:ret()
    local delete = Hammer:labelbutton("delete", 100, 40)
    if delete.startpress then
-      for i=#world.children,1,-1 do
-         if world.children[i]==self.child then
-            table.remove(world.children, i)
+      for i=#self.child.parent.children,1,-1 do
+         if self.child.parent.children[i]==self.child then
+            table.remove(self.child.parent.children, i)
             Signal.emit("switch-state", "stage")
          end
       end
    end
 
+
+   Hammer:ret()
+   if self.child.parent and self.child.parent.type == "smartline" then
+      local smarltine_child = Hammer:labelbutton("smarltine-child woohoo", 100, 40)
+   end
 
 
    if #Hammer.pointers.pressed == 1 then

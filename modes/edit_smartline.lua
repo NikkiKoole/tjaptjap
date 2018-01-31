@@ -3,6 +3,8 @@ local mode = {}
 local thickness_value = {min=1, max=100, value=50}
 
 
+
+
 function angleToRelative(a)
    return (math.pi * 2) - (a + math.pi/2)
 end
@@ -193,9 +195,9 @@ function mode:update(dt)
    Hammer:ret()
    local delete = Hammer:labelbutton("delete", 100, 40)
    if delete.startpress then
-      for i=#world.children,1,-1 do
-         if world.children[i]==self.child then
-            table.remove(world.children, i)
+      for i=#self.child.parent.children,1,-1 do
+         if self.child.parent.children[i]==self.child then
+            table.remove(self.child.parent.children, i)
             Signal.emit("switch-state", "stage")
          end
       end
@@ -309,17 +311,83 @@ function mode:update(dt)
 
 
 
+   Hammer:pos(10,300)
+   local add_shape = Hammer:labelbutton("draw shape", 130,40)
+   if add_shape.released then
+      self.touches = {}
+      if not self.child.children then self.child.children = {} end
+      Signal.emit("switch-state", "draw-item", {pointerID=id, parent=self.child})
+   end
+
+   local add_polygon = Hammer:labelbutton("add polygon", 80,40)
+
+   if add_polygon.dragging then
+      dragger(add_polygon)
+   end
+   if add_polygon.released then
+      local result = {
+         type="polygon",
+         pos={x=0, y=0, z=0},
+         data={ steps=3,  points={{x=0,y=-100}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }
+      }
+      self:releaser(add_polygon, result)
+   end
+
+
+
+
    if #Hammer.pointers.pressed == 1 then
       local isDirty = Hammer:isDirty()
       local wx, wy = camera:worldCoords(Hammer.pointers.pressed[1].x, Hammer.pointers.pressed[1].y)
       if pointInPoly({x=wx,y=wy}, self.child.triangles) then
          isDirty = true
       end
+
+      if not isDirty then
+         if self.child.children then
+            for i=1,#self.child.children do
+               local hit = pointInPoly({x=wx,y=wy}, self.child.children[i].triangles)
+               if hit then
+                  --print("dragging a child!")
+                  Signal.emit("switch-state", "drag-item", {child=self.child.children[i], pointerID=Hammer.pointers.pressed[1].id})
+                  isDirty=true
+               end
+            end
+         end
+      end
+
       if not isDirty then
          Signal.emit("switch-state", "stage")
       end
    end
 end
+
+
+----------------
+   function dragger(ui)
+      local p = getWithID(Hammer.pointers.moved, ui.pointerID)
+      local moved = Hammer.pointers.moved[p]
+      if moved then
+         Hammer:circle("cursor1", 30, {x=moved.x, y=moved.y})
+      end
+   end
+
+   function mode:releaser(ui, result)
+      local p = getWithID(Hammer.pointers.released, ui.pointerID)
+      local released = Hammer.pointers.released[p]
+      local wx,wy = camera:worldCoords(released.x, released.y)
+      wx,wy = self.child.inverse(wx,wy)
+
+      result.pos.x = wx
+      result.pos.y = wy
+      result.world_pos={x=0,y=0,z=0}
+      result.dirty = true
+
+      if not self.child.children then self.child.children = {} end
+      table.insert(self.child.children, result)
+   end
+---------------
+
 
 
 

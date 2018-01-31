@@ -70,6 +70,22 @@ function updateGraph(root, dt)
    end
 
    if root.parent then
+      if root.parent.type == "smartline" then
+         -- Here we use the  last coord of the samrtline to calculate a custom local_trans
+         local c = root.parent.data.coords
+         local x,y = c[#c-1], c[#c]
+         local T = a.trans(x+root.pos.x, y+root.pos.y)
+         --root.pos.x = x
+         --root.pos.y = y
+
+         local P = a.trans(-root.pivot.x or 0, -root.pivot.y or 0)
+         local R = a.rotate(root.rotation or 0)
+         local S = a.scale(root.scale and root.scale.x or 1, root.scale and root.scale.y or 1)
+
+         root.local_trans = T*R*S*P
+
+      end
+
       root.world_trans = root.parent.world_trans * root.local_trans
 
       root.inverse = a.inverse(root.world_trans)
@@ -88,11 +104,6 @@ function updateGraph(root, dt)
       root.world_pos.scaleX = (root.scale and root.scale.x) or 1
       root.world_pos.scaleY = (root.scale and root.scale.y) or 1
    end
-
-
-
-
-
 
 
    --if root.dirty then
@@ -319,72 +330,44 @@ function love.load()
       },
    }
 
-   world = {
-      children = { {
-            data = {
-               coords = {  },
-               join = "miter",
-               lengths = { 120, 120, 100, 50 },
-               relative_rotations = { },
-               thicknesses = { 40, 40, 30, 20, 20 },
-               type = "world",
-               use_relative_rotation = false,
-               world_rotations = { 4.7123889803847, 0.10848259561446, -0.081958043518471, -0.26585057575965 }
-            },
-            id = "TheSmartLine3",
-            pos = {
-               x = -106,
-               y = 182,
-               z = 0
-            },
-            type = "smartline"
-      } },
-      id = "world",
-      pos = {
-         x = 0,
-         y = 0,
-         z = 0
-      }
-   }
+   -- world = {
+   --    children = { {
+   --          data = {
+   --             coords = {  },
+   --             join = "miter",
+   --             lengths = { 120, 120, 100, 50 },
+   --             relative_rotations = { },
+   --             thicknesses = { 40, 40, 30, 20, 20 },
+   --             type = "world",
+   --             use_relative_rotation = false,
+   --             world_rotations = { 4.7123889803847, 0.10848259561446, -0.081958043518471, -0.26585057575965 }
+   --          },
+   --          id = "TheSmartLine3",
+   --          pos = {
+   --             x = -106,
+   --             y = 182,
+   --             z = 0
+   --          },
+   --          type = "smartline"
+   --    } },
+   --    id = "world",
+   --    pos = {
+   --       x = 0,
+   --       y = 0,
+   --       z = 0
+   --    }
+   -- }
 
- --   {
---   children = { {
---       data = {
---         coords = { 0, 0, 118.95652209134, -15.790688773187, 237.00471877442, -37.345810203437, 331.84466689947, -69.053604823048, 370.98784643656, -100.16327366935 },
---         join = "miter",
---         lengths = { 120, 120, 100, 49.999999999994 },
---         relative_rotations = { 6.1512134849629, 6.102579040721, 5.9605384501739, 5.6116439769788 },
---         thicknesses = { 40, 40, 30, 20, 20 },
---         type = "world",
---         use_relative_rotation = false,
---         world_rotations = { 6.1512134849629, -0.048634444241901, -0.14204059054711, -0.34889447319509 }
---       },
---       id = "TheSmartLine3",
---       pos = {
---         x = -106,
---         y = 182,
---         z = 0
---       },
---       type = "smartline"
---     } },
---   id = "world",
---   pos = {
---     x = 0,
---     y = 0,
---     z = 0
---   }
--- }
-
-   local child = world.children[1].data.world_rotations
+   -- local child = world.children[1].data.world_rotations
 
 
-   flux.to(child, 4, {[1] = 6.1512134849629,[2]= -2.048634444241901, [3]=-0.14204059054711,[4]= -0.348894473195010}):onupdate(
-      function()
-         world.children[1].data.world_rotations = child;
-         local new_coords = utils.calculateCoordsFromRotationsAndLengths(false, world.children[1].data)
-         world.children[1].data.coords = new_coords;
-         world.children[1].dirty = true; end
-                                         )
+   -- flux.to(child, 4, {[1] = 6.1512134849629,[2]= -2.048634444241901, [3]=-0.14204059054711,[4]= -0.348894473195010}):onupdate(
+   --    function()
+   --       world.children[1].data.world_rotations = child;
+   --       local new_coords = utils.calculateCoordsFromRotationsAndLengths(false, world.children[1].data)
+   --       world.children[1].data.coords = new_coords;
+   --       world.children[1].dirty = true; end
+   --                                       )
 
    initWorld(world)
    spent_time = 0
