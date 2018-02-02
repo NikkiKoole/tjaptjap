@@ -83,6 +83,7 @@ function updateGraph(root, dt)
             P = a.trans(-root.pivot.x or 0, -root.pivot.y or 0)
          end
 
+
          local R = a.rotate(root.rotation or 0)
          local S = a.scale(root.scale and root.scale.x or 1, root.scale and root.scale.y or 1)
 
@@ -98,7 +99,10 @@ function updateGraph(root, dt)
 
       root.inverse = a.inverse(root.world_trans)
 
+
       root.world_pos.rot = (root.rotation or 0) + root.parent.world_pos.rot
+
+
       if root.scale then
          root.world_pos.scaleX = root.parent.world_pos.scaleX * root.scale.x
          root.world_pos.scaleY = root.parent.world_pos.scaleY * root.scale.y
@@ -477,6 +481,16 @@ function love.filedropped(file)
 end
 
 
+function getFullGraphName(node, name)
+   local str = (node.id or "").."/"
+   str = str..name
+   if node.parent then
+      str = getFullGraphName(node.parent, str)
+   end
+   return str
+end
+
+
 function drawSceneGraph(root)
    local triangle_count = 0
 
@@ -487,7 +501,20 @@ function drawSceneGraph(root)
 
       if root.children[i].triangles  then
          for j=1, #root.children[i].triangles do
-            love.graphics.setColor(math.random()*0 + 100, 155+ math.random()*00 + 20,55, 155)
+
+            if triangle_count % 3 == 0 then
+               love.graphics.setColor(100, 175,55, 155)   --- hercules green monitor.
+            elseif triangle_count % 3 == 1 then
+               love.graphics.setColor(100, 175,55, 130)   --- hercules green monitor.
+
+               --love.graphics.setColor(150, 155  ,55, 155) -- hercules amber
+            elseif triangle_count % 3 == 2 then
+               love.graphics.setColor(100, 175,55, 100)   --- hercules green monitor.
+
+               --love.graphics.setColor(175, 75   ,75, 155) -- hercules pink
+            end
+
+
             love.graphics.polygon("fill", root.children[i].triangles[j])
             triangle_count = triangle_count + 1
          end

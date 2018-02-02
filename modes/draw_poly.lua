@@ -19,7 +19,7 @@ end
 
 function mode:update(dt)
 
-   Hammer:reset(10,300)
+   Hammer:reset(20,100)
    Hammer:ret()
 
    if Hammer:labelbutton("START", 100, 40).released then

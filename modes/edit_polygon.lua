@@ -223,17 +223,26 @@ function mode:update()
    end
 
 
+   Hammer:pos(0,30)
+
+   Hammer:label( "full_path", getFullGraphName(child, ""), SCREEN_WIDTH,20)
+
+   Hammer:pos(20,100)
 
 
-   Hammer:pos(10,300)
-   local add_shape = Hammer:labelbutton("draw shape", 130,40)
+   Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
+   Hammer:ret()
+   local add_shape = Hammer:labelbutton("child line", 120,40)
    if add_shape.released then
       self.touches = {}
       if not self.child.children then self.child.children = {} end
       Signal.emit("switch-state", "draw-line", {pointerID=id, parent=self.child})
    end
 
-   local add_polygon = Hammer:labelbutton("add polygon", 80,40)
+   Hammer:ret()
+   --print(getFullGraphName(child, ""))
+
+   local add_polygon = Hammer:labelbutton( "child poly", 120,40)
 
    if add_polygon.dragging then
       dragger(add_polygon)
@@ -241,17 +250,16 @@ function mode:update()
    if add_polygon.released then
       local result = {
          type="polygon",
+         id="polygon_"..tostring(math.floor(math.random()*20)),
          pos={x=0, y=0, z=0},
          data={ steps=3,  points={{x=0,y=-100}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }
       }
       self:releaser(add_polygon, result)
    end
-
-
-
-   Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
    Hammer:ret()
-   local add_vertex = Hammer:labelbutton("add vertex", 120,40)
+   Hammer:ret()
+
+   local add_vertex = Hammer:labelbutton("vertex =>", 120,40)
    if add_vertex.dragging then
       local p = getWithID(Hammer.pointers.moved, add_vertex.pointerID)
       local moved = Hammer.pointers.moved[p]
@@ -283,7 +291,7 @@ function mode:update()
    end
 
    Hammer:ret()
-   local add_cp = Hammer:labelbutton("bezier", 120,40)
+   local add_cp = Hammer:labelbutton("bezier =>", 120,40)
    if add_cp.dragging then
       local p = getWithID(Hammer.pointers.moved, add_cp.pointerID)
       local moved = Hammer.pointers.moved[p]
@@ -314,16 +322,9 @@ function mode:update()
 
       self:addControlPoint(wx, wy)
    end
-   Hammer:ret()
-
-   local del_node = Hammer:labelbutton("delete last", 120,40)
-   if del_node.released then
-      mode:removeLastTouched()
-      self.lastTouchedIndex = false
-   end
 
    Hammer:ret()
-   local delete = Hammer:labelbutton("delete", 100, 40)
+   local delete = Hammer:labelbutton("delete", 120, 40)
    if delete.startpress then
       for i=#self.child.parent.children,1,-1 do
          if self.child.parent.children[i]==self.child then
@@ -331,6 +332,18 @@ function mode:update()
             Signal.emit("switch-state", "stage")
          end
       end
+   end
+
+
+   Hammer:ret()
+   Hammer:ret()
+
+   if self.lastTouchedIndex then
+   local del_node = Hammer:labelbutton("delete last", 120,40)
+   if del_node.released then
+      mode:removeLastTouched()
+      self.lastTouchedIndex = false
+   end
    end
 
 

@@ -74,6 +74,7 @@ function mode:update(dt)
 
          self.parent.children[#self.parent.children+1] =  {
             type="smartline",
+            id="smartline_i_"..tostring(math.floor(math.random()*20)),
             pos={x=0,y=0,z=0},
             data={
                join="miter",
@@ -98,6 +99,7 @@ function mode:update(dt)
 
          self.parent.children[#self.parent.children+1] =  {
             type="smartline",
+            id="smartline_"..tostring(math.floor(math.random()*20)),
             pos={x=0,y=0,z=0},
             data={
                join="miter",
