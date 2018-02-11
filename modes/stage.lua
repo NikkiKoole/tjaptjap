@@ -5,6 +5,8 @@ local mode = {}
 
 function mode:init()
    self.touches = {}
+   self.str = "CHANGE ME"
+   self.str2 = "#METOO"
 
 end
 
@@ -41,6 +43,14 @@ function mode:update(dt)
       Signal.emit("switch-state", "interactive-movie", {pointerID=id})
    end
 
+   local text_input = Hammer:textinput("text-input", self.str, 300, 40)
+   if text_input.text ~= self.str then
+      self.str = text_input.text
+   end
+   local text_input2 = Hammer:textinput("text-input2", self.str2, 300, 40)
+   if text_input2.text ~= self.str2 then
+      self.str2 = text_input2.text
+   end
 
 
 

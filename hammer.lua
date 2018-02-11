@@ -1,6 +1,12 @@
 
 
 
+local utf8 = require 'utf8'
+
+local function split(str, pos)
+	local offset = utf8.offset(str, pos) or 0
+	return str:sub(1, offset-1), str:sub(offset)
+end
 
 
 -----
@@ -26,6 +32,11 @@
 local hammer = {
    pointersThatAreDragging={}
 }
+
+
+
+
+
 
 function distance(x, y, x1, y1)
    local dx = x - x1
@@ -53,6 +64,39 @@ function listGetPointerIndex(list, id)
 end
 
 
+function hammer:setKeyboardFocusFor(id)
+   self.itemWithKeyboardFocus = id
+end
+
+function hammer:handle_textedited(text, start, length)
+end
+
+function hammer:handle_textinput(t)
+   if self.itemWithKeyboardFocus ~= nil then
+      self.key = t
+   end
+end
+
+
+function is_one_of(me, others)
+   for i =1, #others do
+      local it = others[i]
+      if me == it then
+         return true
+      end
+   end
+
+   return false
+end
+
+
+function hammer:handle_keypressed(key)
+
+   if is_one_of(key, {'backspace', 'return', 'left', 'right'}) then
+      self.key = key
+   end
+
+end
 
 function hammer:panel()
 end
@@ -67,6 +111,8 @@ function hammer:reset(x,y)
 
    self.margin = 10
    self.rowHeight = 40
+
+   self.cursor =0
 end
 
 function hammer:pos(x,y)
@@ -90,6 +136,91 @@ function hammer:circle(id, radius, opt_pos)
    return result
 end
 
+function hammer:textinput(id, text, width, height, opt_pos)
+      local result =  {type="text-input",text=text,id=id,
+                    x=opt_pos and opt_pos.x or self.x,
+                    y=opt_pos and opt_pos.y or self.y,
+                    w=width,h=height,cursor}
+
+      self:handle_history(id, result)
+      local active_from_history = result.active
+
+      self:default_pressed(result, width, height)
+      local active_from_pressed = result.active
+
+      if not active_from_history and active_from_pressed then
+
+      end
+
+      self:default_moved(result, width, height)
+      self:default_released(result)
+
+      if result.active then
+         self:setKeyboardFocusFor(id)
+         local clicked_inside = false
+         for i=1, #self.pointers.released do
+            local pressed = self.pointers.released[i]
+
+            if (pointInRect(pressed.x,
+                            pressed.y,
+                            self.x,
+                            self.y,
+                            width,
+                            height)) then
+               clicked_inside = true
+
+               result.cursor = utf8.len(text)
+
+               for ci=1, utf8.len(text) do
+                  local str = ( text:sub(1, ci))
+                  local w = (love.graphics.getFont():getWidth(str))
+
+                  if self.x + w > pressed.x then
+                     result.cursor = ci
+                     break
+                  end
+               end
+
+            end
+         end
+         if not clicked_inside and #self.pointers.released>0  then
+            result.active = false
+            self.itemWithKeyboardFocus = nil
+         end
+
+         if self.key then
+            if self.itemWithKeyboardFocus == id then
+               if self.key == 'backspace' then
+                  local a,b = split(result.text, result.cursor+1)
+                  result.text = table.concat{split(a,utf8.len(a)), b}
+                  result.cursor = math.max(0, (result.cursor or 0)-1)
+               elseif self.key == 'return' then
+                  result.active = false
+                  self.itemWithKeyboardFocus = nil
+               elseif self.key == 'right' then
+                  result.cursor = math.min(utf8.len(text)+1, (result.cursor or 0)+ 1)
+               elseif self.key == 'left' then
+                  result.cursor = math.max(0, (result.cursor or 0)-1)
+               else
+                  local a,b = split(result.text, result.cursor+1)
+                  result.text = table.concat { (table.concat{a, self.key}), b}
+                  result.cursor = (result.cursor or 0) + 1
+               end
+
+               self.key = nil
+            end
+         end
+      end
+
+
+
+      table.insert(self.drawables, result)
+      self.x = self.x + width + self.margin
+   return result
+
+end
+
+
 function hammer:label(id, text, width, height, opt_pos)
    local result =  {type="label",text=text,id=id,
                     x=opt_pos and opt_pos.x or self.x,
@@ -112,6 +243,13 @@ function hammer:handle_history(id, result)
                result.dy = self.history[hi].dy
             end
          end
+         if self.history[hi].active then
+            result.active = true
+         end
+         if self.history[hi].cursor then
+            result.cursor = self.history[hi].cursor
+         end
+
       end
    end
 
@@ -163,8 +301,6 @@ function hammer:slider(id, width, height, props)
 
       end
    end
-
-
 
    for i=1, #self.pointers.moved do
       if (pointInRect(self.pointers.moved[i].x,
@@ -223,6 +359,8 @@ function hammer:default_pressed(result, width, height)
                       result.x,
                       result.y,
                       width, height)) then
+
+         result.active = true
 
          if not self.dragging_pointer_ids[pressed.id]  then
             self.dragging_pointer_ids[pressed.id] = true
@@ -385,6 +523,39 @@ function hammer:draw()
          love.graphics.rectangle("fill", it.x + it.thumbX, it.y + it.thumbY, math.min(it.w, it.h), math.min(it.w, it.h))
 
       end
+      if it.type == "text-input" then
+         love.graphics.setColor(55,55,55)
+
+         if (it.active) then
+            love.graphics.setColor(130,170,130)
+         end
+
+
+         love.graphics.rectangle("fill", it.x, it.y, it.w, it.h)
+         local w = (love.graphics.getFont():getWidth(it.text))
+         local h = (love.graphics.getFont():getHeight())
+         local yOff = (it.h - h)/2 -- vertical center
+         local xOff = 0 --(it.w - w)/2
+
+         love.graphics.setColor(70,50,50)
+         love.graphics.print(it.text, it.x + xOff+1, it.y + yOff + 1)
+
+         love.graphics.setColor(200,200,150)
+         love.graphics.print(it.text, it.x + xOff, it.y + yOff)
+
+         if it.active then
+            love.graphics.setColor(200,200,150)
+            local cursorX = 0
+            if it.cursor then
+               cursorX = (love.graphics.getFont():getWidth((it.text:sub(1, it.cursor))))
+
+               --print(it.cursor)
+            end
+
+            love.graphics.rectangle("fill", it.x+cursorX, it.y, 2, it.h)
+         end
+      end
+
       if it.type == "label" or it.type=="labelbutton" then
          love.graphics.setColor(55,55,55)
 
@@ -414,6 +585,8 @@ function hammer:draw()
 
       table.insert(self.history, {id=it.id, color=it.color,
                                   dx=it.dx, dy=it.dy,
+                                  active=it.active,
+                                  cursor=it.cursor,
                                   dragging=it.dragging,
                                   startpress=it.startpress,
                                   startdrag=it.startdrag,

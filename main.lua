@@ -302,27 +302,11 @@ function love.load()
 
 
 
-         -- {
-         --    type="polygon", pos={x=0, y=0, z=0},
-         --    data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
-         --    children={
-         --       --{type="rect", rotation=0, pos={x=30, y=10, z=0}, world_pos={x=0,y=0,z=0,rot=0}, data={w=200, h=200, radius=50, steps=8}},
-         --       {type="rope",
-         --       pos={x=100,y=100,z=0},
-         --       rotation=0,
-         --       data={
-         --          join="miter",
-         --          relative_rotation = true,
-         --          rotations={0, 0, 0, 0, 0, 0,0,0,0},
-         --          lengths={120,120,100,100,100,100,100,100 },
-         --          thicknesses={20,50,60,70,70,70,70,60,20},
-         --       }},
-         --       {
-         --          type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8}
-         --       },
+         {
+            type="polygon", pos={x=0, y=0, z=0},
+            data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
+         },
 
-         --    },
-         -- },
          -- {
          -- {
          --    type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0},
@@ -450,17 +434,17 @@ function serializeRecursive(root)
       end
    end
 
-   return result;
-
+   return result
 end
 
 function love.keypressed(key)
-   if key == "s" then
+
+   if key == "f4" then
 
       local serialized = serializeRecursive(world)
       love.filesystem.write("filename.txt", inspect(serialized))
    end
-   if key == "o" then
+   if key == "f6" then
       love.system.openURL("file://"..love.filesystem.getSaveDirectory())
 
       local data = love.filesystem.newFileData("filename.txt")
@@ -470,7 +454,13 @@ function love.keypressed(key)
       updateSceneGraph(true, world, 0)
       camera = Camera(0, 0)
    end
-   	--suit.keypressed(key)
+   if key == "escape" then
+      love.event.quit()
+   end
+
+
+   Hammer:handle_keypressed(key)
+
 
 end
 
@@ -529,7 +519,6 @@ end
 function love.update(dt)
    flux.update(dt)
    spent_time = spent_time + dt
-   if love.keyboard.isDown("escape") then love.event.quit() end
    updateSceneGraph(false, world, dt)
 end
 
@@ -543,6 +532,22 @@ function love.draw()
    love.graphics.print("#tris "..triangle_count,  SCREEN_WIDTH - 100, 10)
    Hammer:draw()
 end
+
+
+function love.textedited(text, start, length)
+    -- for IME input
+    Hammer:handle_textedited(text, start, length)
+end
+
+function love.textinput(t)
+	-- forward text input to SUIT
+	Hammer:handle_textinput(t)
+end
+
+
+
+
+
 
 function setPivot(me)
    local pressed = Hammer.pointers.pressed[1]
