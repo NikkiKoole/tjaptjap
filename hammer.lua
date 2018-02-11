@@ -1,7 +1,6 @@
 
 
 
-local utf8 = require 'utf8'
 
 local function split(str, pos)
 	local offset = utf8.offset(str, pos) or 0
@@ -198,7 +197,7 @@ function hammer:textinput(id, text, width, height, opt_pos)
                   result.active = false
                   self.itemWithKeyboardFocus = nil
                elseif self.key == 'right' then
-                  result.cursor = math.min(utf8.len(text)+1, (result.cursor or 0)+ 1)
+                  result.cursor = math.min(utf8.len(text), (result.cursor or 0)+ 1)
                elseif self.key == 'left' then
                   result.cursor = math.max(0, (result.cursor or 0)-1)
                else

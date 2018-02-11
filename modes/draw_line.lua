@@ -24,13 +24,12 @@ end
 
 
 function mode:update(dt)
-
    Hammer:reset(10,300)
    Hammer:ret()
-
    if Hammer:labelbutton("START", 100, 40).released then
       self.start = true
    end
+
    Hammer:ret()
    Hammer:label("nd1","req. dist."..math.floor(self.needed_distance.value), 200,40)
    Hammer:ret()
@@ -55,8 +54,6 @@ function mode:update(dt)
    end
    Hammer:ret()
 
-
-
    if Hammer:labelbutton("ESCAPE", 100, 40).startpress then
       Signal.emit("switch-state", "stage")
       return
@@ -65,13 +62,8 @@ function mode:update(dt)
    if not self.start then return end
    local result
 
-
-
-
    if #(Hammer.pointers.pressed) > 0 then
-
       if self.firstTime == true then
-
          self.parent.children[#self.parent.children+1] =  {
             type="smartline",
             id="smartline_i_"..tostring(math.floor(math.random()*20)),
@@ -112,19 +104,14 @@ function mode:update(dt)
                coords={}}
          }
 
-
-
          self.thicknesses = {}
          self.coords = {}
          end
       end
 
-
-
       if Hammer.pointers.pressed[1] and Hammer.pointers.moved[1] then
          if Hammer.pointers.pressed[1].id == Hammer.pointers.moved[1].id then
             local wx,wy = camera:worldCoords(Hammer.pointers.moved[1].x, Hammer.pointers.moved[1].y)
-
 
             if self.parent.inverse then
                wx,wy = self.parent.inverse(wx,wy)

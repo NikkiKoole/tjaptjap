@@ -30,8 +30,7 @@ function mode:update(dt)
       end
    end
 
-   ---------------------------
-      if #Hammer.pointers.pressed == 1 then
+   if #Hammer.pointers.pressed == 1 then
       local isDirty = false
       for i=1, #Hammer.drawables do
          local it = Hammer.drawables[i]
@@ -50,9 +49,6 @@ function mode:update(dt)
          Signal.emit("switch-state", "stage")
       end
    end
-
-   ---------------------------
-
 end
 
 

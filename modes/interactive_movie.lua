@@ -15,9 +15,6 @@
 
 local mode = {}
 
-
-
-
 function saveFrame()
    for i,child in pairs(world.children) do
       child.animationStartFrame = {x=child.pos.x, y=child.pos.y}
@@ -33,10 +30,7 @@ function clearAllAnimations()
    for i,child in pairs(world.children) do
       child.animation = {}
    end
-
 end
-
-
 
 function compare(a,b)
   return a.time < b.time
@@ -46,7 +40,6 @@ function replayAnimation(time)
    for i,o in pairs(world.children) do
       if o.animation then
          table.sort(o.animation, compare)
-
          -- reset child
          o.pos.x = o.animationStartFrame and o.animationStartFrame.x or 0
          o.pos.y = o.animationStartFrame and o.animationStartFrame.y or 0
@@ -67,17 +60,13 @@ function replayAnimation(time)
    end
 end
 
-
-
 function mode:enter(from, data)
-
    self.selectedItems = {}
    self.time = 0
    self.isRecording = false
    self.isReplaying = false
    clearAllAnimations()
 end
-
 
 function secondsToClock(seconds)
   local seconds = tonumber(seconds)
@@ -95,8 +84,6 @@ end
 function mode:update(dt)
    self.dirty_types = {}
    Hammer:reset(10, 100)
-
-
 
    local stage_mode = Hammer:labelbutton("stage mode", 130,40)
    if stage_mode.released then

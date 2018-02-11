@@ -222,19 +222,15 @@ function mode:update()
       end
    end
 
-
    Hammer:pos(0,30)
-
    Hammer:label( "full_path", getFullGraphName(child, ""), SCREEN_WIDTH,20)
-
    Hammer:pos(20,100)
+
    local text_input = Hammer:textinput("name-input", self.child.id or "unnamed", 150, 40)
    if text_input.text ~= self.child.id then
       self.child.id = text_input.text
    end
    Hammer:ret()
-
-
    Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
    Hammer:ret()
    local add_shape = Hammer:labelbutton("child line", 120,40)
@@ -243,12 +239,8 @@ function mode:update()
       if not self.child.children then self.child.children = {} end
       Signal.emit("switch-state", "draw-line", {pointerID=id, parent=self.child})
    end
-
    Hammer:ret()
-   --print(getFullGraphName(child, ""))
-
    local add_polygon = Hammer:labelbutton( "child poly", 120,40)
-
    if add_polygon.dragging then
       dragger(add_polygon)
    end
@@ -280,7 +272,6 @@ function mode:update()
          local x2, y2 = child.world_trans(si.x or si.cx, si.y or si.cy)
          x2,y2 = camera:cameraCoords(x2,y2)
          Hammer:circle("si", 10, {x=x2, y=y2})
-
          x2, y2 = child.world_trans(ni.x or ni.cx, ni.y or ni.cy)
          x2,y2 = camera:cameraCoords(x2,y2)
          Hammer:circle("ni", 10, {x=x2, y=y2})
@@ -312,7 +303,6 @@ function mode:update()
          local x2, y2 = child.world_trans(si.x or si.cx, si.y or si.cy)
          x2,y2 = camera:cameraCoords(x2,y2)
          Hammer:circle("si", 10, {x=x2, y=y2})
-
          x2, y2 = child.world_trans(ni.x or ni.cx, ni.y or ni.cy)
          x2,y2 = camera:cameraCoords(x2,y2)
          Hammer:circle("ni", 10, {x=x2, y=y2})
@@ -339,32 +329,26 @@ function mode:update()
       end
    end
 
-
    Hammer:ret()
    Hammer:ret()
 
    if self.lastTouchedIndex then
-   local del_node = Hammer:labelbutton("delete last", 120,40)
-   if del_node.released then
-      mode:removeLastTouched()
-      self.lastTouchedIndex = false
+      local del_node = Hammer:labelbutton("delete last", 120,40)
+      if del_node.released then
+         mode:removeLastTouched()
+         self.lastTouchedIndex = false
+      end
    end
-   end
-
 
    Hammer:ret()
    if self.child.parent and self.child.parent.type == "smartline" then
       local smarltine_child = Hammer:labelbutton("smarltine-child woohoo", 100, 40)
    end
 
-
    if #Hammer.pointers.pressed == 1 then
       local wx, wy = camera:worldCoords(Hammer.pointers.pressed[1].x, Hammer.pointers.pressed[1].y)
-
       local isDirty = Hammer:isDirty()
-
       if not isDirty then
-      -- if hit test children (if any) try and drag them
          if self.child.children then
             for i=1,#self.child.children do
                local hit = pointInPoly({x=wx,y=wy}, self.child.children[i].triangles)
@@ -381,8 +365,5 @@ function mode:update()
          Signal.emit("switch-state", "stage")
       end
    end
-
 end
-
-
 return mode

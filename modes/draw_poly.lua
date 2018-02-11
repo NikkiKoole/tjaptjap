@@ -18,7 +18,6 @@ function mode:enter(from,data)
 end
 
 function mode:update(dt)
-
    Hammer:reset(20,100)
    Hammer:ret()
 
@@ -30,6 +29,7 @@ function mode:update(dt)
    Hammer:ret()
    Hammer:slider("distance", 200,40, self.needed_distance)
    Hammer:ret()
+
    if Hammer:labelbutton("ESCAPE", 100, 40).startpress then
       Signal.emit("switch-state", "stage")
       return
@@ -38,9 +38,7 @@ function mode:update(dt)
    if not self.start then return end
    local result
 
-
    if #(Hammer.pointers.pressed) > 0 then
-
       if self.firstTime == true then
          self.parent.children[#self.parent.children+1] =  {
             type="polygon", pos={x=0, y=0, z=0},
@@ -55,16 +53,8 @@ function mode:update(dt)
             data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} }
          }
          self.coords = {}
-
-
-
       end
-
-      end
-
-
-
-
+   end
 
    if Hammer.pointers.pressed[1] and Hammer.pointers.moved[1] then
       if Hammer.pointers.pressed[1].id == Hammer.pointers.moved[1].id then
@@ -86,8 +76,6 @@ function mode:update(dt)
                table.insert(self.coords, wy)
             end
          end
-
-         --print(inspect(self.coords))
       end
    end
 
@@ -98,18 +86,10 @@ function mode:update(dt)
       end
    end
 
-
-
-
    if #self.coords >= 6 then
       self.parent.children[#self.parent.children].data.points = mapFlatCoordsToPoints(self.coords)
       self.parent.children[#self.parent.children].dirty = true
    end
-
-
-
-
-
 end
 
 

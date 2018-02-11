@@ -44,7 +44,7 @@ function mode:update(dt)
    end
    local load_file = Hammer:labelbutton("load", 70,40)
    if load_file.released then
-            love.system.openURL("file://"..love.filesystem.getSaveDirectory())
+      love.system.openURL("file://"..love.filesystem.getSaveDirectory())
 
    end
 
@@ -61,7 +61,7 @@ function mode:update(dt)
    end
 
 
-   Hammer:pos(10,love.graphics.getHeight()- 60)
+   Hammer:pos(10,love.graphics.getHeight()- 50)
    local add_polygon = Hammer:labelbutton("polygon", 80,40)
 
    if add_polygon.dragging then

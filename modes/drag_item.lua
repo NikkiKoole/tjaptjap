@@ -18,7 +18,6 @@ function mode:pointermoved(x,y,dx,dy)
    end
    self.child.pos.x =    self.child.pos.x + dx
    self.child.pos.y =    self.child.pos.y + dy
-
    self.child.dirty = true
 end
 

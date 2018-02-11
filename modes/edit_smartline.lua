@@ -1,9 +1,5 @@
 local mode = {}
-
 local thickness_value = {min=1, max=100, value=50}
-
-
-
 
 function angleToRelative(a)
    return (math.pi * 2) - (a + math.pi/2)
@@ -17,7 +13,6 @@ function getClosestNodeIndex(x, y, coords)
    local best_distance = math.huge
    local index = -1
    local insertIndex = -1
-
    for i=1, #coords, 2 do
       local d = utils.distance(x,y,coords[i+0],coords[i+1])
       if d < best_distance then
@@ -27,46 +22,34 @@ function getClosestNodeIndex(x, y, coords)
    end
    -- at this moment you have the index of the closestNode
    -- now we look and see if my current pos is closer to the next node after the closest then the closest itself is
-
    local i2 = index*2-1
    if (i2+1 < #coords) then
       local d1 = utils.distance(x,y,coords[i2+2],coords[i2 + 3])
       local d2 = utils.distance(coords[i2+0],coords[i2 + 1],coords[i2+2],coords[i2 + 3])
       if d1 > d2 then index = index-1 end
    end
-
    return index
 end
-
-
 
 function calculateAllPropsFromCoords(coords)
    local result = {relative_rotations={}, world_rotations={}, lengths={}}
    local world_rotation = 0
    local counter = 1
    for i=1, #coords-2, 2 do
-      local thisX = coords[i+0]
-      local thisY = coords[i+1]
-      local nextX = coords[i+2]
-      local nextY =  coords[i+3]
-      local a = utils.angle(  nextX, nextY,thisX, thisY)
-      local d = utils.distance( thisX, thisY, nextX, nextY)
+      local a = utils.angle(  coords[i+2],  coords[i+3], coords[i+0],  coords[i+1])
+      local d = utils.distance( coords[i+0],  coords[i+1], coords[i+2],  coords[i+3])
       local wa = angleToWorld(a)
-
       table.insert(result.relative_rotations, angleToRelative(a)  )
-
       if counter > 1 then
          local diff = (result.relative_rotations[counter]-  result.relative_rotations[counter-1] )
          table.insert(result.world_rotations, diff  )
       else
          table.insert(result.world_rotations, result.relative_rotations[1])
       end
-
       world_rotation = wa + world_rotation
       table.insert(result.lengths, d)
       counter = counter + 1
    end
-
    return result
 end
 
@@ -109,10 +92,9 @@ function mode:update(dt)
    local child = self.child
    Hammer:reset(0,30)
    Hammer:label( "full_path", getFullGraphName(child, ""), SCREEN_WIDTH,20)
-
    Hammer:pos(20,100)
 
-      local text_input = Hammer:textinput("name-input", self.child.id or "unnamed", 150, 40)
+   local text_input = Hammer:textinput("name-input", self.child.id or "unnamed", 150, 40)
    if text_input.text ~= self.child.id then
       self.child.id = text_input.text
    end
@@ -126,8 +108,8 @@ function mode:update(dt)
       if not self.child.children then self.child.children = {} end
       Signal.emit("switch-state", "draw-line", {pointerID=id, parent=self.child})
    end
-   Hammer:ret()
 
+   Hammer:ret()
    local add_polygon = Hammer:labelbutton("child poly", 120,40)
 
    if add_polygon.dragging then
@@ -144,8 +126,7 @@ function mode:update(dt)
    end
    Hammer:ret()
    Hammer:ret()
-      local add_vertex = Hammer:labelbutton("add vertex =>", 120,40)
-
+   local add_vertex = Hammer:labelbutton("add vertex =>", 120,40)
    if add_vertex.dragging then
       local p = getWithID(Hammer.pointers.moved, add_vertex.pointerID)
       local moved = Hammer.pointers.moved[p]
@@ -157,7 +138,6 @@ function mode:update(dt)
          self.bestIndex =  closestNodeIndex
       end
    end
-
    if add_vertex.enddrag then
       local p = getWithID(Hammer.pointers.released, add_vertex.pointerID)
       local released = Hammer.pointers.released[p]
@@ -178,6 +158,7 @@ function mode:update(dt)
          self.child.dirty = true
       end
    end
+
    Hammer:ret()
    if Hammer:labelbutton("("..self.lineOptionIndex..") "..self.lineOptions[self.lineOptionIndex], 120, 40).released then
       self.lineOptionIndex = self.lineOptionIndex + 1
@@ -197,10 +178,7 @@ function mode:update(dt)
       self.child.data.join = self.lineStyleOptions[self.lineStyleOptionIndex]
       self.child.dirty = true
    end
-
    Hammer:ret()
-
-
    Hammer:ret()
    local delete = Hammer:labelbutton("delete", 120, 40)
    if delete.startpress then
@@ -212,9 +190,7 @@ function mode:update(dt)
       end
    end
 
-
    Hammer:ret()
-
 
    if self.lastActiveIndex > -1 then
       Hammer:ret()
@@ -231,12 +207,10 @@ function mode:update(dt)
 
       local del_node = Hammer:labelbutton("delete last", 120,40)
       if del_node.released then
-
          local index = self.lastActiveIndex -1
          table.remove(self.child.data.thicknesses, index+1)
          table.remove(child.data.coords, index*2+1)
          table.remove(child.data.coords, index*2+1)
-
          local props = calculateAllPropsFromCoords(child.data.coords)
          child.data.relative_rotations = props.relative_rotations
          child.data.world_rotations = props.world_rotations
@@ -244,7 +218,6 @@ function mode:update(dt)
 
          self.child.dirty=true
          self.lastActiveIndex = -1
-
          if #child.data.coords <4 then
             for i=#world.children,1,-1 do
                if world.children[i]==self.child then
@@ -253,14 +226,8 @@ function mode:update(dt)
                end
             end
          end
-
       end
    end
-
-
-
-
-
 
    Hammer:pos(0,0)
    local recipe = self.lineOptions[self.lineOptionIndex]
@@ -271,13 +238,10 @@ function mode:update(dt)
       local color = {200,200,200}
       local button = Hammer:rectangle( "smartline-handle"..i, 30, 30,
                                        {x=cx2-15, y=cy2-15, color=color})
-
       if button.startpress then
          self.lastActiveIndex = (i+1)/2
          thickness_value.value = child.data.thicknesses[self.lastActiveIndex] or 0
       end
-
-
       if (self.bestIndex == (i+1)/2 ) then
          Hammer:circle("bestindex", 30, {x=cx2, y=cy2})
       end
@@ -288,7 +252,6 @@ function mode:update(dt)
          if moved then
             local wx,wy = camera:worldCoords(moved.x-button.dx, moved.y-button.dy)
             wx,wy = child.inverse(wx,wy)
-
 
             if recipe == 'coords' then
                child.data.coords[i  ] = wx
@@ -302,41 +265,26 @@ function mode:update(dt)
                if i > 1 then
                   local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
                   local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
-
                   child.data.relative_rotations[-1 + (i+1)/2] =  angleToRelative(ap)
-
                   local p2 = calculateAllPropsFromCoords(child.data.coords)
                   child.data.lengths = p2.lengths
-
-                  --child.data.lengths[-1 + (i+1)/2] = dp
-
-
                   local new_coords = utils.calculateCoordsFromRotationsAndLengths(true, child.data)
                   child.data.coords = new_coords
-
                   local props = calculateAllPropsFromCoords(child.data.coords)
                   child.data.relative_rotations = props.relative_rotations
                   child.data.world_rotations = props.world_rotations
-
                end
+
             elseif recipe == "world" then
                if i > 1 then
                   local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
                   local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
                   local startAngle = mode:getNestedRotation(((i+1)/2)-2)
-
-                  --child.data.lengths[-1 + (i+1)/2] = dp
                   child.data.world_rotations[-1+(i+1)/2] = angleToWorld(ap) - startAngle
-
-
                   local p2 = calculateAllPropsFromCoords(child.data.coords)
                   child.data.lengths = p2.lengths
-
-
                   local new_coords = utils.calculateCoordsFromRotationsAndLengths(false, child.data)
                   child.data.coords = new_coords
-
-
                   local props = calculateAllPropsFromCoords(child.data.coords)
                   child.data.relative_rotations = props.relative_rotations
                   child.data.world_rotations = props.world_rotations
@@ -378,8 +326,9 @@ function mode:update(dt)
    end
 end
 
+----
+-- @duplication
 
-----------------
    function dragger(ui)
       local p = getWithID(Hammer.pointers.moved, ui.pointerID)
       local moved = Hammer.pointers.moved[p]

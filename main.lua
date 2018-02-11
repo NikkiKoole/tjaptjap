@@ -206,8 +206,8 @@ function love.load()
    love.graphics.setFont(helvetica)
    Hammer.pointers = pointers
 
-   nameparts = string_split_on("/some/deeply/nested/path", "/")
-   print(inspect(nameparts))
+
+
    world = {
       pos={x=0,y=0,z=0},
       id="world",
@@ -473,8 +473,6 @@ function love.filedropped(file)
    local data = love.filesystem.newFileData(file)
    local path_parts = string_split_on( file.getFilename(file), "\\")
 
-   print(inspect(path_parts))
-
    world = loadstring("return "..data:getString())()
 
    initWorld(world)
@@ -514,14 +512,11 @@ function drawSceneGraph(root)
                love.graphics.setColor(100, 175,55, 155)   --- hercules green monitor.
             elseif triangle_count % 3 == 1 then
                love.graphics.setColor(100, 175,55, 130)   --- hercules green monitor.
-
                --love.graphics.setColor(150, 155  ,55, 155) -- hercules amber
             elseif triangle_count % 3 == 2 then
                love.graphics.setColor(100, 175,55, 100)   --- hercules green monitor.
-
                --love.graphics.setColor(175, 75   ,75, 155) -- hercules pink
             end
-
 
             love.graphics.polygon("fill", root.children[i].triangles[j])
             triangle_count = triangle_count + 1
@@ -542,9 +537,7 @@ function love.update(dt)
       print("hammer ")
       Hammer:reset(0,0)
       local save_dialog = Hammer:labelbutton("save dialog", 130,40)
-
    end
-
 end
 
 function love.draw()
@@ -568,10 +561,6 @@ function love.textinput(t)
 end
 
 
-
-
-
-
 function setPivot(me)
    local pressed = Hammer.pointers.pressed[1]
    local wxr,wyr = camera:worldCoords(pressed.x, pressed.y)
@@ -591,9 +580,7 @@ function setPivot(me)
 
    me.child.pivot.x = t2x
    me.child.pivot.y = t2y
-
    me.setPivot=false
-
 end
 
 function makePivotBehaviour(pivot, child)

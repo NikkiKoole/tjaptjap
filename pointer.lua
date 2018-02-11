@@ -81,9 +81,4 @@ function love.touchpressed(id, x, y, dx, dy, pressure)
    pointerPressed({id=id, x=x, y=y, dx=dx, dy=dy, pressure=pressure})
 end
 
-
-
-
-
---------------------------------
 return pointers
