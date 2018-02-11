@@ -42,6 +42,23 @@ function mode:update(dt)
       self.touches = {}
       Signal.emit("switch-state", "interactive-movie", {pointerID=id})
    end
+   local load_file = Hammer:labelbutton("load", 70,40)
+   if load_file.released then
+            love.system.openURL("file://"..love.filesystem.getSaveDirectory())
+
+   end
+
+
+   local save_file = Hammer:labelbutton("save", 70,40)
+   if save_file.released then
+
+      love.filesystem.write(world.name..".hat.txt", inspect(serializeRecursive(world), {indent=""}))
+
+   end
+   local name = Hammer:textinput("name-input", world.name or "unnamed world", 130, 40)
+   if name.text ~= world.name then
+      world.name = name.text
+   end
 
 
    Hammer:pos(10,love.graphics.getHeight()- 60)

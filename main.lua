@@ -25,6 +25,7 @@ utils = require "utils"
 local shapes = require "shapes"
 poly = require 'poly'
 
+utf8 = require 'utf8'
 
 local pointers = require "pointer"
 
@@ -34,6 +35,8 @@ local a = require "vendor.affine"
 
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
+
+show_save_screen = false
 
 
 
@@ -175,6 +178,23 @@ function initWorld(world)
    end
 end
 
+function string_split_on(str, splitter)
+   local result = {}
+   local index1 = 1
+
+   for i=1, utf8.len(str) do
+      if str:sub(i, i) == splitter then
+         table.insert(result, str:sub(index1, i-1) )
+         index1 = i+1
+      end
+   end
+
+   table.insert(result, str:sub(index1, utf8.len(str)) )
+
+
+   return result
+end
+
 
 function love.load()
    if arg[#arg] == "-debug" then require("mobdebug").start() end
@@ -186,6 +206,8 @@ function love.load()
    love.graphics.setFont(helvetica)
    Hammer.pointers = pointers
 
+   nameparts = string_split_on("/some/deeply/nested/path", "/")
+   print(inspect(nameparts))
    world = {
       pos={x=0,y=0,z=0},
       id="world",
@@ -438,35 +460,27 @@ function serializeRecursive(root)
 end
 
 function love.keypressed(key)
-
-   if key == "f4" then
-
-      local serialized = serializeRecursive(world)
-      love.filesystem.write("filename.txt", inspect(serialized))
-   end
-   if key == "f6" then
-      love.system.openURL("file://"..love.filesystem.getSaveDirectory())
-
-      local data = love.filesystem.newFileData("filename.txt")
-      world = loadstring("return "..data:getString())()
-
-      initWorld(world)
-      updateSceneGraph(true, world, 0)
-      camera = Camera(0, 0)
-   end
    if key == "escape" then
       love.event.quit()
    end
 
-
    Hammer:handle_keypressed(key)
-
-
 end
 
+
 function love.filedropped(file)
+
    local data = love.filesystem.newFileData(file)
+   local path_parts = string_split_on( file.getFilename(file), "\\")
+
+   print(inspect(path_parts))
+
    world = loadstring("return "..data:getString())()
+
+   initWorld(world)
+   updateSceneGraph(true, world, 0)
+   camera = Camera(0, 0)
+
    --world = bitser.loadData(data:getPointer(), data:getSize())
 end
 
@@ -479,6 +493,10 @@ function getFullGraphName(node, name)
    end
    return str
 end
+
+
+
+
 
 
 function drawSceneGraph(root)
@@ -520,6 +538,13 @@ function love.update(dt)
    flux.update(dt)
    spent_time = spent_time + dt
    updateSceneGraph(false, world, dt)
+   if show_save_screen then
+      print("hammer ")
+      Hammer:reset(0,0)
+      local save_dialog = Hammer:labelbutton("save dialog", 130,40)
+
+   end
+
 end
 
 function love.draw()
@@ -535,12 +560,10 @@ end
 
 
 function love.textedited(text, start, length)
-    -- for IME input
     Hammer:handle_textedited(text, start, length)
 end
 
 function love.textinput(t)
-	-- forward text input to SUIT
 	Hammer:handle_textinput(t)
 end
 

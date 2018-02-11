@@ -1,13 +1,15 @@
 TODO
 -------
 
-- moving multiple vertices with one pointer in polymode
+- save various files, name em
+- use what we have now to experiment with flux and find issues
 
-- movie mode; rotations, ?line coords?, ?vertices?
-- nested scene graph logic.
-- add all and remove items/children via stage UI
-- reintroduce the parallax scrolling on z
-- add random polygons a generator with some params
+- moving multiple vertices with one pointer in polymode
 - add color,  per shape/per triangle / per triangle vertex
 - make a mesh per thing
+- nested scene graph logic.
+
+- reintroduce the parallax scrolling on z
+- add random polygons a generator with some params
 - keyframe animation, live recording animation
+- movie mode; rotations, ?line coords?, ?vertices?
