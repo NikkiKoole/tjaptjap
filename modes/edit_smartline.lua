@@ -112,8 +112,14 @@ function mode:update(dt)
 
    Hammer:pos(20,100)
 
+      local text_input = Hammer:textinput("name-input", self.child.id or "unnamed", 150, 40)
+   if text_input.text ~= self.child.id then
+      self.child.id = text_input.text
+   end
+   Hammer:ret()
    Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
    Hammer:ret()
+
    local add_shape = Hammer:labelbutton("child line", 120,40)
    if add_shape.released then
       self.touches = {}

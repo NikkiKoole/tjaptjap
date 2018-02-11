@@ -228,6 +228,11 @@ function mode:update()
    Hammer:label( "full_path", getFullGraphName(child, ""), SCREEN_WIDTH,20)
 
    Hammer:pos(20,100)
+   local text_input = Hammer:textinput("name-input", self.child.id or "unnamed", 150, 40)
+   if text_input.text ~= self.child.id then
+      self.child.id = text_input.text
+   end
+   Hammer:ret()
 
 
    Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
