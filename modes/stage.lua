@@ -298,6 +298,7 @@ function zoom(scaleDiff, center)
     local offsetY = new_y/(camera.scale * (1 + scaleDiff)) - new_y/camera.scale
 
     camera:move(-offsetX, -offsetY )
+    print(camera.scale)
     camera:zoom(1 + scaleDiff)
     --clamp_camera()
 end

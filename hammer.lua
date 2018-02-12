@@ -518,7 +518,13 @@ function hammer:draw()
       if it.type == "slider" then
          love.graphics.rectangle("fill", it.x, it.y, it.w, it.h)
 
-         love.graphics.setColor(255,0,0, 150)
+         if (it.over) then
+            love.graphics.setColor(255,255,255)
+         else
+
+            love.graphics.setColor(255,0,0, 150)
+         end
+
          love.graphics.rectangle("fill", it.x + it.thumbX, it.y + it.thumbY, math.min(it.w, it.h), math.min(it.w, it.h))
 
       end
