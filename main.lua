@@ -170,6 +170,7 @@ end
 
 
 function initWorld(world)
+
    world.dirty = true
    if world.children then
       for i=1, #world.children do
@@ -436,6 +437,8 @@ function serializeRecursive(root)
 
 
    local result = {}
+
+
    for k,_ in pairs(root) do
       local isBlacklisted = false
 
@@ -470,14 +473,14 @@ end
 
 function love.filedropped(file)
 
-   local data = love.filesystem.newFileData(file)
-   local path_parts = string_split_on( file.getFilename(file), "\\")
+   --local data = love.filesystem.newFileData(file)
+   --local path_parts = string_split_on( file.getFilename(file), "\\")
+   --print(inspect(path_parts))
+   -- world = loadstring("return "..data:getString())()
 
-   world = loadstring("return "..data:getString())()
-
-   initWorld(world)
-   updateSceneGraph(true, world, 0)
-   camera = Camera(0, 0)
+   -- initWorld(world)
+   -- updateSceneGraph(true, world, 0)
+   -- camera = Camera(0, 0)
 
    --world = bitser.loadData(data:getPointer(), data:getSize())
 end

@@ -5,8 +5,7 @@ local mode = {}
 
 function mode:init()
    self.touches = {}
-   self.str = "CHANGE ME"
-   self.str2 = "#METOO"
+   self.loadable_files_panel = false
 
 end
 
@@ -44,21 +43,71 @@ function mode:update(dt)
    end
    local load_file = Hammer:labelbutton("load", 70,40)
    if load_file.released then
-      love.system.openURL("file://"..love.filesystem.getSaveDirectory())
+      local hat_files = {};
+      local files = love.filesystem.getDirectoryItems("")
+      for i=1, #files do
+         if string.match(files[i], ".hat.txt") then
+            table.insert(hat_files, files[i])
+         end
+      end
+      self.loadable_files_panel = true
+      self.files_to_load = hat_files
+
+      --print(inspect(hat_files));
+
+      --love.system.openURL("file://"..love.filesystem.getSaveDirectory())
 
    end
 
 
+
+
    local save_file = Hammer:labelbutton("save", 70,40)
    if save_file.released then
-
-      love.filesystem.write(world.name..".hat.txt", inspect(serializeRecursive(world), {indent=""}))
+      local serialized = serializeRecursive(world)
+      serialized.camera = {x=camera.x, y=camera.y, scale=camera.scale}
+      love.filesystem.write(world.name..".hat.txt", inspect(serialized, {indent=""}))
 
    end
    local name = Hammer:textinput("name-input", world.name or "unnamed world", 130, 40)
    if name.text ~= world.name then
       world.name = name.text
    end
+
+   Hammer:pos(10, 100)
+   if (self.loadable_files_panel ~= false) then
+      for i=1, #self.files_to_load do
+         local name = string.gsub( self.files_to_load[i], ".hat.txt", "")
+
+         if Hammer.x + 200 >= love.graphics.getWidth() then
+            Hammer:ret()
+         end
+
+         local button = Hammer:labelbutton(name, 200,40)
+
+         if button.released then
+            local data = love.filesystem.newFileData(name..".hat.txt")
+            --print(inspect(data:getString()))
+            world = loadstring("return "..data:getString())()
+            --world.camera = nil
+
+               if (world.camera) then
+                  camera = Camera(world.camera.x , world.camera.y)
+                  print(world.camera.scale)
+                  camera:zoom(world.camera.scale)
+               else
+                  camera = Camera(0,0)
+               end
+
+
+            initWorld(world)
+            updateSceneGraph(true, world, 0)
+
+            self.loadable_files_panel = false
+         end
+      end
+   end
+
 
 
    Hammer:pos(10,love.graphics.getHeight()- 50)
@@ -298,7 +347,6 @@ function zoom(scaleDiff, center)
     local offsetY = new_y/(camera.scale * (1 + scaleDiff)) - new_y/camera.scale
 
     camera:move(-offsetX, -offsetY )
-    print(camera.scale)
     camera:zoom(1 + scaleDiff)
     --clamp_camera()
 end
