@@ -41,7 +41,7 @@ function mode:update(dt)
    end
    if Hammer:labelbutton(thick_label, 250,40).released then
 
-      self.use_thickness_func = self.use_thickness_func+1
+      self.use_thickness_func = self.use_thickness_func + 1
       if self.use_thickness_func > 2 then
          self.use_thickness_func = 0
       end
@@ -153,6 +153,15 @@ function mode:update(dt)
    if #(Hammer.pointers.released) > 0 then
       if self.firstTime == false then
          self.shapeHasEnded = true
+
+         -- If we are using a thickness func
+         -- I want to make the last thickness the same as the first
+         if self.use_thickness_func == 1 or self.use_thickness_func == 2 then
+            self.thicknesses[#self.thicknesses] =  self.thicknesses[1]
+         end
+
+
+
       end
    end
 
