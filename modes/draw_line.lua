@@ -39,13 +39,12 @@ function mode:update(dt)
    if self.use_thickness_func>0 then
       thick_label = "use thickness func"..self.use_thickness_func
    end
-   if Hammer:labelbutton(thick_label, 250,40).released then
 
+   if Hammer:labelbutton(thick_label, 250,40).released then
       self.use_thickness_func = self.use_thickness_func + 1
       if self.use_thickness_func > 2 then
          self.use_thickness_func = 0
       end
-
    end
    Hammer:ret()
 
@@ -64,6 +63,7 @@ function mode:update(dt)
 
    if #(Hammer.pointers.pressed) > 0 then
       if self.firstTime == true then
+
          self.parent.children[#self.parent.children+1] =  {
             type="smartline",
             id="smartline_i_"..tostring(math.floor(math.random()*20)),
@@ -86,12 +86,15 @@ function mode:update(dt)
          self.shapeHasEnded = false
 
          if not (#self.coords >= 4) then
-            print(inspect(self.coords))
-         else
 
-         self.parent.children[#self.parent.children+1] =  {
+         else
+            local check_last =self.parent.children[#self.parent.children]
+            assert(#(check_last.data.coords) >= 4)
+
+            self.parent.children[#self.parent.children+1] =  {
+
             type="smartline",
-            id="smartline_"..tostring(math.floor(math.random()*20)),
+            id="smartline_"..tostring(#self.parent.children),
             pos={x=0,y=0,z=0},
             data={
                join="miter",
@@ -144,8 +147,6 @@ function mode:update(dt)
                         table.insert(self.thicknesses,self.next_thick_value.value)
                      end
                   end
-
-
                end
          end
       end
@@ -159,11 +160,22 @@ function mode:update(dt)
          if self.use_thickness_func == 1 or self.use_thickness_func == 2 then
             self.thicknesses[#self.thicknesses] =  self.thicknesses[1]
          end
+         if #self.coords < 4 then
 
+            -- HACK fix this, i will for now just use mouse data, because
+            -- somehow touches trigger mouseevents too here
+            -- which makes this code run twice (once witha userdata id and one mouse)
+            -- and removing the last thing twice is obviously pretty messed up
 
+            if (Hammer.pointers.released[1].id == "mouse") then
+               table.remove(self.parent.children, #self.parent.children )
+               print("removed last drawn smartline, it was too short")
+            end
 
+         end
       end
    end
+
 
 
 
@@ -171,7 +183,16 @@ function mode:update(dt)
       self.parent.children[#self.parent.children].data.coords = self.coords
       self.parent.children[#self.parent.children].data.thicknesses = self.thicknesses
       self.parent.children[#self.parent.children].dirty = true
+   else
+      if #self.coords < 4 then
+         --print("coords < 4", self.parent.children[#self.parent.children].data.id)
+         --print("draw line coords<4 ", inspect(self.coords))
+      end
+
    end
+
+
+
 
 end
 

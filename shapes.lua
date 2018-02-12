@@ -222,7 +222,7 @@ function makeCustomPolygon(x,y, points, steps)
    return result
 end
 
-function makeSmartLine(x,y, data)
+function makeSmartLine(x,y, data, meta)
    -- The idea here is to either use the given coords to calculate all other values OR
    -- use either rotations or world_rotations and lengths
    local result = {}
@@ -248,7 +248,8 @@ function makeSmartLine(x,y, data)
       elseif not data.use_relative_rotation and #data.world_rotations > 0 then
          data.coords = utils.calculateCoordsFromRotationsAndLengths(false, data, x, y)
       else
-         print("Did i get here? How do i fix this")
+
+         print("Did i get here? How do i fix this", inspect(meta))
       end
 
       -- hope we have some other data then
@@ -265,6 +266,7 @@ function makeSmartLine(x,y, data)
       newcoords[i+1] = data.coords[i+1] + y
    end
 
+--   if data.id then print("id: ", data.id) end
    assert(#newcoords >= 4)
    local vertices, indices, draw_mode = polyline(data.join, newcoords, data.thicknesses, 1, false)
    result = {vertices=vertices, indices=indices, draw_mode=draw_mode,type="smartline"}
@@ -312,7 +314,7 @@ function makeShape(meta)
    elseif meta.type == "polygon" then
       result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points, meta.data.steps)
    elseif meta.type == "smartline" then
-      result = makeSmartLine(meta.pos.x, meta.pos.y, meta.data)
+      result = makeSmartLine(meta.pos.x, meta.pos.y, meta.data, meta)
    elseif meta.type == "mesh3d" then
       result = makeMesh3d(meta.pos.x, meta.pos.y, meta.data)
    else
