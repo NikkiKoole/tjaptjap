@@ -166,14 +166,19 @@ function mode:update(dt)
             -- somehow touches trigger mouseevents too here
             -- which makes this code run twice (once witha userdata id and one mouse)
             -- and removing the last thing twice is obviously pretty messed up
+            -- UPDATE using the mouse isnt agood idea either, it keeps on being released
 
-            if (Hammer.pointers.released[1].id == "mouse") then
-               table.remove(self.parent.children, #self.parent.children )
-               print("removed last drawn smartline, it was too short")
+            if (Hammer.pointers.released[1].id ~= "mouse") then
+               local me = self.parent.children[#self.parent.children]
+               if (me.data.coords and #(me.data.coords) < 4) then
+                  table.remove(self.parent.children, #self.parent.children )
+                  print("removed last drawn smartline, it was too short")
+               end
             end
 
          end
       end
+
    end
 
 
