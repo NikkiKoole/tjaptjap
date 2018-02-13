@@ -327,7 +327,7 @@ function love.load()
 
 
 
-
+         -- TODO points should get rgba values here probably.
          {
             type = "polygon",
             pos = {x=0, y=0, z=0},

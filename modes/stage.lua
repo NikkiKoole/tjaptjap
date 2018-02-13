@@ -342,6 +342,7 @@ function mode:touchmoved( id, x, y, dx, dy, pressure )
 end
 
 function zoom(scaleDiff, center)
+   -- FIXME clamp the zoom omehow
     local w = love.graphics.getWidth()
     local h = love.graphics.getHeight()
     local new_x = center.x - w/2
@@ -350,7 +351,7 @@ function zoom(scaleDiff, center)
     local offsetY = new_y/(camera.scale * (1 + scaleDiff)) - new_y/camera.scale
 
     camera:move(-offsetX, -offsetY )
-    camera:zoom(1 + scaleDiff)
+    camera:zoom(math.max(1 + scaleDiff, 0.005))
     --clamp_camera()
 end
 

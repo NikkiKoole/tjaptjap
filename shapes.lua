@@ -150,6 +150,8 @@ function makeStarPolygon(cx, cy, sides, r1, r2, a1, a2)
    local a = 0 --the angle my point points towards
    local r = 0 -- the radius, or distance of my point
 
+   --table.insert(result, cx)
+   --table.insert(result, cy)
 
    for i=1, steps do
       if i %  2 == 0 then
@@ -165,6 +167,9 @@ function makeStarPolygon(cx, cy, sides, r1, r2, a1, a2)
 
       angle1 = angle1 + anglestep
    end
+
+   --table.insert(result, cx + r2 * math.cos(angle1 + a2))
+   --table.insert(result, cy + r2 * math.sin(angle1 + a2))
 
    return result
 end
