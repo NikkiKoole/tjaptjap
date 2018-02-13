@@ -551,7 +551,10 @@ function hammer:draw()
          end
 
          if (it.active) then
-            love.graphics.setColor(130,170,130)
+            love.graphics.setColor(130,170,130, 100)
+            love.graphics.rectangle("fill", it.x-2, it.y-2, it.w+4, it.h+4)
+
+            love.graphics.setColor(0,0,0, 100)
          end
 
 
