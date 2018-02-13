@@ -276,61 +276,67 @@ function love.load()
          --    }
          -- },
 
-         {
-            type="smartline",
-            id="TheSmartLine",
-            color={255,0,0, 255},
-            color_setting='triple',
-            pos={x=0,y=0,z=0},
-            data={
-               join="miter",
-               type="coords",
-               use_relative_rotation = true,
-               coords={0,0,150,100,250,400,500,700,600,800,750,900,810,1000},
-               world_rotations={},
-               relative_rotations={},
-               lengths={},
-               thicknesses={20,10,30,20,20, 10,20,20,20}
-            }
-         },
-         {
-            type="smartline",
-            id="TheSmartLine2",
-            pos={x=0,y=0,z=0},
-            data={
-               join="miter",
-               type="relative",
-               use_relative_rotation = true,
-               coords={},
-               world_rotations={},
-               relative_rotations={0, 0, 0, 0, 0, 0,0,0},
-               lengths={120,120,100,100,100,100,100,100 },
-               thicknesses={20,10,30,20,20, 10,20,20,20}
-            }
-         },
-         {
-            type="smartline",
-            id="TheSmartLine3",
-            pos={x=200,y=0,z=0},
-            data={
-               join="miter",
-               type="world",
+         -- {
+         --    type="smartline",
+         --    id="TheSmartLine",
+         --    color={255,0,0, 255},
+         --    color_setting='triple',
+         --    pos={x=0,y=0,z=0},
+         --    data={
+         --       join="miter",
+         --       type="coords",
+         --       use_relative_rotation = true,
+         --       coords={0,0,150,100,250,400,500,700,600,800,750,900,810,1000},
+         --       world_rotations={},
+         --       relative_rotations={},
+         --       lengths={},
+         --       thicknesses={20,10,30,20,20, 10,20,20,20}
+         --    }
+         -- },
+         -- {
+         --    type="smartline",
+         --    id="TheSmartLine2",
+         --    pos={x=0,y=0,z=0},
+         --    data={
+         --       join="miter",
+         --       type="relative",
+         --       use_relative_rotation = true,
+         --       coords={},
+         --       world_rotations={},
+         --       relative_rotations={0, 0, 0, 0, 0, 0,0,0},
+         --       lengths={120,120,100,100,100,100,100,100 },
+         --       thicknesses={20,10,30,20,20, 10,20,20,20}
+         --    }
+         -- },
+         -- {
+         --    type="smartline",
+         --    id="TheSmartLine3",
+         --    pos={x=200,y=0,z=0},
+         --    data={
+         --       join="miter",
+         --       type="world",
 
-               use_relative_rotation = false,
-               coords={},
-               world_rotations={-math.pi/2,-0.8,-0.8,0.8},
-               lengths={120,120,100,50},
-               thicknesses={40,40,30,20,20},
-               relative_rotations={},
-            }
-         },
+         --       use_relative_rotation = false,
+         --       coords={},
+         --       world_rotations={-math.pi/2,-0.8,-0.8,0.8},
+         --       lengths={120,120,100,50},
+         --       thicknesses={40,40,30,20,20},
+         --       relative_rotations={},
+         --    }
+         -- },
+
 
 
 
          {
-            type="polygon", pos={x=0, y=0, z=0},
-            data={ steps=3,  points={{x=0,y=0}, {cx=100, cy=-100},{cx=200, cy=-100},{cx=300, cy=-100}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}} },
-         },
+            type = "polygon",
+            pos = {x=0, y=0, z=0},
+            data = {
+               steps=3,
+               points={{x=0,y=0}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}},
+               triangle_colors={{200,100,100,255},{100,100,200,255}}
+            },
+         }
 
          -- {
          -- {
@@ -537,8 +543,13 @@ function drawSceneGraph(root)
                      --love.graphics.setColor(color[1], color[2],color[3], 255 - (triangle_count%3)*60)
                   end
                end
-
             end
+            local tc = root.children[i].data.triangle_colors
+            if tc then
+               use_color = {tc[j][1], tc[j][2], tc[j][3], tc[j][4] or 255}
+            end
+
+            --print(inspect(root.children[i].data.triangle_colors ))
             love.graphics.setColor(255,255,255)
             --print(inspect(root.children[i].triangles[j]))
             local vertices = get_colored_vertices_for_triangle(root.children[i].triangles[j], use_color)
@@ -563,7 +574,7 @@ function get_colored_vertices_for_triangle(triangle, color)
       table.insert(nested, color[1])
       table.insert(nested, color[2] - (i*50))
       table.insert(nested, color[3])
-      table.insert(nested, color[4] - (i*50))
+      table.insert(nested, color[4])
 
       table.insert(result, nested)
    end

@@ -40,6 +40,12 @@ function mode:addControlPoint(x,y)
 end
 
 
+function mode:set_triangle_color(index, color)
+   --self.child.triangles[index] = ..
+   print("hi", index, inspect(color))
+end
+
+
 function mode:removeVertexIfOverlappingWithNextOrPrevious(it)
    local points = self.child.data.points
    local next_i, prev_i = it.i + 1, it.i - 1
@@ -105,11 +111,15 @@ function mode:getClosestNodes(x, y)
 end
 
 
-   function dragger(ui)
+   function dragger_color(ui, optional_color)
       local p = getWithID(Hammer.pointers.moved, ui.pointerID)
       local moved = Hammer.pointers.moved[p]
       if moved then
-         Hammer:circle("cursor1", 30, {x=moved.x, y=moved.y})
+         if optional_color then
+            Hammer:circle("cursor1", 30, {x=moved.x, y=moved.y, color=optional_color})
+         else
+            Hammer:circle("cursor1", 30, {x=moved.x, y=moved.y})
+         end
       end
    end
 
@@ -372,6 +382,34 @@ function mode:update()
    end
 
    Hammer:ret()
+
+   Hammer:pos(10,love.graphics.getHeight()- 50)
+
+   local colors = {{255,0,0},{255,0,255},{0,255,0}, {0,0,255},{0,255,255},{255,255,0}}
+   for i=1, #colors do
+      local colorbutton = Hammer:rectangle("color_dragger_"..tostring(i), 40, 40, {color=colors[i]})
+
+      if colorbutton.dragging then
+         dragger_color(colorbutton, colors[i])
+      end
+      if colorbutton.released then
+         local p = getWithID(Hammer.pointers.released, colorbutton.pointerID)
+         local released = Hammer.pointers.released[p]
+         local wx,wy = camera:worldCoords(released.x, released.y)
+
+         for j=1, #self.child.triangles do
+            local t = self.child.triangles[j]
+            local t1 = {x=t[1], y=t[2]}
+            local t2 = {x=t[3], y=t[4]}
+            local t3 = {x=t[5], y=t[6]}
+            local hit = pointInTriangle({x=wx,y=wy}, t1, t2, t3)
+            if hit then
+               mode:set_triangle_color(j, colors[i])
+            end
+         end
+      end
+   end
+
    if self.child.parent and self.child.parent.type == "smartline" then
       local smarltine_child = Hammer:labelbutton("smarltine-child woohoo", 100, 40)
    end

@@ -144,7 +144,8 @@ end
 
 function pointInPoly(point, triangles)
    local hit = false
-   if not triangles then return false end
+   local index = 0
+   if not triangles then return false,0 end
    for i=1, #triangles do
       local t = triangles[i]
       --print(t[1],t[2],t[3],t[4],t[5],t[6])
@@ -158,6 +159,7 @@ function pointInPoly(point, triangles)
       --print(point.x, point.y, t[1]..","..t[2]..","..t[3]..","..t[4]..","..t[5]..","..t[6])
       hit = pointInTriangle(point, t1, t2, t3)
       if hit then
+         index = i
          --print(t1.x, t2.x, t3.x)
          --print("triangle # ".. i .. " hit? ("..tostring(hit)..") total triangles"..#triangles )
          --print(point.x, point.y, t[1]..","..t[2]..","..t[3]..","..t[4]..","..t[5]..","..t[6])
@@ -165,7 +167,7 @@ function pointInPoly(point, triangles)
 
       if hit then break end
    end
-   return hit
+   return hit, index
 end
 
 

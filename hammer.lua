@@ -131,6 +131,10 @@ function hammer:circle(id, radius, opt_pos)
                     x=opt_pos.x or self.x,
                     y=opt_pos.y or self.y,
                     r=radius}
+   if opt_pos and opt_pos.color then
+      result.color = opt_pos.color
+   end
+
    table.insert(self.drawables, result)
    return result
 end
