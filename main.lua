@@ -333,7 +333,7 @@ function love.load()
             pos = {x=0, y=0, z=0},
             data = {
                steps=3,
-               points={{x=0,y=0}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}},
+               points={{x=100,y=0}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}},
                triangle_colors={{200,100,100,255},{100,100,200,255}}
             },
          }
@@ -401,9 +401,23 @@ function love.load()
 
    updateSceneGraph(true, world, 0)
    camera = Camera(0, 0)
+   clipboard = {}
    Gamestate.registerEvents()
    Gamestate.switch(StageMode)
    --Gamestate.switch(InteractiveMovieMode)
+
+   Signal.register(
+      'copy-to-clipboard',
+      function(thing)
+         if #clipboard <= 5 then
+            table.insert(clipboard, inspect(serializeRecursive(thing), {indent=""}))
+         else
+            table.remove(clipboard, 1)
+            table.insert(clipboard, inspect(serializeRecursive(thing), {indent=""}))
+
+         end
+      end
+   )
 
    Signal.register(
       'switch-state',

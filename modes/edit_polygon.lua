@@ -251,6 +251,14 @@ function mode:update()
    end
    Hammer:ret()
    Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
+
+   local copy_to_clip = Hammer:labelbutton("copy", 120,20)
+   if copy_to_clip.released then
+      Signal.emit("copy-to-clipboard", self.child)
+
+   end
+
+
    Hammer:ret()
    local add_shape = Hammer:labelbutton("child line", 120,40)
    if add_shape.released then

@@ -77,6 +77,8 @@ function mode:update(dt)
       world.name = name.text
    end
 
+
+
    Hammer:pos(10, 100)
    if (self.loadable_files_panel ~= false) then
       for i=1, #self.files_to_load do
@@ -184,6 +186,33 @@ function mode:update(dt)
       self.touches = {}
       Signal.emit("switch-state", "draw-poly", {pointerID=id, parent=world})
    end
+   if #clipboard > 0 then
+      local clipb = Hammer:labelbutton("clipboard", 120,40)
+      if clipb.released then
+         self.show_clipboard_contents = not self.show_clipboard_contents
+      end
+      if self.show_clipboard_contents then
+         Hammer:pos(10,love.graphics.getHeight()-100)
+         for i=1, #clipboard do
+            local it = loadstring("return "..clipboard[i])()
+            local clipitem = Hammer:labelbutton(it.id, 120,40)
+            if clipitem.dragging then
+               dragger(clipitem)
+            end
+            if clipitem.released then
+               local result = it
+               result.dirty = true
+               releaser(clipitem, result)
+            end
+
+         end
+         Hammer:pos(10,love.graphics.getHeight()-50)
+
+      end
+
+
+   end
+
 
 end
 
