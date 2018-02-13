@@ -146,6 +146,18 @@ function updateGraph(root, dt)
       local x,y = root.world_trans(0,0)
       shape = shapes.transformShape(x,y,shape,root)
       root.triangles = poly.triangulate(root.type, shape)
+      if root.data.triangle_colors then
+         print("tris vs colors:", #root.triangles, #root.data.triangle_colors)
+
+         while #root.triangles > #root.data.triangle_colors do
+            table.insert(root.data.triangle_colors, root.color or{255,255,0,255})
+         end
+         while #root.triangles < #root.data.triangle_colors do
+            table.remove(root.data.triangle_colors)
+         end
+
+      end
+
       root.dirty = false
 
       if root.children then

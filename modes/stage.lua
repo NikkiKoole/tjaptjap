@@ -92,13 +92,11 @@ function mode:update(dt)
 
          if button.released then
             local data = love.filesystem.newFileData(name..".hat.txt")
-            --print(inspect(data:getString()))
             world = loadstring("return "..data:getString())()
             --world.camera = nil
 
                if (world.camera) then
                   camera = Camera(world.camera.x , world.camera.y)
-                  print(world.camera.scale)
                   camera:zoom(world.camera.scale)
                else
                   camera = Camera(0,0)

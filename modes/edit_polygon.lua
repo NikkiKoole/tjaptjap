@@ -30,12 +30,6 @@ end
 function mode:addVertex(x, y)
    local si, ni  = self:getClosestNodes(x, y)
    table.insert(self.child.data.points, ni, {x=x, y=y})
-
-   if self.child.data.triangle_colors then
-      local a = #self.child.data.triangle_colors
-      table.insert(self.child.data.triangle_colors, ni-1 ,{50, 100,100,255})
-   end
-
    self.child.dirty=true
 end
 
