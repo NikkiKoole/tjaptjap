@@ -279,6 +279,8 @@ function love.load()
          {
             type="smartline",
             id="TheSmartLine",
+            color={255,0,0, 255},
+            color_setting='triple',
             pos={x=0,y=0,z=0},
             data={
                join="miter",
@@ -501,6 +503,10 @@ end
 
 
 function drawSceneGraph(root)
+   local simple_format = {
+      {"VertexPosition", "float", 2}, -- The x,y position of each vertex.
+      {"VertexColor", "byte", 4} -- The r,g,b,a color of each vertex.
+   }
    local triangle_count = 0
 
    for i=1, #root.children do
@@ -509,6 +515,8 @@ function drawSceneGraph(root)
       end
 
       if root.children[i].triangles  then
+         local color = root.children[i].color
+
          for j=1, #root.children[i].triangles do
 
             if triangle_count % 3 == 0 then
@@ -520,8 +528,23 @@ function drawSceneGraph(root)
                love.graphics.setColor(100, 175,55, 100)   --- hercules green monitor.
                --love.graphics.setColor(175, 75   ,75, 155) -- hercules pink
             end
+            local use_color = {0,255,0,255}
+            if color then
+               love.graphics.setColor(color[1], color[2],color[3], color[4] or 255)
+               if root.children[i].color_setting then
+                  if root.children[i].color_setting == 'triple' then
+                     use_color = {color[1], color[2],color[3], 255 - (triangle_count%3)*60}
+                     --love.graphics.setColor(color[1], color[2],color[3], 255 - (triangle_count%3)*60)
+                  end
+               end
 
-            love.graphics.polygon("fill", root.children[i].triangles[j])
+            end
+            love.graphics.setColor(255,255,255)
+            --print(inspect(root.children[i].triangles[j]))
+            local vertices = get_colored_vertices_for_triangle(root.children[i].triangles[j], use_color)
+            --love.graphics.polygon("fill", root.children[i].triangles[j])
+            local mesh = love.graphics.newMesh(simple_format, vertices, "strip")
+            love.graphics.draw(mesh)
             triangle_count = triangle_count + 1
          end
       else
@@ -529,6 +552,22 @@ function drawSceneGraph(root)
       end
    end
    return triangle_count
+end
+
+function get_colored_vertices_for_triangle(triangle, color)
+   local result = {};
+   for i=1, #triangle, 2 do
+      local nested = {}
+      table.insert(nested, triangle[i + 0])
+      table.insert(nested, triangle[i + 1])
+      table.insert(nested, color[1])
+      table.insert(nested, color[2] - (i*50))
+      table.insert(nested, color[3])
+      table.insert(nested, color[4] - (i*50))
+
+      table.insert(result, nested)
+   end
+   return result;
 end
 
 

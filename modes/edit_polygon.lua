@@ -23,6 +23,7 @@ end
 function mode:enter(from, data)
    self.child = data
    self.setPivot = false
+   self.color_panel_opened = false
 end
 
 
@@ -239,6 +240,12 @@ function mode:update()
       if not self.child.children then self.child.children = {} end
       Signal.emit("switch-state", "draw-line", {pointerID=id, parent=self.child})
    end
+
+
+
+
+
+
    Hammer:ret()
    local add_polygon = Hammer:labelbutton( "child poly", 120,40)
    if add_polygon.dragging then
@@ -255,6 +262,30 @@ function mode:update()
    end
    Hammer:ret()
    Hammer:ret()
+
+    -- palette
+   local set_color = Hammer:labelbutton("color", 80,40)
+   local picked_color = Hammer:rectangle("picked_color", 40,40, {color=self.child.color or {255,255,255}})
+
+   if set_color.released or picked_color.released then
+      self.color_panel_opened =  not self.color_panel_opened
+   end
+   Hammer.x = Hammer.x + 20
+   if self.color_panel_opened then
+       local colors = {{255,0,0},{255,0,255},{0,255,0}, {0,0,255},{0,255,255},{255,255,0}}
+       for i=1, #colors do
+          local colorbutton = Hammer:rectangle("color"..tostring(i), 40, 40, {color=colors[i]})
+          if colorbutton.released then
+             self.child.color = colors[i]
+             self.child.color_setting = "triple"
+          end
+       end
+   end
+   Hammer:ret()
+   Hammer:ret()
+
+
+
 
    local add_vertex = Hammer:labelbutton("vertex =>", 120,40)
    if add_vertex.dragging then
