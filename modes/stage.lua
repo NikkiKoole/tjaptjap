@@ -34,8 +34,14 @@ function mode:update(dt)
    end
 
 
+
    Hammer:reset(10, 30)
 
+
+   local colors = {{255,0,0},{255,0,255},{0,255,0}, {0,0,255},{0,255,255},{255,255,0}}
+   for i=1, #colors do
+      local colorbutton = Hammer:rectangle("color"..tostring(i), 32, 32, {color=colors[i]})
+   end
    local movie_mode = Hammer:labelbutton("movie mode", 130,40)
    if movie_mode.released then
       self.touches = {}

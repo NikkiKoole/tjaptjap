@@ -491,9 +491,6 @@ function hammer:draw()
    for i=1, #(self.drawables) do
       local it = self.drawables[i]
       love.graphics.setColor(255,255,255)
-      if (it.color) then
-         love.graphics.setColor(it.color[1],it.color[2],it.color[3], 100)
-      end
 
       if (it.over) then
          love.graphics.setColor(255,0,255)
@@ -504,8 +501,17 @@ function hammer:draw()
          love.graphics.setColor(255,0,0)
       end
 
-       if (it.dragging) then
+      if (it.dragging) then
          love.graphics.setColor(55,222,255)
+      end
+
+      if (it.color) then
+         love.graphics.setColor(it.color[1],it.color[2],it.color[3], 255)
+         if (it.over or it.dragging or it.pressed) then
+            love.graphics.setColor(it.color[1],it.color[2],it.color[3], 155)
+
+         end
+
       end
 
        if it.type == "circle" then
@@ -513,23 +519,36 @@ function hammer:draw()
       end
 
       if it.type == "rect" or it.type=="labelbutton" then
-         love.graphics.rectangle("fill", it.x, it.y, it.w, it.h)
-      end
-      if it.type == "slider" then
-         love.graphics.rectangle("fill", it.x, it.y, it.w, it.h)
-
          if (it.over) then
-            love.graphics.setColor(255,255,255)
+            if not it.color then
+               love.graphics.setColor(255,255,255,100)
+            end
+
+            love.graphics.rectangle("fill", it.x-2, it.y-2, it.w+4, it.h+4)
          else
 
-            love.graphics.setColor(255,0,0, 150)
+            love.graphics.rectangle("fill", it.x, it.y, it.w, it.h)
          end
+      end
+      if it.type == "slider" then
+         love.graphics.setColor(255,255,255, 150)
+         love.graphics.rectangle("fill", it.x, it.y, it.w, it.h)
+
+
+         love.graphics.setColor(255,0,0, 150)
+         if (it.over) then
+            love.graphics.setColor(255,0,0, 250)
+         end
+
 
          love.graphics.rectangle("fill", it.x + it.thumbX, it.y + it.thumbY, math.min(it.w, it.h), math.min(it.w, it.h))
 
       end
       if it.type == "text-input" then
-         love.graphics.setColor(55,55,55)
+         love.graphics.setColor(105,105,105, 100)
+         if (it.over) then
+            love.graphics.setColor(130,130,130,150)
+         end
 
          if (it.active) then
             love.graphics.setColor(130,170,130)
@@ -563,12 +582,8 @@ function hammer:draw()
 
       if it.type == "label" or it.type=="labelbutton" then
          love.graphics.setColor(55,55,55)
-
-         if (it.pressed) then
-            love.graphics.setColor(170,150,130)
-         end
-
          love.graphics.rectangle("fill", it.x, it.y, it.w, it.h)
+
          local w = (love.graphics.getFont():getWidth(it.text))
          local h = (love.graphics.getFont():getHeight())
 
