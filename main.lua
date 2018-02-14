@@ -602,7 +602,7 @@ function get_colored_vertices_for_triangle(triangle, color)
       table.insert(nested, triangle[i + 0])
       table.insert(nested, triangle[i + 1])
       table.insert(nested, color[1])
-      table.insert(nested, color[2])
+      table.insert(nested, color[2]- (i*20))
       table.insert(nested, color[3])
       table.insert(nested, color[4] - (i*30))
 

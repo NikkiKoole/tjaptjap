@@ -125,7 +125,28 @@ function mode:update(dt)
       self:releaser(add_polygon, result)
    end
    Hammer:ret()
+
+       -- palette
+   local set_color = Hammer:labelbutton("color", 80,40)
+   local picked_color = Hammer:rectangle("picked_color", 40,40, {color=self.child.color or {255,255,255}})
+
+   if set_color.released or picked_color.released then
+      self.color_panel_opened =  not self.color_panel_opened
+   end
+   Hammer.x = Hammer.x + 20
+   if self.color_panel_opened then
+       local colors = {{255,0,0},{255,0,255},{0,255,0}, {0,0,255},{0,255,255},{255,255,0}}
+       for i=1, #colors do
+          local colorbutton = Hammer:rectangle("color"..tostring(i), 40, 40, {color=colors[i]})
+          if colorbutton.released then
+             self.child.color = colors[i]
+             self.child.color_setting = "triple"
+          end
+       end
+   end
+
    Hammer:ret()
+
    local add_vertex = Hammer:labelbutton("add vertex =>", 120,40)
    if add_vertex.dragging then
       local p = getWithID(Hammer.pointers.moved, add_vertex.pointerID)
@@ -179,7 +200,6 @@ function mode:update(dt)
       self.child.dirty = true
    end
    Hammer:ret()
-   Hammer:ret()
    local delete = Hammer:labelbutton("delete", 120, 40)
    if delete.startpress then
       for i=#self.child.parent.children,1,-1 do
@@ -191,6 +211,9 @@ function mode:update(dt)
    end
 
    Hammer:ret()
+
+
+
 
    if self.lastActiveIndex > -1 then
       Hammer:ret()
@@ -228,6 +251,48 @@ function mode:update(dt)
          end
       end
    end
+
+
+   ------ drag colors onto triangles
+   Hammer:ret()
+
+   Hammer:pos(10,love.graphics.getHeight()- 50)
+
+   local colors = {{255,0,0},{255,0,255},{0,255,0}, {0,0,255},{0,255,255},{255,255,0}}
+   for i=1, #colors do
+      local colorbutton = Hammer:rectangle("color_dragger_"..tostring(i), 40, 40, {color=colors[i]})
+
+      if colorbutton.dragging then
+         dragger_color(colorbutton, colors[i])
+      end
+      if colorbutton.released then
+         local p = getWithID(Hammer.pointers.released, colorbutton.pointerID)
+         local released = Hammer.pointers.released[p]
+         local wx,wy = camera:worldCoords(released.x, released.y)
+
+         for j=1, #self.child.triangles do
+            local t = self.child.triangles[j]
+            local t1 = {x=t[1], y=t[2]}
+            local t2 = {x=t[3], y=t[4]}
+            local t3 = {x=t[5], y=t[6]}
+            local hit = pointInTriangle({x=wx,y=wy}, t1, t2, t3)
+            if hit then
+               if not self.child.data.triangle_colors then
+                  self.child.data.triangle_colors = {}
+                  while #self.child.triangles > #self.child.data.triangle_colors do
+                     table.insert(self.child.data.triangle_colors, self.child.color or colors[i])
+                  end
+               else
+               end
+               self.child.data.triangle_colors[j] = colors[i]
+            end
+
+         end
+      end
+   end
+
+   -----------------------------
+
 
    Hammer:pos(0,0)
    local recipe = self.lineOptions[self.lineOptionIndex]

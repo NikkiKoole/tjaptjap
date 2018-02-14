@@ -290,7 +290,7 @@ function mode:update()
    end
    Hammer.x = Hammer.x + 20
    if self.color_panel_opened then
-       local colors = {{255,0,0},{255,0,255},{0,255,0}, {0,0,255},{0,255,255},{255,255,0}}
+       local colors = {{255,0,0},{0,255,0},{0,0,255}, {0,255,255}, {255,0,255} ,{255,255,0}}
        for i=1, #colors do
           local colorbutton = Hammer:rectangle("color"..tostring(i), 40, 40, {color=colors[i]})
           if colorbutton.released then
@@ -389,6 +389,7 @@ function mode:update()
       end
    end
 
+   ------ drag colors onto triangles
    Hammer:ret()
 
    Hammer:pos(10,love.graphics.getHeight()- 50)
@@ -417,10 +418,9 @@ function mode:update()
                   while #self.child.triangles > #self.child.data.triangle_colors do
                      table.insert(self.child.data.triangle_colors, self.child.color or colors[i])
                   end
-                  mode:set_triangle_color(j, colors[i])
                else
-                  mode:set_triangle_color(j, colors[i])
                end
+               self.child.data.triangle_colors[j] = colors[i]
             end
          end
       end
