@@ -146,6 +146,10 @@ function updateGraph(root, dt)
       local x,y = root.world_trans(0,0)
       shape = shapes.transformShape(x,y,shape,root)
       root.triangles = poly.triangulate(root.type, shape)
+
+
+
+
       if root.data.triangle_colors then
          print("tris vs colors:", #root.triangles, #root.data.triangle_colors)
 
@@ -598,9 +602,9 @@ function get_colored_vertices_for_triangle(triangle, color)
       table.insert(nested, triangle[i + 0])
       table.insert(nested, triangle[i + 1])
       table.insert(nested, color[1])
-      table.insert(nested, color[2] - (i*50))
+      table.insert(nested, color[2])
       table.insert(nested, color[3])
-      table.insert(nested, color[4])
+      table.insert(nested, color[4] - (i*30))
 
       table.insert(result, nested)
    end

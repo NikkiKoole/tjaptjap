@@ -382,7 +382,7 @@ function rotateShape(cx, cy, shape, theta)
    local costheta = math.cos(theta)
    local sintheta = math.sin(theta)
 
-   if shape.type == "smartline" then
+   if shape.type and shape.type == "smartline" then
       for i=1, #shape.vertices do
          local it = shape.vertices[i]
          x = it[1]
@@ -394,19 +394,14 @@ function rotateShape(cx, cy, shape, theta)
       end
       return shape
    else
-
-
-
-
-
-   for i=1, #shape, 2 do
-      x = shape[i +0]
-      y = shape[i+1]
-      nx = costheta * (x-cx) - sintheta * (y-cy) + cx
-      ny = sintheta * (x-cx) + costheta * (y-cy) + cy
-      result[i+0] = nx
-      result[i+1] = ny
-   end
+      for i=1, #shape, 2 do
+         x = shape[i +0]
+         y = shape[i+1]
+         nx = costheta * (x-cx) - sintheta * (y-cy) + cx
+         ny = sintheta * (x-cx) + costheta * (y-cy) + cy
+         result[i+0] = nx
+         result[i+1] = ny
+      end
    end
 
    return result

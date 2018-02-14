@@ -34,11 +34,9 @@ function mode:addVertex(x, y)
 end
 
 function mode:addControlPoint(x,y)
+
    local si,ni = self:getClosestNodes(x, y)
    table.insert(self.child.data.points, ni, {cx=x, cy=y})
-
-
-
    self.child.dirty = true
 end
 
@@ -414,7 +412,15 @@ function mode:update()
             local t3 = {x=t[5], y=t[6]}
             local hit = pointInTriangle({x=wx,y=wy}, t1, t2, t3)
             if hit then
-               mode:set_triangle_color(j, colors[i])
+               if not self.child.data.triangle_colors then
+                  self.child.data.triangle_colors = {}
+                  while #self.child.triangles > #self.child.data.triangle_colors do
+                     table.insert(self.child.data.triangle_colors, self.child.color or colors[i])
+                  end
+                  mode:set_triangle_color(j, colors[i])
+               else
+                  mode:set_triangle_color(j, colors[i])
+               end
             end
          end
       end
