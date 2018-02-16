@@ -161,11 +161,16 @@ function updateGraph(root, dt)
 
       if root.data.triangle_colors then
          while #root.triangles > #root.data.triangle_colors do
-            table.insert(root.data.triangle_colors, root.color or{255,255,0,255})
+            if root.color then
+               table.insert(root.data.triangle_colors, {root.color[1], root.color[2], root.color[3], root.color[4]})
+            else
+               table.insert(root.data.triangle_colors, {255,255,0,255})
+            end
          end
          while #root.triangles < #root.data.triangle_colors do
             table.remove(root.data.triangle_colors)
          end
+         print(inspect(root.data.triangle_colors))
       end
       if root.data.vertex_colors then
          while #root.triangles > #root.data.vertex_colors do
@@ -564,15 +569,12 @@ function drawSceneGraph(root)
    local triangle_count = 0
 
    for i=1, #root.children do
-      if root.children[i].children then
-         triangle_count = triangle_count +  drawSceneGraph(root.children[i])
-      end
+
 
       if root.children[i].triangles  then
          local color = root.children[i].color
 
          for j=1, #root.children[i].triangles do
-
             if triangle_count % 3 == 0 then
                love.graphics.setColor(100, 175,55, 155)   --- hercules green monitor.
             elseif triangle_count % 3 == 1 then
@@ -616,8 +618,12 @@ function drawSceneGraph(root)
             love.graphics.draw(mesh)
             triangle_count = triangle_count + 1
          end
-      else
-         --print("child at index "..i.." has no triangles.", root.children[i].type)
+      end
+
+      -- TODO putting this logic here means children wil e drawn after the parent
+      -- move it up to first draw the children
+      if root.children[i].children then
+         triangle_count = triangle_count +  drawSceneGraph(root.children[i])
       end
    end
    return triangle_count
@@ -645,16 +651,46 @@ function get_colored_vertices_for_vertex(triangle, colors)
 end
 
 
+function get_adjusted_color(color, triangleindex, kind)
+   return color
+
+   -- TODO make a set of functions that change vertex colors
+
+   -- print(triangleindex)
+   -- return {
+   --    color[1] - triangleindex * 20,
+   --    color[2] ,
+   --    color[3] ,
+   --    color[4] - triangleindex * 20
+   -- }
+
+   -- return {
+   --    color[1] ,
+   --    color[2] - triangleindex * 20,
+   --    color[3] ,
+   --    color[4] - triangleindex * 20
+   -- }
+
+end
+
+
 function get_colored_vertices_for_triangle(triangle, color)
    local result = {};
+
+   --local colors = {{255,0,0},{0,255,0},{0,0,255}, {0,255,255}, {255,0,255},{255,255,0}}
+
+
+
    for i=1, #triangle, 2 do
+      local colora = get_adjusted_color(color, i)
+
       local nested = {}
       table.insert(nested, triangle[i + 0])
       table.insert(nested, triangle[i + 1])
-      table.insert(nested, color[1])
-      table.insert(nested, color[2]- (i*20))
-      table.insert(nested, color[3])
-      table.insert(nested, color[4] - (i*30))
+      table.insert(nested, colora[1])
+      table.insert(nested, colora[2]) --  - (i*20))
+      table.insert(nested, colora[3])
+      table.insert(nested, colora[4]) -- - (i*30))
 
       table.insert(result, nested)
    end

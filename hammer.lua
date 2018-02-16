@@ -510,7 +510,7 @@ function hammer:draw()
       end
 
       if (it.color) then
-         love.graphics.setColor(it.color[1],it.color[2],it.color[3], 255)
+         love.graphics.setColor(it.color[1],it.color[2],it.color[3], it.color[4] or 255)
          if (it.over or it.dragging or it.pressed) then
             love.graphics.setColor(it.color[1],it.color[2],it.color[3], 155)
 
