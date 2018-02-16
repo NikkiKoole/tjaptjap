@@ -150,8 +150,20 @@ function updateGraph(root, dt)
 
 
 
+      if root.data.vertex_colors then
+         print("adding some")
+         while #root.triangles > #root.data.vertex_colors do
+            table.insert(root.data.vertex_colors, { {255,255,0,255}, {0,0,255,255}, {255,100,100,100}})
+         end
+         while #root.triangles < #root.data.vertex_colors do
+            table.remove(root.data.vertex_colors)
+         end
+
+      end
+
+
       if root.data.triangle_colors then
-         print("tris vs colors:", #root.triangles, #root.data.triangle_colors)
+--         print("tris vs colors:", #root.triangles, #root.data.triangle_colors)
 
          while #root.triangles > #root.data.triangle_colors do
             table.insert(root.data.triangle_colors, root.color or{255,255,0,255})
