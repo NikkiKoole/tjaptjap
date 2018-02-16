@@ -18,27 +18,19 @@ SmartLineMode = require "modes.edit_smartline"
 Mesh3dMode = require "modes.edit_mesh3d"
 RectMode = require "modes.edit_rect"
 
---RopeMode = require "modes.edit_rope"
 Hammer = require "hammer"
-
 utils = require "utils"
 local shapes = require "shapes"
 poly = require 'poly'
-
 utf8 = require 'utf8'
-
 local pointers = require "pointer"
-
 flux = require "vendor.flux"
 local a = require "vendor.affine"
+
 --------------------------------
 
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
-
-show_save_screen = false
-
-
 
 
 function parentize(root)
@@ -170,7 +162,7 @@ function updateGraph(root, dt)
          while #root.triangles < #root.data.triangle_colors do
             table.remove(root.data.triangle_colors)
          end
-         print(inspect(root.data.triangle_colors))
+
       end
       if root.data.vertex_colors then
          while #root.triangles > #root.data.vertex_colors do
@@ -250,121 +242,7 @@ function love.load()
       pos={x=0,y=0,z=0},
       id="world",
       children={
-         -- {
-         --    type="simplerect",
-         --    id="opa-oom",
-         --    pos={x=0,y=0,z=0},
-         --    rotation=0,
-         --    data={w=100, h=100},
-         --    world_pos={x=0,y=0,z=0,rot=0},
-         -- },
-         -- {
-         --    type="simplerect",
-         --    id="opa-oom2",
-         --    pos={x=500,y=0,z=0},
-         --    rotation=0,
-         --    data={w=100, h=100},
-         --    world_pos={x=0,y=0,z=0,rot=0},
-         -- },
-         -- {
-         --    type="simplerect",
-         --    id="opa-oom3",
-         --    pos={x=0,y=600,z=0},
-         --    rotation=0,
-         --    data={w=100, h=100},
-         --    world_pos={x=0,y=0,z=0,rot=0},
-         -- },
-         -- {
-         --    type="simplerect",
-         --    id="opa-oom4",
-         --    pos={x=10,y=600,z=0},
-         --    rotation=0,
-         --    data={w=100, h=100},
-         --    world_pos={x=0,y=0,z=0,rot=0},
-         -- },
-         -- {
-         --    type="simplerect",
-         --    id="opa",
-         --    pivot={x=-150,y=-150},
-         --    pos={x=0,y=0,z=0},
-         --    scale={x=2, y=2},
-         --    rotation=0,
-         --    data={w=300, h=300},
-         --    children={
-         --       {
-         --          type="simplerect",
-         --          id="papa",
-         --          pos={x=150,y=0,z=0},
-         --          scale={x=1.5, y=1.5},
-         --          data={w=200, h=200},
-         --          rotation=math.pi/13 ,
 
-         --          children={
-         --             {
-         --                type="simplerect",
-         --                id="jongen",
-         --                scale={x=1.5, y=1.5},
-         --                pos={x=100,y=0,z=0},
-         --                data={w=100, h=100},
-         --                rotation=0,
-         --             }
-         --          }
-         --       }
-         --    }
-         -- },
-
-         -- {
-         --    type="smartline",
-         --    id="TheSmartLine",
-         --    color={255,0,0, 255},
-         --    color_setting='triple',
-         --    pos={x=0,y=0,z=0},
-         --    data={
-         --       join="miter",
-         --       type="coords",
-         --       use_relative_rotation = true,
-         --       coords={0,0,150,100,250,400,500,700,600,800,750,900,810,1000},
-         --       world_rotations={},
-         --       relative_rotations={},
-         --       lengths={},
-         --       thicknesses={20,10,30,20,20, 10,20,20,20}
-         --    }
-         -- },
-         -- {
-         --    type="smartline",
-         --    id="TheSmartLine2",
-         --    pos={x=0,y=0,z=0},
-         --    data={
-         --       join="miter",
-         --       type="relative",
-         --       use_relative_rotation = true,
-         --       coords={},
-         --       world_rotations={},
-         --       relative_rotations={0, 0, 0, 0, 0, 0,0,0},
-         --       lengths={120,120,100,100,100,100,100,100 },
-         --       thicknesses={20,10,30,20,20, 10,20,20,20}
-         --    }
-         -- },
-         -- {
-         --    type="smartline",
-         --    id="TheSmartLine3",
-         --    pos={x=200,y=0,z=0},
-         --    data={
-         --       join="miter",
-         --       type="world",
-
-         --       use_relative_rotation = false,
-         --       coords={},
-         --       world_rotations={-math.pi/2,-0.8,-0.8,0.8},
-         --       lengths={120,120,100,50},
-         --       thicknesses={40,40,30,20,20},
-         --       relative_rotations={},
-         --    }
-         -- },
-
-
-
-         -- TODO points should get rgba values here probably.
          {
             type = "polygon",
             pos = {x=0, y=0, z=0},
@@ -374,22 +252,6 @@ function love.load()
                triangle_colors={{200,100,100,255},{100,100,200,255}}
             },
          }
-
-         -- {
-         -- {
-         --    type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0},
-         --    data={w=200, h=200, radius=50, steps=8}
-         -- },
-
-         -- {
-         --    type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0}, data={w=200, h=200, radius=50, steps=8},
-         --    children = {
-         --       {type="rect", rotation=0, pivot={x=0,y=0}, pos={x=300, y=100, z=0}, data={w=100, h=100, radius=100, steps=8}},
-         --       {type="circle", pos={x=500, y=100, z=0}, data={radius=200, steps=2}},
-         --       {type="star", rotation=0.1, pos={x=0, y=300, z=0}, data={sides=8, r1=100, r2=200, a1=0, a2=0}},
-
-         --    }
-         -- },
 
       },
    }
@@ -702,11 +564,6 @@ function love.update(dt)
    flux.update(dt)
    spent_time = spent_time + dt
    updateSceneGraph(false, world, dt)
-   if show_save_screen then
-      print("hammer ")
-      Hammer:reset(0,0)
-      local save_dialog = Hammer:labelbutton("save dialog", 130,40)
-   end
 end
 
 function love.draw()

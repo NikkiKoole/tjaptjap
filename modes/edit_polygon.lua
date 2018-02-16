@@ -509,17 +509,17 @@ function mode:update()
             if not self.child.data.triangle_colors then
                self.child.data.triangle_colors = {}
                while #self.child.triangles > #self.child.data.triangle_colors do
-                  table.insert(self.child.data.triangle_colors, self.child.color or colors[i])
+                  if (self.child.color) then
+                     table.insert(self.child.data.triangle_colors, {self.child.color[1], self.child.color[2], self.child.color[3], self.child.color[4]}  )
+                  else
+                     table.insert(self.child.data.triangle_colors, {colors[i][1], colors[i][2], colors[i][3], colors[i][4]})
+                  end
                end
             else
             end
             self.child.data.triangle_colors[fci] = colors[i]
          end
       end
-   end
-
-   if self.child.parent and self.child.parent.type == "smartline" then
-      local smarltine_child = Hammer:labelbutton("smarltine-child woohoo", 100, 40)
    end
 
    if #Hammer.pointers.pressed == 1 then
