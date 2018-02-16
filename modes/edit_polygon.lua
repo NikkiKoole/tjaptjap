@@ -13,24 +13,14 @@ function isTriangleHit(triangle, point)
    return hit
 end
 
-
 function getFirstCollidingIndex(triangles, wx, wy)
    for j=1, #triangles do
       if isTriangleHit(triangles[j], {x=wx,y=wy}) then
-      -- local t = triangles[j]
-      -- local t1 = {x=t[1], y=t[2]}
-      -- local t2 = {x=t[3], y=t[4]}
-      -- local t3 = {x=t[5], y=t[6]}
-      -- local hit = pointInTriangle({x=wx,y=wy}, t1, t2, t3)
-      -- if hit then
          return j
       end
    end
    return 0
 end
-
-
-
 
 function getWithID(list, id)
    if (list) then
@@ -43,15 +33,12 @@ function getWithID(list, id)
    return -1
 end
 
-
-
 function mode:enter(from, data)
    self.child = data
    self.setPivot = false
    self.color_panel_opened = false
    self.selected_triangle = nil
 end
-
 
 function mode:addVertex(x, y)
    local si, ni  = self:getClosestNodes(x, y)
@@ -60,14 +47,10 @@ function mode:addVertex(x, y)
 end
 
 function mode:addControlPoint(x,y)
-
    local si,ni = self:getClosestNodes(x, y)
    table.insert(self.child.data.points, ni, {cx=x, cy=y})
    self.child.dirty = true
 end
-
-
-
 
 function mode:removeVertexIfOverlappingWithNextOrPrevious(it)
    local points = self.child.data.points
@@ -95,19 +78,16 @@ function mode:removeLastTouched()
       table.remove(self.child.data.points, self.lastTouchedIndex)
       assert(self.child)
       self.child.dirty = true
-      --local shape = shapes.makeShape(self.child)
-      --self.child.triangles = poly.triangulate(self.child.type, shape)
    end
 end
 
 function mode:getClosestNodes(x, y)
    local points = self.child.data.points
    local best_distance = math.huge
-   local si=-1
-   local ni=-1
-   --local best_pair = {si=-1, ni=-1}
-   for i=1, #points do
+   local si = -1
+   local ni = -1
 
+   for i=1, #points do
       local self_index = i
       local next_index = i + 1
 
@@ -125,7 +105,6 @@ function mode:getClosestNodes(x, y)
 
       if (d < best_distance) then
          best_distance = d
-         --best_pair = {si=self_index, ni = next_index}
          si = self_index
          ni = next_index
       end
@@ -163,57 +142,91 @@ end
 
 ---------
 
-
+local alpha1_value = {min=0, max=255, value=255}
+local alpha2_value = {min=0, max=255, value=255}
+local alpha3_value = {min=0, max=255, value=255}
 
 function mode:selected_triangle_ui()
    Hammer:reset(10,200)
 
    if not self.child.data.vertex_colors then
-      print("setting intiall")
-      self.child.data.vertex_colors = {{}}
+      self.child.data.vertex_colors = {}
+      local ti = 1
+      while #self.child.triangles > #self.child.data.vertex_colors do
+         local color = { {255,255,255,255} , {255,255,255,255}, {255,255,255,255} }
+         if self.child.data.triangle_colors then
+            local c = self.child.data.triangle_colors[ti]
+            color[1] = {c[1], c[2], c[3], c[4]}
+            color[2] = {c[1], c[2], c[3], c[4]}
+            color[3] = {c[1], c[2], c[3], c[4]}
+         end
+
+         table.insert(self.child.data.vertex_colors, color)
+         ti = ti + 1
+      end
    end
 
-   --print(inspect(self.child.data.vertex_colors))
-
-
-   --table.insert(self.child.data.triangle_colors, self.child.color or colors[i])
-
-
+   local colorbutton_used = false
 
    local set_color1 = Hammer:labelbutton("color 1", 80,40)
-   local picked_color1 = Hammer:rectangle("picked_color1", 40,40, {color={255,255,255}})
+   local picked_color1 = Hammer:rectangle("picked_color1", 40,40, {color= self.child.data.vertex_colors[self.selected_triangle_index][1] or {255,255,255}})
+   local value_a1 = alpha1_value.value
+   local alpha1 = Hammer:slider("alpha1", 150,40, alpha1_value)
+
+   if alpha1_value.value ~= value_a1 then
+      self.child.data.vertex_colors[self.selected_triangle_index][1][4] = value_a1
+   end
+
    Hammer:ret()
    local colors = {{255,0,0},{0,255,0},{0,0,255}, {0,255,255}, {255,0,255},{255,255,0}}
    for i=1, #colors do
       local colorbutton = Hammer:rectangle("color1"..tostring(i), 40, 40, {color=colors[i]})
       if colorbutton.released then
-
-         --self.child.color = colors[i]
-         --self.child.color_setting = "triple"
+         colorbutton_used = true
+         self.child.data.vertex_colors[self.selected_triangle_index][1] = colors[i]
       end
    end
    Hammer:ret()
 
    local set_color2 = Hammer:labelbutton("color 2", 80,40)
-   local picked_color2 = Hammer:rectangle("picked_color2", 40,40, {color={255,255,255}})
+   local picked_color2 = Hammer:rectangle("picked_color2", 40,40, {color= self.child.data.vertex_colors[self.selected_triangle_index][2] or {255,255,255}})
+   local value_a2 = alpha2_value.value
+   local alpha2 = Hammer:slider("alpha2", 150,40, alpha2_value)
+
+   if alpha2_value.value ~= value_a2 then
+      self.child.data.vertex_colors[self.selected_triangle_index][2][4] = value_a2
+   end
+
    Hammer:ret()
    for i=1, #colors do
       local colorbutton = Hammer:rectangle("color2"..tostring(i), 40, 40, {color=colors[i]})
       if colorbutton.released then
-         --self.child.color = colors[i]
-         --self.child.color_setting = "triple"
+         colorbutton_used = true
+         self.child.data.vertex_colors[self.selected_triangle_index][2] = colors[i]
       end
    end
    Hammer:ret()
 
    local set_color3 = Hammer:labelbutton("color 3", 80,40)
-   local picked_color3 = Hammer:rectangle("picked_color3", 40,40, {color={255,255,255}})
+   local picked_color3 = Hammer:rectangle("picked_color3", 40,40, {color= self.child.data.vertex_colors[self.selected_triangle_index][3] or {255,255,255}})
+   local value_a3 = alpha3_value.value
+   local alpha3 = Hammer:slider("alpha3", 150,40, alpha3_value)
+
+   if alpha3_value.value ~= value_a3 then
+      self.child.data.vertex_colors[self.selected_triangle_index][3][4] = value_a3
+   end
+
+   if alpha1.released or  alpha2.released or alpha3.released then
+      colorbutton_used = true
+   end
+
+
    Hammer:ret()
    for i=1, #colors do
       local colorbutton = Hammer:rectangle("color3"..tostring(i), 40, 40, {color=colors[i]})
       if colorbutton.released then
-         --self.child.color = colors[i]
-         --self.child.color_setting = "triple"
+         colorbutton_used = true
+         self.child.data.vertex_colors[self.selected_triangle_index][3] = colors[i]
       end
    end
    Hammer:ret()
@@ -225,65 +238,41 @@ function mode:selected_triangle_ui()
       local wx, wy = camera:worldCoords(Hammer.pointers.pressed[1].x, Hammer.pointers.pressed[1].y)
       if isTriangleHit(self.selected_triangle, {x=wx,y=wy}) then
          pressedHit = true
-         print("set pressedHIt ", pressedHit )
       end
    end
 
-
-
-   if #Hammer.pointers.released == 1  and not pressedHit then
+   if #Hammer.pointers.released == 1  and not pressedHit  and not colorbutton_used then
       local wx, wy = camera:worldCoords(Hammer.pointers.released[1].x, Hammer.pointers.released[1].y)
-      print("hammmer dirty?",Hammer:isDirty())
-      --print(inspect(self.selected_triangle), wx, wy)
-
       if not isTriangleHit(self.selected_triangle, {x=wx,y=wy}) then
          self.selected_triangle = nil
-         print("Did i really unset this now?x")
       end
    end
 
-
-   --if self.selected_triangle
-
-
-
-
+   if colorbutton_used then
+   end
 end
-
-
 
 function mode:update()
    local child = self.child
-
    if self.selected_triangle ~= nil then
       mode:selected_triangle_ui()
-
-
       return
    end
 
-
    -- TODO optimize, make bbox a prop on shapes, now we need to calculate it everyframe
    local shape = shapes.makeShape(child)
-
    local bbminx, bbminy, bbmaxx, bbmaxy= shapes.getShapeBBox(shape)
 
    Hammer:reset(10,200)
-
    Hammer:pos(0,0)
 
-
    local p = child.pivot
-
-   local rx2, ry2 = camera:cameraCoords(
-      child.world_trans(p and p.x or 0, p and p.y or 0)
-   )
+   local rx2, ry2 = camera:cameraCoords( child.world_trans(p and p.x or 0, p and p.y or 0) )
    local pivot = Hammer:rectangle( "pivot", 30, 30,{x=rx2-15, y=ry2-15, color=color})
+
    makePivotBehaviour(pivot, child)
 
-   local rx1, ry1 = camera:cameraCoords(
-      child.world_trans(  (p and p.x or 0) + (bbmaxx-bbminx)/2 ,  (p and p.y or 0))
-   )
+   local rx1, ry1 = camera:cameraCoords( child.world_trans(  (p and p.x or 0) + (bbmaxx-bbminx)/2 ,  (p and p.y or 0)) )
    local rotator = Hammer:rectangle( "rotator", 30, 30,{x=rx1-15, y=ry1-15, color=color})
 
    if rotator.dragging and not pivot.dragging then
@@ -303,29 +292,18 @@ function mode:update()
       end
    end
 
-
-
-
    for i=1, #child.data.points do
       local point = child.data.points[i]
-
       local cx2, cy2 = camera:cameraCoords(child.world_trans((point.x or point.cx), (point.y or point.cy)))
 
-
-      -- local cx2, cy2 = camera:cameraCoords(
-      --    (point.x or point.cx) + child.pos.x,
-      --    (point.y or point.cy) + child.pos.y)
       local color
-
       if point.x and point.y then
          color={0,100,100}
       else
          color={200,100,100}
       end
 
-
-      local button = Hammer:rectangle( "poly-handle"..i, 30, 30,
-                                       {x=cx2-15, y=cy2-15, color=color})
+      local button = Hammer:rectangle( "poly-handle"..i, 30, 30, {x=cx2-15, y=cy2-15, color=color})
 
       if button.pressed then
          self.lastTouchedIndex = i
@@ -337,8 +315,8 @@ function mode:update()
          local p = getWithID(Hammer.pointers.moved, button.pointerID)
          local moved = Hammer.pointers.moved[p]
          if moved then
-            local wx,wy = camera:worldCoords(moved.x-button.dx, moved.y-button.dy)
 
+            local wx,wy = camera:worldCoords(moved.x-button.dx, moved.y-button.dy)
             wx,wy = self.child.inverse(wx,wy)
 
             if point.x and point.y then
@@ -511,12 +489,10 @@ function mode:update()
 
    ------ drag colors onto triangles
    Hammer:ret()
-
    Hammer:pos(10,love.graphics.getHeight()- 50)
 
-
-
    local colors = {{255,0,0},{255,0,255},{0,255,0}, {0,0,255},{0,255,255},{255,255,0},{0,0,0},{125,125,125},{255,255,255}}
+
    for i=1, #colors do
       local colorbutton = Hammer:rectangle("color_dragger_"..tostring(i), 40, 40, {color=colors[i]})
 
@@ -546,31 +522,21 @@ function mode:update()
       local smarltine_child = Hammer:labelbutton("smarltine-child woohoo", 100, 40)
    end
 
-
-
-
-
-
    if #Hammer.pointers.pressed == 1 then
       local wx, wy = camera:worldCoords(Hammer.pointers.pressed[1].x, Hammer.pointers.pressed[1].y)
       local isDirty = Hammer:isDirty()
 
-
-
       if not isDirty then
          local fci = getFirstCollidingIndex(self.child.triangles, wx, wy)
          if fci > 0 then
-            print("open ui for triangle ", fci)
             isDirty = true
             self.selected_triangle = self.child.triangles[fci]
             self.selected_triangle_index = fci
+            alpha1_value.value = self.child.data.vertex_colors and self.child.data.vertex_colors[fci][1][4] or 255
+            alpha2_value.value = self.child.data.vertex_colors and self.child.data.vertex_colors[fci][2][4] or 255
+            alpha3_value.value = self.child.data.vertex_colors and self.child.data.vertex_colors[fci][3][4] or 255
          end
       end
-
-
-      -- if pointInPoly({x=wx,y=wy}, self.child.triangles) then
-      --    isDirty = true
-      -- end
 
       if not isDirty then
          if self.child.children then
@@ -580,7 +546,6 @@ function mode:update()
                   Signal.emit("switch-state", "drag-item", {child=self.child.children[i], pointerID=Hammer.pointers.pressed[1].id})
                   isDirty=true
                end
-
             end
          end
       end
@@ -589,7 +554,6 @@ function mode:update()
          Signal.emit("switch-state", "stage")
       end
    end
-
-
 end
+
 return mode

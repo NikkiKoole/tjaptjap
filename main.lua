@@ -151,28 +151,32 @@ function updateGraph(root, dt)
 
 
       if root.data.vertex_colors then
-         print("adding some")
          while #root.triangles > #root.data.vertex_colors do
             table.insert(root.data.vertex_colors, { {255,255,0,255}, {0,0,255,255}, {255,100,100,100}})
          end
          while #root.triangles < #root.data.vertex_colors do
             table.remove(root.data.vertex_colors)
          end
-
       end
 
-
       if root.data.triangle_colors then
---         print("tris vs colors:", #root.triangles, #root.data.triangle_colors)
-
          while #root.triangles > #root.data.triangle_colors do
             table.insert(root.data.triangle_colors, root.color or{255,255,0,255})
          end
          while #root.triangles < #root.data.triangle_colors do
             table.remove(root.data.triangle_colors)
          end
+      end
+      if root.data.vertex_colors then
+         while #root.triangles > #root.data.vertex_colors do
+            table.insert(root.data.vertex_colors, { {255,255,255,255} , {255,255,255,255}, {255,255,255,255} })
+         end
+          while #root.triangles < #root.data.vertex_colors do
+            table.remove(root.data.vertex_colors)
+         end
 
       end
+
 
       root.dirty = false
 
@@ -437,12 +441,14 @@ function love.load()
    Signal.register(
       'copy-to-clipboard',
       function(thing)
+         local add =  inspect(serializeRecursive(thing), {indent=""})
+         print(add)
+
          if #clipboard <= 5 then
-            table.insert(clipboard, inspect(serializeRecursive(thing), {indent=""}))
+            table.insert(clipboard, add)
          else
             table.remove(clipboard, 1)
-            table.insert(clipboard, inspect(serializeRecursive(thing), {indent=""}))
-
+            table.insert(clipboard, add)
          end
       end
    )
@@ -594,7 +600,17 @@ function drawSceneGraph(root)
             --print(inspect(root.children[i].data.triangle_colors ))
             love.graphics.setColor(255,255,255)
             --print(inspect(root.children[i].triangles[j]))
-            local vertices = get_colored_vertices_for_triangle(root.children[i].triangles[j], use_color)
+
+
+            local vertices = {};
+            if root.children[i].data.vertex_colors then
+               vertices = get_colored_vertices_for_vertex(root.children[i].triangles[j], root.children[i].data.vertex_colors[j])
+
+            else
+               vertices = get_colored_vertices_for_triangle(root.children[i].triangles[j], use_color)
+            end
+
+
             --love.graphics.polygon("fill", root.children[i].triangles[j])
             local mesh = love.graphics.newMesh(simple_format, vertices, "strip")
             love.graphics.draw(mesh)
@@ -606,6 +622,28 @@ function drawSceneGraph(root)
    end
    return triangle_count
 end
+
+function get_colored_vertices_for_vertex(triangle, colors)
+   -- colors = {color1, color2, color3}
+
+
+   local result = {};
+   for i=1, #triangle, 2 do
+      local nested = {}
+      local index = math.floor(i/2)+1
+
+      table.insert(nested, triangle[i + 0])
+      table.insert(nested, triangle[i + 1])
+      table.insert(nested, colors[index][1])
+      table.insert(nested, colors[index][2])
+      table.insert(nested, colors[index][3])
+      table.insert(nested, colors[index][4])
+
+      table.insert(result, nested)
+   end
+   return result;
+end
+
 
 function get_colored_vertices_for_triangle(triangle, color)
    local result = {};
