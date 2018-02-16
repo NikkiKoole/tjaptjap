@@ -3,8 +3,8 @@ TODO
 
 - use what we have now to experiment with flux and find issues
 
+- duplicate (not really) the coloring function from polygon to smartlines
 - moving multiple vertices with one pointer in polymode
-- add color,  per shape/per triangle / per triangle vertex
 - make a mesh per thing
 - nested scene graph logic.
 
