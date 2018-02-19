@@ -10,15 +10,11 @@ function mode:init()
 end
 
 function show_scene_graph()
-
    for i=1, #world.children do
-      local it= world.children[i]
+      local it = world.children[i]
       Hammer:labelbutton(it.id or "unnamed"..i, 130,40)
    end
-
-
 end
-
 
 
 function mode:update(dt)
@@ -55,6 +51,11 @@ function mode:update(dt)
       self.touches = {}
       Signal.emit("switch-state", "interactive-movie", {pointerID=id})
    end
+   local enable_profiler = Hammer:labelbutton("profiler", 130, 40)
+   if enable_profiler.released then
+      show_profile_screen = not show_profile_screen
+   end
+
    local load_file = Hammer:labelbutton("load", 70,40)
    if load_file.released then
       local hat_files = {};

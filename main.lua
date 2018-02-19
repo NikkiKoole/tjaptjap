@@ -228,6 +228,14 @@ end
 
 function love.load()
    if arg[#arg] == "-debug" then require("mobdebug").start() end
+
+   ---- profiler block
+   love.profiler = require('vendor.profile')
+   love.profiler.hookall("Lua")
+   love.profiler.start()
+   love.frame = 0
+   ---- end profiler
+
    love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT, {resizable=true, vsync=true, fullscreen=false})
 
    helvetica = love.graphics.newFont("resources/helvetica_bold.ttf", 18)
@@ -235,7 +243,7 @@ function love.load()
 
    love.graphics.setFont(helvetica)
    Hammer.pointers = pointers
-
+   show_profile_screen = false
 
 
    world = {
@@ -561,6 +569,15 @@ end
 
 
 function love.update(dt)
+   --- profiler code
+   love.frame = love.frame + 1
+   if love.frame%100 == 0 then
+      love.report = love.profiler.report('time', 20)
+      love.profiler.reset()
+   end
+   -- end profiler
+
+
    flux.update(dt)
    spent_time = spent_time + dt
    updateSceneGraph(false, world, dt)
@@ -575,6 +592,11 @@ function love.draw()
    love.graphics.print("camera " .. math.floor(camera.x) .. ", " .. math.floor(camera.y) .. "," .. tonumber(string.format("%.3f", camera.scale)).." pointers : ["..(#pointers.moved)..","..(#pointers.pressed)..","..(#pointers.released).."]")
    love.graphics.print("#tris "..triangle_count,  SCREEN_WIDTH - 100, 10)
    Hammer:draw()
+
+   if show_profile_screen then
+      love.graphics.print(love.report or "Please wait...")
+   end
+
 end
 
 
