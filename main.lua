@@ -571,11 +571,14 @@ end
 
 function love.update(dt)
    --- profiler code
-   love.frame = love.frame + 1
-   if love.frame%100 == 0 then
-      love.report = love.profiler.report('time', 20)
-      love.profiler.reset()
+   if show_profile_screen then
+      love.frame = love.frame + 1
+      if love.frame%100 == 0 then
+         love.report = love.profiler.report('time', 20)
+         love.profiler.reset()
+      end
    end
+
    -- end profiler
 
 

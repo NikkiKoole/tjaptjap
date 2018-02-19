@@ -71,7 +71,25 @@ function mode:enter(from, data)
    clearAllAnimations()
 
    self.frameDictionary = {}
+   self.tweenOptionIndex = 1
+   self.lineStyles = {"coords", "world", "relative"}
+   self.lineStyleIndex = 1
 end
+
+
+
+function getNestedRotation(child, index)
+   local result = 0
+   for i=index,1,-1 do
+      if child.data.world_rotations[i] then
+         result = result + child.data.world_rotations[i]
+      end
+   end
+   return result
+end
+
+
+
 
 function secondsToClock(seconds)
   local seconds = tonumber(seconds)
@@ -169,44 +187,141 @@ function mode:update(dt)
    Hammer:pos(10,200)
 
 
-   local save_data_points_for_tweening = Hammer:labelbutton("save frame", 130, 40)
-   if save_data_points_for_tweening.released then
-      if #self.selectedItems == 1 then
-         for i=1, #self.selectedItems do
-            local it = self.selectedItems[i].item
-            table.insert(self.frameDictionary, table_copy(it.data.points))
-         end
-      else
-         print("not yet handling multiple in selection, only the one.")
+
+   local tween_options = {"linear","quadin","quadout","quadinout","cubicin","cubicout","cubicinout","quartin","quartout","quartinout","quintin","quintout","quintinout","expoin","expoout","expoinout","sinein","sineout","sineinout","circin","circout","circinout","backin","backout","backinout","elasticin","elasticout","elasticinout"}
+
+   local tween_button = Hammer:labelbutton(tween_options[self.tweenOptionIndex], 130,40)
+   if tween_button.released then
+      self.tweenOptionIndex = self.tweenOptionIndex + 1
+      if self.tweenOptionIndex > #tween_options then
+         self.tweenOptionIndex = 1
       end
    end
 
-
    local tween_duration = Hammer:slider("tweenduration", 150,40, duration_value)
+   Hammer:ret()
 
+
+   if #self.selectedItems == 1 then
+      --if self.selectedItems[1].item.type == "polygon" then
+
+      local save_data_points_for_tweening = Hammer:labelbutton("save frame", 130, 40)
+      if save_data_points_for_tweening.released then
+         if #self.selectedItems == 1 then
+
+            for i=1, #self.selectedItems do
+
+               local it = self.selectedItems[i].item
+
+               if it.type == "polygon" then
+                  table.insert(self.frameDictionary, table_copy(it.data.points))
+               elseif it.type == "smartline" then
+                  table.insert(self.frameDictionary, table_copy(it.data))
+
+               else
+                  print("unknwn type for saving")
+               end
+
+
+            end
+         else
+            print("not yet handling multiple in selection, only the one.")
+         end
+      end
+
+
+
+   end
 
 
 
    Hammer:ret()
 
--- linear quadin quadout quadinout cubicin cubicout cubicinout quartin quartout quartinout quintin quintout quintinout expoin expoout expoinout sinein sineout sineinout circin circout circinout backin backout backinout elasticin elasticout elasticinout
-
-
 
    if #self.selectedItems == 1 then
+      if self.selectedItems[1].item.type == "smartline" then
+         local linetype = Hammer:labelbutton(self.lineStyles[self.lineStyleIndex], 130,40)
+         if linetype.released then
+            self.lineStyleIndex= self.lineStyleIndex + 1
+            if self.lineStyleIndex > #self.lineStyles then
+               self.lineStyleIndex = 1
+            end
+         end
+
+
+         Hammer:ret()
+
+      end
+
+
       for i=1, #self.frameDictionary do
          local frameButton = Hammer:labelbutton(self.selectedItems[1].item.id.."  #"..i, 130,40)
+         if Hammer.x + 200 >= love.graphics.getWidth() then
+            Hammer:ret()
+         end
+
          if frameButton.released then
-            for j=1, #self.selectedItems[1].item.data.points do
-               local c =  self.selectedItems[1].item.data.points[j]
-               local f = self.frameDictionary[i][j]
-               flux.to(c,  duration_value.value or 1, {x=f.x, y=f.y}):ease("circinout"):onupdate(
-                  function()
-                     self.selectedItems[1].item.data.points[j] = c
-                     self.selectedItems[1].item.dirty = true
-                  end
-                                                     )
+            local it = self.selectedItems[1].item
+
+            if it.type == "polygon" then
+               for j=1, #it.data.points do
+                  local c =  self.selectedItems[1].item.data.points[j]
+                  local f = self.frameDictionary[i][j]
+                  flux.to(c, math.random() +  duration_value.value or 1, {x=f.x, y=f.y}):ease(tween_options[self.tweenOptionIndex])
+                  :onupdate(
+                     function()
+                        self.selectedItems[1].item.data.points[j] = c
+                        self.selectedItems[1].item.dirty = true
+                     end
+                           )
+               end
+            elseif it.type == "smartline" then
+               local style = self.lineStyles[self.lineStyleIndex]
+               if style == "coords" then
+                  local f = self.frameDictionary[i].coords
+                  local c =  self.selectedItems[1].item.data.coords
+
+                  flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
+                  :onupdate(
+                     function()
+                        self.selectedItems[1].item.data.coords = c
+                        self.selectedItems[1].item.dirty = true
+                     end
+                           )
+               elseif style == "world" then
+                  local f = self.frameDictionary[i].world_rotations
+                  local c =  self.selectedItems[1].item.data.world_rotations
+
+                  flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
+                  :onupdate(
+                     function()
+                        self.selectedItems[1].item.data.world_rotations = c
+                        local new_coords = utils.calculateCoordsFromRotationsAndLengths(false, self.selectedItems[1].item.data)
+                        self.selectedItems[1].item.data.coords = new_coords
+                        self.selectedItems[1].item.dirty = true
+                     end
+                           )
+
+               elseif style == "relative" then
+                  local f = self.frameDictionary[i].relative_rotations
+                  local c =  self.selectedItems[1].item.data.relative_rotations
+
+                  flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
+                  :onupdate(
+                     function()
+                        self.selectedItems[1].item.data.relative_rotations = c
+                        local new_coords = utils.calculateCoordsFromRotationsAndLengths(true, self.selectedItems[1].item.data)
+                        self.selectedItems[1].item.data.coords = new_coords
+                        self.selectedItems[1].item.dirty = true
+                     end
+                           )
+
+               end
+
+
+            else
             end
+
 
 
          end
@@ -229,38 +344,110 @@ function mode:update(dt)
    -- end
    for j=1, #self.selectedItems do
       local child = self.selectedItems[j].item
-      for i=1, #child.data.points do
-         local point = child.data.points[i]
-         local cx2, cy2 = camera:cameraCoords(child.world_trans((point.x or point.cx), (point.y or point.cy)))
-         local color
 
-         if point.x and point.y then
-            color={0,100,100}
-         else
-            color={200,100,100}
-         end
+      -- if child is poly
+      if child.type=="polygon" then
+         for i=1, #child.data.points do
+            local point = child.data.points[i]
+            local cx2, cy2 = camera:cameraCoords(child.world_trans((point.x or point.cx), (point.y or point.cy)))
+            local color
 
-         local button = Hammer:rectangle( "poly-handle"..i.."__"..j, 30, 30, {x=cx2-15, y=cy2-15, color=color})
+            if point.x and point.y then
+               color={0,100,100}
+            else
+               color={200,100,100}
+            end
 
-         if button.dragging then
-            local p = getWithID(Hammer.pointers.moved, button.pointerID)
-            local moved = Hammer.pointers.moved[p]
-            if moved then
+            local button = Hammer:rectangle( "poly-handle"..i.."__"..j, 30, 30, {x=cx2-15, y=cy2-15, color=color})
 
-               local wx,wy = camera:worldCoords(moved.x-button.dx, moved.y-button.dy)
-               wx,wy = child.inverse(wx,wy)
+            if button.dragging then
+               local p = getWithID(Hammer.pointers.moved, button.pointerID)
+               local moved = Hammer.pointers.moved[p]
+               if moved then
 
-               if point.x and point.y then
-                  child.data.points[i].x = wx
-                  child.data.points[i].y = wy
-               elseif point.cx and point.cy then
-                  child.data.points[i].cx = wx
-                  child.data.points[i].cy = wy
+                  local wx,wy = camera:worldCoords(moved.x-button.dx, moved.y-button.dy)
+                  wx,wy = child.inverse(wx,wy)
+
+                  if point.x and point.y then
+                     child.data.points[i].x = wx
+                     child.data.points[i].y = wy
+                  elseif point.cx and point.cy then
+                     child.data.points[i].cx = wx
+                     child.data.points[i].cy = wy
+                  end
+                  child.dirty = true
                end
-               child.dirty = true
             end
          end
+      elseif child.type == "smartline" then
+         local recipe = self.lineStyles[self.lineStyleIndex]
+
+         for i=1, #child.data.coords, 2 do
+            local x,y = child.data.coords[i], child.data.coords[i+1]
+            local cx2, cy2 = camera:cameraCoords(child.world_trans(x,y))
+            local color = {200,200,200}
+            local button = Hammer:rectangle( "smartline-handle"..i, 30, 30,
+                                             {x=cx2-15, y=cy2-15, color=color})
+
+
+            ------ DUPLICATION FROM edit_smartline
+            if button.dragging then
+               local p = getWithID(Hammer.pointers.moved, button.pointerID)
+               local moved = Hammer.pointers.moved[p]
+               if moved then
+                  local wx,wy = camera:worldCoords(moved.x-button.dx, moved.y-button.dy)
+                  wx,wy = child.inverse(wx,wy)
+
+                  if recipe == 'coords' then
+                     child.data.coords[i  ] = wx
+                     child.data.coords[i+1] = wy
+                     local props = calculateAllPropsFromCoords(child.data.coords)
+                     child.data.relative_rotations = props.relative_rotations
+                     child.data.world_rotations = props.world_rotations
+                     child.data.lengths = props.lengths
+
+                  elseif recipe == 'relative' then
+                     if i > 1 then
+                        local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
+                        local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
+                        child.data.relative_rotations[-1 + (i+1)/2] =  angleToRelative(ap)
+                        local p2 = calculateAllPropsFromCoords(child.data.coords)
+                        child.data.lengths = p2.lengths
+                        local new_coords = utils.calculateCoordsFromRotationsAndLengths(true, child.data)
+                        child.data.coords = new_coords
+                        local props = calculateAllPropsFromCoords(child.data.coords)
+                        child.data.relative_rotations = props.relative_rotations
+                        child.data.world_rotations = props.world_rotations
+                     end
+
+                  elseif recipe == "world" then
+                     if i > 1 then
+                        local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
+                        local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
+                        local startAngle = getNestedRotation(child, ((i+1)/2)-2)
+                        child.data.world_rotations[-1+(i+1)/2] = angleToWorld(ap) - startAngle
+                        local p2 = calculateAllPropsFromCoords(child.data.coords)
+                        child.data.lengths = p2.lengths
+                        local new_coords = utils.calculateCoordsFromRotationsAndLengths(false, child.data)
+                        child.data.coords = new_coords
+                        local props = calculateAllPropsFromCoords(child.data.coords)
+                        child.data.relative_rotations = props.relative_rotations
+                        child.data.world_rotations = props.world_rotations
+                     end
+                  end
+
+                  child.dirty = true
+               end
+            end
+
+            ---------------------------------------------- EDN DUPLICATION
+         end
+
+      else
+
       end
+
+
 
    end
 

@@ -4,13 +4,11 @@ TODO
 interactivemovie L180 local button = Hammer:rectangle( "poly-handle"..i.."__"..j, 30, 30, {x=cx2-15, y=cy2-15, color=color})
 whn you mess up those IDs (use ..i without the j ) the result is quite cool, mayeb use it as a feature ?
 
-- imnagine a way when you press space you click a frame and do something nice with those frames, tween from one to another
-  you want to save the diff somehow, so you know which properties to tween
+
+- use what we have now to experiment with flux and find issues
 
 - make it possible to remove all triangle colors and all vertex colors
 - some ui that shows nested parent-child relations
-
-- use what we have now to experiment with flux and find issues
 
 
 - duplicate (not really) the coloring function from polygon to smartlines
@@ -23,4 +21,4 @@ whn you mess up those IDs (use ..i without the j ) the result is quite cool, may
 - keyframe animation
 - live recording animation
 - movie mode; rotations, ?line coords?, ?vertices?
-- You need a way to optionally close polygons.
+- You need a way to optionally close polygons. (the type of polygons with a center node (nice for triangles) )
