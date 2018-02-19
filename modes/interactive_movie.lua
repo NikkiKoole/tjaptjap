@@ -267,7 +267,7 @@ function mode:update(dt)
                for j=1, #it.data.points do
                   local c =  self.selectedItems[1].item.data.points[j]
                   local f = self.frameDictionary[i][j]
-                  flux.to(c, math.random() +  duration_value.value or 1, {x=f.x, y=f.y}):ease(tween_options[self.tweenOptionIndex])
+                  flux.to(c, duration_value.value or 1, {x=f.x, y=f.y}):ease(tween_options[self.tweenOptionIndex])
                   :onupdate(
                      function()
                         self.selectedItems[1].item.data.points[j] = c

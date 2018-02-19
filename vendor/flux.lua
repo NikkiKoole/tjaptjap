@@ -23,6 +23,8 @@ local easing = {
   circ    = "-(math.sqrt(1 - (p * p)) - 1)",
   back    = "p * p * (2.7 * p - 1.7)",
   elastic = "-(2^(10 * (p - 1)) * math.sin((p - 1.075) * (math.pi * 2) / .3))"
+
+
 }
 
 local makefunc = function(str, expr)

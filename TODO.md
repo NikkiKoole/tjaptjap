@@ -5,6 +5,8 @@ interactivemovie L180 local button = Hammer:rectangle( "poly-handle"..i.."__"..j
 whn you mess up those IDs (use ..i without the j ) the result is quite cool, mayeb use it as a feature ?
 
 
+- blend flux animations
+
 - use what we have now to experiment with flux and find issues
 
 - make it possible to remove all triangle colors and all vertex colors

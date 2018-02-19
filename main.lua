@@ -230,10 +230,7 @@ function love.load()
    if arg[#arg] == "-debug" then require("mobdebug").start() end
 
    ---- profiler block
-   love.profiler = require('vendor.profile')
-   love.profiler.hookall("Lua")
-   love.profiler.start()
-   love.frame = 0
+   profilerInitted = false
    ---- end profiler
 
    love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT, {resizable=true, vsync=true, fullscreen=false})
@@ -572,6 +569,14 @@ end
 function love.update(dt)
    --- profiler code
    if show_profile_screen then
+      if profilerInitted == false then
+         love.profiler = require('vendor.profile')
+         love.profiler.hookall("Lua")
+         love.profiler.start()
+         love.frame = 0
+         profilerInitted = true
+      end
+
       love.frame = love.frame + 1
       if love.frame%100 == 0 then
          love.report = love.profiler.report('time', 20)
