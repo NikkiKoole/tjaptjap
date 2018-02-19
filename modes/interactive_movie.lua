@@ -61,6 +61,7 @@ function replayAnimation(time)
 end
 
 function mode:enter(from, data)
+   self.draggedItems = {}
    self.selectedItems = {}
    self.time = 0
    self.isRecording = false
@@ -150,6 +151,58 @@ function mode:update(dt)
    if self.isRecording or self.isReplaying then
       self.time = self.time + dt
    end
+
+   Hammer:pos(10,200)
+   for i=#self.selectedItems, 1,-1 do
+      local it = self.selectedItems[i]
+      local b = Hammer:labelbutton(tostring(it.item.id), 130,40)
+      if b.released then
+         local foundIndex = getIndexOfItem(it.item, self.selectedItems)
+         if foundIndex > 0 then
+            table.remove(self.selectedItems, foundIndex)
+         end
+      end
+
+   end
+   for j=1, #self.selectedItems do
+      local child = self.selectedItems[j].item
+      for i=1, #child.data.points do
+         local point = child.data.points[i]
+         local cx2, cy2 = camera:cameraCoords(child.world_trans((point.x or point.cx), (point.y or point.cy)))
+
+         local color
+         if point.x and point.y then
+            color={0,100,100}
+         else
+            color={200,100,100}
+         end
+
+         local button = Hammer:rectangle( "poly-handle"..i.."__"..j, 30, 30, {x=cx2-15, y=cy2-15, color=color})
+
+         if button.dragging then
+            local p = getWithID(Hammer.pointers.moved, button.pointerID)
+            local moved = Hammer.pointers.moved[p]
+            if moved then
+
+               local wx,wy = camera:worldCoords(moved.x-button.dx, moved.y-button.dy)
+               wx,wy = child.inverse(wx,wy)
+
+               if point.x and point.y then
+                  child.data.points[i].x = wx
+                  child.data.points[i].y = wy
+               elseif point.cx and point.cy then
+                  child.data.points[i].cx = wx
+                  child.data.points[i].cy = wy
+               end
+               child.dirty = true
+            end
+         end
+      end
+
+   end
+
+
+
 end
 
 
@@ -176,7 +229,7 @@ end
 function mode:pointermoved(id, x, y, dx, dy)
    -- find item
    local item
-   for i,it in pairs(self.selectedItems) do
+   for i,it in pairs(self.draggedItems) do
       if (it.id == id) then
          item = it.item
          break
@@ -207,18 +260,37 @@ end
 function mode:pointerpressed(x, y, id)
    for i,o in pairs(world.children) do
       if testHit(x,y,o) then
-         table.insert(self.selectedItems, {id=id, item=o})
-         print("hit! "..o.type.." id:"..tostring(id))
+         table.insert(self.draggedItems, {id=id, item=o})
       end
    end
 end
 
+function getIndexOfItem(child, list)
+   for i=1, #list do
+      if list[i].item == child then return i end
+   end
+   return 0
+end
+
+
 function mode:pointerreleased(x,y,id)
-   for i,it in pairs(self.selectedItems) do
+   for i,it in pairs(self.draggedItems) do
       if (it.id == id) then
-         table.remove(self.selectedItems, i)
+         table.remove(self.draggedItems, i)
       end
    end
+   --
+   for i,o in pairs(world.children) do
+      if testHit(x,y,o) then
+         local foundIndex = getIndexOfItem(o, self.selectedItems)
+         if foundIndex == 0 then
+            table.insert(self.selectedItems, {id=id, item=o})
+         else
+            --table.remove(self.selectedItems, foundIndex)
+         end
+      end
+   end
+
 end
 
 function mode:mousepressed( x, y, button, istouch )
