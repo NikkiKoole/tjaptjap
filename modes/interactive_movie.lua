@@ -15,6 +15,8 @@
 
 local mode = {}
 
+local duration_value = {min=0, max=10.0, value=1.0}
+
 function saveFrame()
    for i,child in pairs(world.children) do
       child.animationStartFrame = {x=child.pos.x, y=child.pos.y}
@@ -67,6 +69,8 @@ function mode:enter(from, data)
    self.isRecording = false
    self.isReplaying = false
    clearAllAnimations()
+
+   self.frameDictionary = {}
 end
 
 function secondsToClock(seconds)
@@ -80,6 +84,16 @@ function secondsToClock(seconds)
     ms    = string.format("%03.f", math.floor((seconds - math.floor(seconds)) * 1000));
     return hours..":"..mins..":"..secs..":"..ms
   end
+end
+
+function table_copy(obj, seen)
+  if type(obj) ~= 'table' then return obj end
+  if seen and seen[obj] then return seen[obj] end
+  local s = seen or {}
+  local res = setmetatable({}, getmetatable(obj))
+  s[obj] = res
+  for k, v in pairs(obj) do res[table_copy(k, s)] = table_copy(v, s) end
+  return res
 end
 
 function mode:update(dt)
@@ -153,24 +167,73 @@ function mode:update(dt)
    end
 
    Hammer:pos(10,200)
-   for i=#self.selectedItems, 1,-1 do
-      local it = self.selectedItems[i]
-      local b = Hammer:labelbutton(tostring(it.item.id), 130,40)
-      if b.released then
-         local foundIndex = getIndexOfItem(it.item, self.selectedItems)
-         if foundIndex > 0 then
-            table.remove(self.selectedItems, foundIndex)
+
+
+   local save_data_points_for_tweening = Hammer:labelbutton("save frame", 130, 40)
+   if save_data_points_for_tweening.released then
+      if #self.selectedItems == 1 then
+         for i=1, #self.selectedItems do
+            local it = self.selectedItems[i].item
+            table.insert(self.frameDictionary, table_copy(it.data.points))
+         end
+      else
+         print("not yet handling multiple in selection, only the one.")
+      end
+   end
+
+
+   local tween_duration = Hammer:slider("tweenduration", 150,40, duration_value)
+
+
+
+
+   Hammer:ret()
+
+-- linear quadin quadout quadinout cubicin cubicout cubicinout quartin quartout quartinout quintin quintout quintinout expoin expoout expoinout sinein sineout sineinout circin circout circinout backin backout backinout elasticin elasticout elasticinout
+
+
+
+   if #self.selectedItems == 1 then
+      for i=1, #self.frameDictionary do
+         local frameButton = Hammer:labelbutton(self.selectedItems[1].item.id.."  #"..i, 130,40)
+         if frameButton.released then
+            for j=1, #self.selectedItems[1].item.data.points do
+               local c =  self.selectedItems[1].item.data.points[j]
+               local f = self.frameDictionary[i][j]
+               flux.to(c,  duration_value.value or 1, {x=f.x, y=f.y}):ease("circinout"):onupdate(
+                  function()
+                     self.selectedItems[1].item.data.points[j] = c
+                     self.selectedItems[1].item.dirty = true
+                  end
+                                                     )
+            end
+
+
          end
       end
 
    end
+
+   Hammer:ret()
+
+
+   -- for i=#self.selectedItems, 1,-1 do
+   --    local it = self.selectedItems[i]
+   --    local b = Hammer:labelbutton(tostring(it.item.id), 130,40)
+   --    if b.released then
+   --       local foundIndex = getIndexOfItem(it.item, self.selectedItems)
+   --       if foundIndex > 0 then
+   --          table.remove(self.selectedItems, foundIndex)
+   --       end
+   --    end
+   -- end
    for j=1, #self.selectedItems do
       local child = self.selectedItems[j].item
       for i=1, #child.data.points do
          local point = child.data.points[i]
          local cx2, cy2 = camera:cameraCoords(child.world_trans((point.x or point.cx), (point.y or point.cy)))
-
          local color
+
          if point.x and point.y then
             color={0,100,100}
          else
@@ -229,6 +292,9 @@ end
 function mode:pointermoved(id, x, y, dx, dy)
    -- find item
    local item
+   if #self.selectedItems > 0 then return end
+
+
    for i,it in pairs(self.draggedItems) do
       if (it.id == id) then
          item = it.item

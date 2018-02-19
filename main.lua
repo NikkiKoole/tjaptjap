@@ -253,6 +253,7 @@ function love.load()
 
          {
             type = "polygon",
+            id="slimthing",
             pos = {x=0, y=0, z=0},
             data = {
                steps=3,
@@ -594,7 +595,8 @@ function love.draw()
    Hammer:draw()
 
    if show_profile_screen then
-      love.graphics.print(love.report or "Please wait...")
+      love.graphics.setColor(255,255,155)
+      love.graphics.print(love.report or "Please wait...", 150, 150)
    end
 
 end
