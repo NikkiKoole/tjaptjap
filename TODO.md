@@ -4,6 +4,7 @@ TODO
 interactivemovie L180 local button = Hammer:rectangle( "poly-handle"..i.."__"..j, 30, 30, {x=cx2-15, y=cy2-15, color=color})
 whn you mess up those IDs (use ..i without the j ) the result is quite cool, mayeb use it as a feature ?
 
+- throwaway tween wehn you start a new one
 - combine all colors into one data structures (instead of 3 atm)
 
 
