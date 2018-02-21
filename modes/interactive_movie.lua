@@ -267,13 +267,25 @@ function mode:update(dt)
                for j=1, #it.data.points do
                   local c =  self.selectedItems[1].item.data.points[j]
                   local f = self.frameDictionary[i][j]
-                  flux.to(c, duration_value.value or 1, {x=f.x, y=f.y}):ease(tween_options[self.tweenOptionIndex])
-                  :onupdate(
-                     function()
-                        self.selectedItems[1].item.data.points[j] = c
-                        self.selectedItems[1].item.dirty = true
-                     end
-                           )
+                  if (f.x and f.y) then
+                     flux.to(c, duration_value.value or 1, {x=f.x, y=f.y}):ease(tween_options[self.tweenOptionIndex])
+                        :onupdate(
+                           function()
+                              self.selectedItems[1].item.data.points[j] = c
+                              self.selectedItems[1].item.dirty = true
+                           end
+                                 )
+                  elseif (f.cx and f.cy) then
+                     flux.to(c, duration_value.value or 1, {cx=f.cx, cy=f.cy}):ease(tween_options[self.tweenOptionIndex])
+                        :onupdate(
+                           function()
+                              self.selectedItems[1].item.data.points[j] = c
+                              self.selectedItems[1].item.dirty = true
+                           end
+                                 )
+                  end
+
+
                end
             elseif it.type == "smartline" then
                local style = self.lineStyles[self.lineStyleIndex]

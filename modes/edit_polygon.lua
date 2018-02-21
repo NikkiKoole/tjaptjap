@@ -252,12 +252,18 @@ function mode:selected_triangle_ui()
    end
 end
 
+
+
 function mode:update()
    local child = self.child
    if self.selected_triangle ~= nil then
       mode:selected_triangle_ui()
       return
    end
+
+
+
+
 
    -- TODO optimize, make bbox a prop on shapes, now we need to calculate it everyframe
    local shape = shapes.makeShape(child)
