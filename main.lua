@@ -5,6 +5,7 @@ Camera = require "vendor.camera"
 inspect = require "vendor.inspect"
 
 InterActiveMovieMode = require "modes.interactive_movie"
+GameMode = require "modes.game"
 
 StageMode = require "modes.stage"
 DragMode = require "modes.drag_item"
@@ -253,13 +254,23 @@ function love.load()
             id="slimthing",
             pos = {x=0, y=0, z=0},
             data = {
+               steps=3,
+               points={{x=100,y=50}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}},
+               triangle_colors={{200,200,100,255},{100,100,200,255}}
+            },
+         },
 
-
+         {
+            type = "polygon",
+            id="slimthing",
+            pos = {x=500, y=0, z=0.3},
+            data = {
                steps=3,
                points={{x=100,y=50}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}},
                triangle_colors={{200,100,100,255},{100,100,200,255}}
             },
-         }
+         },
+         {type="circle", pos={x=500, y=100, z=0.4}, data={radius=200, steps=8}}
 
       },
    }
@@ -356,6 +367,8 @@ function love.load()
             State = SmartLineMode
          elseif state == "interactive-movie" then
             State = InterActiveMovieMode
+         elseif state == "game" then
+            State = GameMode
          end
          Gamestate.switch(State, data)
       end
@@ -486,7 +499,12 @@ function drawSceneGraph(root)
 
             --love.graphics.polygon("fill", root.children[i].triangles[j])
             local mesh = love.graphics.newMesh(simple_format, vertices, "strip")
-            love.graphics.draw(mesh)
+            local parallax = {x= camera.x - (root.children[i].pos.z * camera.x), y= camera.y - (root.children[i].pos.z * camera.y) }
+            root.children[i].parallax = {x=-parallax.x, y=-parallax.y}
+            love.graphics.draw(mesh,  -parallax.x, -parallax.y)
+
+            --love.graphics.draw(mesh,  0, 0)
+
             triangle_count = triangle_count + 1
          end
       end

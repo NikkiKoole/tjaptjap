@@ -439,7 +439,7 @@ function mode:update(dt)
                         local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
                         local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
                         local startAngle = getNestedRotation(child, ((i+1)/2)-2)
-                        print(inspect(child.data.world_rotations))
+                        print(inspect(child.data.world_rotations), -1+(i+1)/2)
                         child.data.world_rotations[-1+(i+1)/2] = angleToWorld(ap) - startAngle
                         local p2 = calculateAllPropsFromCoords(child.data.coords)
                         child.data.lengths = p2.lengths
@@ -455,7 +455,7 @@ function mode:update(dt)
                end
             end
 
-            ---------------------------------------------- EDN DUPLICATION
+            ---------------------------------------------- END DUPLICATION
          end
 
       else

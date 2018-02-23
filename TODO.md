@@ -4,13 +4,10 @@ TODO
 interactivemovie L180 local button = Hammer:rectangle( "poly-handle"..i.."__"..j, 30, 30, {x=cx2-15, y=cy2-15, color=color})
 whn you mess up those IDs (use ..i without the j ) the result is quite cool, mayeb use it as a feature ?
 
-- throwaway tween wehn you start a new one
 - combine all colors into one data structures (instead of 3 atm)
-
-
 - make it possible to remove all triangle colors and all vertex colors
 
-
+- make a game mode, 3 screens high, parallax scrolling, center cam on items, have some default tweens per thing and attach sounds, maybe use a bit of OOP here.
 - make lines start from either end
 - blend flux animations
 - use what we have now to experiment with flux and find issues
