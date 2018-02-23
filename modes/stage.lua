@@ -255,10 +255,7 @@ function mode:pointerpressed(x, y, id)
       elseif o.type=="rect" then
          hit = utils.pointInRect2(wx, wy, o.pos.x + cdx,   o.pos.y + cdy, o.data.w, o.data.h )
       elseif o.type=="polygon" then
-
-         local wx, wy = camera:worldCoords(x + cdx, y + cdy)
-
-         hit = pointInPoly({x=wx ,y=wy}, o.triangles)
+         hit = pointInPoly({x=wx ,y=wy}, o.triangles, o.parallax.x, o.parallax.y)
       elseif o.type=="polyline" then
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
       elseif o.triangles then

@@ -142,16 +142,18 @@ function pointInTriangle(p, t1, t2, t3)
    return ((b1 == b2) and (b2 == b3))
 end
 
-function pointInPoly(point, triangles)
+function pointInPoly(point, triangles, offsetX, offsetY)
    local hit = false
    local index = 0
    if not triangles then return false,0 end
    for i=1, #triangles do
       local t = triangles[i]
+
+      -- this ofset is added to do the parallax
       --print(t[1],t[2],t[3],t[4],t[5],t[6])
-      local t1 = {x=t[1], y=t[2]}
-      local t2 = {x=t[3], y=t[4]}
-      local t3 = {x=t[5], y=t[6]}
+      local t1 = {x=t[1]+offsetX, y=t[2]+offsetY}
+      local t2 = {x=t[3]+offsetX, y=t[4]+offsetY}
+      local t3 = {x=t[5]+offsetX, y=t[6]+offsetY}
 
 
 

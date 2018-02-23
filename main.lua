@@ -254,12 +254,10 @@ function love.load()
             id="slimthing",
             pos = {x=0, y=0, z=0},
             data = {
-               steps=3,
                points={{x=100,y=50}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}},
                triangle_colors={{200,200,100,255},{100,100,200,255}}
             },
          },
-
          {
             type = "polygon",
             id="slimthing",
@@ -270,7 +268,11 @@ function love.load()
                triangle_colors={{200,100,100,255},{100,100,200,255}}
             },
          },
-         {type="circle", pos={x=500, y=100, z=0.4}, data={radius=200, steps=8}}
+         -- {type="circle", pos={x=500, y=100, z=0.4}, data={radius=200, steps=8}},
+         -- {type="circle", pos={x=200, y=100, z=0.4}, data={radius=200, steps=8}},
+         -- {type="circle", pos={x=100, y=100, z=0.7}, data={radius=200, steps=8}},
+         -- {type="circle", pos={x=500, y=800, z=0.9}, data={radius=200, steps=8}},
+
 
       },
    }
@@ -499,7 +501,8 @@ function drawSceneGraph(root)
 
             --love.graphics.polygon("fill", root.children[i].triangles[j])
             local mesh = love.graphics.newMesh(simple_format, vertices, "strip")
-            local parallax = {x= camera.x - (root.children[i].pos.z * camera.x), y= camera.y - (root.children[i].pos.z * camera.y) }
+            local parallax = {x= camera.x - ((root.children[i].pos.z+1) * camera.x),
+                              y= camera.y - ((root.children[i].pos.z+1) * camera.y) }
             root.children[i].parallax = {x=-parallax.x, y=-parallax.y}
             love.graphics.draw(mesh,  -parallax.x, -parallax.y)
 
