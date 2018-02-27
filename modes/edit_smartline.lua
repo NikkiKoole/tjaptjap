@@ -31,11 +31,24 @@ function getClosestNodeIndex(x, y, coords)
    return index
 end
 
+function calculateAllPropsFromCoordsReverse(coords)
+   local result = {relative_rotations={}, world_rotations={}, lengths={}}
+   local world_rotation = 0
+   local counter = 1
+
+   print(inspect(coords))
+   for i=#coords,1 ,-2 do
+      print(coords[i-1],  coords[i])
+   end
+
+end
+
 function calculateAllPropsFromCoords(coords)
    local result = {relative_rotations={}, world_rotations={}, lengths={}}
    local world_rotation = 0
    local counter = 1
    for i=1, #coords-2, 2 do
+
       local a = utils.angle(  coords[i+2],  coords[i+3], coords[i+0],  coords[i+1])
       local d = utils.distance( coords[i+0],  coords[i+1], coords[i+2],  coords[i+3])
       local wa = angleToWorld(a)
@@ -70,7 +83,7 @@ function mode:enter(from, data)
    self.lineStyleOptionIndex = 1
    self.bestIndex =  -1
    self.lastActiveIndex = -1
-
+   self.inverseWorldRotations = false
    for i=1, #self.lineOptions do
       if self.lineOptions[i]==data.data.type then
          self.lineOptionIndex = i
@@ -188,6 +201,13 @@ function mode:update(dt)
       end
       self.child.data.type = self.lineOptions[self.lineOptionIndex]
    end
+   if self.lineOptions[self.lineOptionIndex] == "world" then
+      if Hammer:labelbutton(self.inverseWorldRotations == false and "NRM" or "INV" , 40,40).released then
+         self.inverseWorldRotations = not self.inverseWorldRotations
+      end
+   end
+
+
 
    Hammer:ret()
    local lineStyle = Hammer:labelbutton("("..self.lineStyleOptionIndex..") "..self.lineStyleOptions[self.lineStyleOptionIndex], 120, 40)
@@ -346,9 +366,16 @@ function mode:update(dt)
                end
 
             elseif recipe == "world" then
+               if self.inverseWorldRotations == true then
+                  print("This does not work TODO")
+                  calculateAllPropsFromCoordsReverse(child.data.coords)
+
+               else
+
                if i > 1 then
                   local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
                   local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
+                  print(((i+1)/2)-2)
                   local startAngle = mode:getNestedRotation(((i+1)/2)-2)
                   child.data.world_rotations[-1+(i+1)/2] = angleToWorld(ap) - startAngle
                   local p2 = calculateAllPropsFromCoords(child.data.coords)
@@ -359,6 +386,9 @@ function mode:update(dt)
                   child.data.relative_rotations = props.relative_rotations
                   child.data.world_rotations = props.world_rotations
                end
+
+               end
+
             end
 
             child.dirty = true
