@@ -504,9 +504,9 @@ function drawSceneGraph(root)
             local parallax = {x= camera.x - ((root.children[i].pos.z+1) * camera.x),
                               y= camera.y - ((root.children[i].pos.z+1) * camera.y) }
             root.children[i].parallax = {x=-parallax.x, y=-parallax.y}
-            love.graphics.draw(mesh,  -parallax.x, -parallax.y)
+            --love.graphics.draw(mesh,  -parallax.x, -parallax.y)
 
-            --love.graphics.draw(mesh,  0, 0)
+            love.graphics.draw(mesh,  0, 0)
 
             triangle_count = triangle_count + 1
          end

@@ -315,24 +315,26 @@ function mode:update()
          self.lastTouchedIndex = i
       end
 
-      if button.dragging then
-         self.lastTouchedIndex = i
+      if not rotator.dragging and not pivot.dragging then
+         if button.dragging then
+            self.lastTouchedIndex = i
 
-         local p = getWithID(Hammer.pointers.moved, button.pointerID)
-         local moved = Hammer.pointers.moved[p]
-         if moved then
+            local p = getWithID(Hammer.pointers.moved, button.pointerID)
+            local moved = Hammer.pointers.moved[p]
+            if moved then
 
-            local wx,wy = camera:worldCoords(moved.x-button.dx, moved.y-button.dy)
-            wx,wy = self.child.inverse(wx,wy)
+               local wx,wy = camera:worldCoords(moved.x-button.dx, moved.y-button.dy)
+               wx,wy = self.child.inverse(wx,wy)
 
-            if point.x and point.y then
-               self.child.data.points[i].x = wx
-               self.child.data.points[i].y = wy
-            elseif point.cx and point.cy then
-               self.child.data.points[i].cx = wx
-               self.child.data.points[i].cy = wy
+               if point.x and point.y then
+                  self.child.data.points[i].x = wx
+                  self.child.data.points[i].y = wy
+               elseif point.cx and point.cy then
+                  self.child.data.points[i].cx = wx
+                  self.child.data.points[i].cy = wy
+               end
+               self.child.dirty = true
             end
-            self.child.dirty = true
          end
       end
    end

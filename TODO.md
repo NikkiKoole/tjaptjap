@@ -13,7 +13,6 @@ whn you mess up those IDs (use ..i without the j ) the result is quite cool, may
 - use what we have now to experiment with flux and find issues
 - some ui that shows nested parent-child relations
 - duplicate (not really) the coloring function from polygon to smartlines
-- moving multiple vertices with one pointer in polymode
 - make a mesh per thing
 - nested scene graph logic.
 - reintroduce the parallax scrolling on z

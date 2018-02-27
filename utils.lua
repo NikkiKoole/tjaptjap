@@ -143,6 +143,9 @@ function pointInTriangle(p, t1, t2, t3)
 end
 
 function pointInPoly(point, triangles, offsetX, offsetY)
+   if offsetX == nil then offsetX = 0 end
+   if offsetY == nil then offsetY = 0 end
+
    local hit = false
    local index = 0
    if not triangles then return false,0 end

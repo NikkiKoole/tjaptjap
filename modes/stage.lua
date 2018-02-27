@@ -255,7 +255,7 @@ function mode:pointerpressed(x, y, id)
       elseif o.type=="rect" then
          hit = utils.pointInRect2(wx, wy, o.pos.x + cdx,   o.pos.y + cdy, o.data.w, o.data.h )
       elseif o.type=="polygon" then
-         hit = pointInPoly({x=wx ,y=wy}, o.triangles, o.parallax.x, o.parallax.y)
+         hit = pointInPoly({x=wx ,y=wy}, o.triangles, o.parallax and o.parallax.x or 0, o.parallax and  o.parallax.y or 0)
       elseif o.type=="polyline" then
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
       elseif o.triangles then
