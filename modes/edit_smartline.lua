@@ -41,7 +41,7 @@ function calculateAllPropsFromCoords(coords)
       local wa = angleToWorld(a)
       table.insert(result.relative_rotations, angleToRelative(a)  )
       if counter > 1 then
-         local diff = (result.relative_rotations[counter]-  result.relative_rotations[counter-1] )
+         local diff = (result.relative_rotations[counter] - result.relative_rotations[counter-1] )
          table.insert(result.world_rotations, diff  )
       else
          table.insert(result.world_rotations, result.relative_rotations[1])
@@ -126,7 +126,7 @@ function mode:update(dt)
    end
    Hammer:ret()
 
-       -- palette
+   -- palette
    local set_color = Hammer:labelbutton("color", 80,40)
    local picked_color = Hammer:rectangle("picked_color", 40,40, {color=self.child.color or {255,255,255}})
 

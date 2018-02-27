@@ -5,6 +5,7 @@ Camera = require "vendor.camera"
 inspect = require "vendor.inspect"
 
 InterActiveMovieMode = require "modes.interactive_movie"
+GameMode = require "modes.game"
 
 StageMode = require "modes.stage"
 DragMode = require "modes.drag_item"
@@ -253,11 +254,25 @@ function love.load()
             id="slimthing",
             pos = {x=0, y=0, z=0},
             data = {
+               points={{x=100,y=50}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}},
+               triangle_colors={{200,200,100,255},{100,100,200,255}}
+            },
+         },
+         {
+            type = "polygon",
+            id="slimthing",
+            pos = {x=500, y=0, z=0.3},
+            data = {
                steps=3,
                points={{x=100,y=50}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}},
                triangle_colors={{200,100,100,255},{100,100,200,255}}
             },
-         }
+         },
+         -- {type="circle", pos={x=500, y=100, z=0.4}, data={radius=200, steps=8}},
+         -- {type="circle", pos={x=200, y=100, z=0.4}, data={radius=200, steps=8}},
+         -- {type="circle", pos={x=100, y=100, z=0.7}, data={radius=200, steps=8}},
+         -- {type="circle", pos={x=500, y=800, z=0.9}, data={radius=200, steps=8}},
+
 
       },
    }
@@ -309,6 +324,8 @@ function love.load()
    clipboard = {}
    Gamestate.registerEvents()
    Gamestate.switch(StageMode)
+
+
    --Gamestate.switch(InteractiveMovieMode)
 
    Signal.register(
@@ -352,6 +369,8 @@ function love.load()
             State = SmartLineMode
          elseif state == "interactive-movie" then
             State = InterActiveMovieMode
+         elseif state == "game" then
+            State = GameMode
          end
          Gamestate.switch(State, data)
       end
@@ -441,7 +460,6 @@ function drawSceneGraph(root)
 
       if root.children[i].triangles  then
          local color = root.children[i].color
-
          for j=1, #root.children[i].triangles do
             if triangle_count % 3 == 0 then
                love.graphics.setColor(100, 175,55, 155)   --- hercules green monitor.
@@ -483,7 +501,13 @@ function drawSceneGraph(root)
 
             --love.graphics.polygon("fill", root.children[i].triangles[j])
             local mesh = love.graphics.newMesh(simple_format, vertices, "strip")
-            love.graphics.draw(mesh)
+            local parallax = {x= camera.x - ((root.children[i].pos.z+1) * camera.x),
+                              y= camera.y - ((root.children[i].pos.z+1) * camera.y) }
+            root.children[i].parallax = {x=-parallax.x, y=-parallax.y}
+            love.graphics.draw(mesh,  -parallax.x, -parallax.y)
+
+            --love.graphics.draw(mesh,  0, 0)
+
             triangle_count = triangle_count + 1
          end
       end
@@ -583,9 +607,7 @@ function love.update(dt)
          love.profiler.reset()
       end
    end
-
    -- end profiler
-
 
    flux.update(dt)
    spent_time = spent_time + dt
@@ -620,25 +642,27 @@ end
 
 
 function setPivot(me)
-   local pressed = Hammer.pointers.pressed[1]
-   local wxr,wyr = camera:worldCoords(pressed.x, pressed.y)
-   local tx,ty = me.child.world_trans(0,0)
-   local diffx = (wxr - tx)/me.child.world_pos.scaleX
-   local diffy = (wyr - ty)/me.child.world_pos.scaleY
+   local pressed  = Hammer.pointers.pressed[1]
+   local wxr, wyr = camera:worldCoords(pressed.x, pressed.y)
+   local tx,ty    = me.child.world_trans(0,0)
+   local diffx    = (wxr - tx)/me.child.world_pos.scaleX
+   local diffy    = (wyr - ty)/me.child.world_pos.scaleY
    local t2x, t2y = utils.rotatePoint(diffx, diffy, 0, 0, -me.child.world_pos.rot)
+
    if not me.child.pivot then
       me.child.pivot = {x=0,y=0}
    end
 
    local pivotdx = t2x - (me.child.pivot.x)
    local pivotdy = t2y - (me.child.pivot.y)
+
    pivotdx,pivotdy = utils.rotatePoint(pivotdx, pivotdy, 0, 0, me.child.world_pos.rot)
-   me.child.pos.x = me.child.pos.x + pivotdx
-   me.child.pos.y = me.child.pos.y + pivotdy
+   me.child.pos.x  = me.child.pos.x + pivotdx
+   me.child.pos.y  = me.child.pos.y + pivotdy
 
    me.child.pivot.x = t2x
    me.child.pivot.y = t2y
-   me.setPivot=false
+   me.setPivot = false
 end
 
 function makePivotBehaviour(pivot, child)

@@ -89,6 +89,11 @@ function mode:update(dt)
       world.name = name.text
    end
 
+   local game_mode = Hammer:labelbutton("game-mode", 70, 40)
+   if game_mode.released then
+      Signal.emit("switch-state", "game")
+   end
+
 
 
    Hammer:pos(10, 100)
@@ -237,6 +242,7 @@ function mode:pointerpressed(x, y, id)
 
    local wx, wy = camera:worldCoords(x,y)
    for i, o in ipairs(world.children) do
+      -- PARALLAX related code here
       local layer_speed = 1.0 + o.pos.z
       local cdx = camera.x - camera.x * layer_speed
       local cdy = camera.y - camera.y * layer_speed
@@ -249,7 +255,7 @@ function mode:pointerpressed(x, y, id)
       elseif o.type=="rect" then
          hit = utils.pointInRect2(wx, wy, o.pos.x + cdx,   o.pos.y + cdy, o.data.w, o.data.h )
       elseif o.type=="polygon" then
-         hit = pointInPoly({x=wx,y=wy}, o.triangles)
+         hit = pointInPoly({x=wx ,y=wy}, o.triangles, o.parallax.x, o.parallax.y)
       elseif o.type=="polyline" then
          hit = pointInPoly({x=wx,y=wy}, o.triangles)
       elseif o.triangles then
@@ -319,6 +325,7 @@ function mode:mousemoved(x, y, dx, dy, istouch)
          local c,s = math.cos(-camera.rot), math.sin(-camera.rot)
          dx,dy = c*dx - s*dy, s*dx + c*dy
          self.lastdelta = {x=dx, y=dy}
+
          camera:move(-dx / camera.scale, -dy / camera.scale)
       end
    end

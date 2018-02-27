@@ -263,17 +263,31 @@ function mode:update(dt)
          if frameButton.released then
             local it = self.selectedItems[1].item
 
+            if self.selectedItems[1].item.tween then self.selectedItems[1].item.tween:stop() end
+
             if it.type == "polygon" then
                for j=1, #it.data.points do
                   local c =  self.selectedItems[1].item.data.points[j]
                   local f = self.frameDictionary[i][j]
-                  flux.to(c, duration_value.value or 1, {x=f.x, y=f.y}):ease(tween_options[self.tweenOptionIndex])
-                  :onupdate(
-                     function()
-                        self.selectedItems[1].item.data.points[j] = c
-                        self.selectedItems[1].item.dirty = true
-                     end
-                           )
+                  if (f.x and f.y) then
+                     self.selectedItems[1].item.tween = flux.to(c, duration_value.value or 1, {x=f.x, y=f.y}):ease(tween_options[self.tweenOptionIndex])
+                        :onupdate(
+                           function()
+                              self.selectedItems[1].item.data.points[j] = c
+                              self.selectedItems[1].item.dirty = true
+                           end
+                                 )
+                  elseif (f.cx and f.cy) then
+                     self.selectedItems[1].item.tween =flux.to(c, duration_value.value or 1, {cx=f.cx, cy=f.cy}):ease(tween_options[self.tweenOptionIndex])
+                        :onupdate(
+                           function()
+                              self.selectedItems[1].item.data.points[j] = c
+                              self.selectedItems[1].item.dirty = true
+                           end
+                                 )
+                  end
+
+
                end
             elseif it.type == "smartline" then
                local style = self.lineStyles[self.lineStyleIndex]
@@ -281,7 +295,7 @@ function mode:update(dt)
                   local f = self.frameDictionary[i].coords
                   local c =  self.selectedItems[1].item.data.coords
 
-                  flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
+                  self.selectedItems[1].item.tween = flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
                   :onupdate(
                      function()
                         self.selectedItems[1].item.data.coords = c
@@ -292,7 +306,7 @@ function mode:update(dt)
                   local f = self.frameDictionary[i].world_rotations
                   local c =  self.selectedItems[1].item.data.world_rotations
 
-                  flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
+                  self.selectedItems[1].item.tween = flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
                   :onupdate(
                      function()
                         self.selectedItems[1].item.data.world_rotations = c
@@ -306,7 +320,7 @@ function mode:update(dt)
                   local f = self.frameDictionary[i].relative_rotations
                   local c =  self.selectedItems[1].item.data.relative_rotations
 
-                  flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
+                  self.selectedItems[1].item.tween = flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
                   :onupdate(
                      function()
                         self.selectedItems[1].item.data.relative_rotations = c
@@ -425,6 +439,7 @@ function mode:update(dt)
                         local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
                         local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
                         local startAngle = getNestedRotation(child, ((i+1)/2)-2)
+                        print(inspect(child.data.world_rotations), -1+(i+1)/2)
                         child.data.world_rotations[-1+(i+1)/2] = angleToWorld(ap) - startAngle
                         local p2 = calculateAllPropsFromCoords(child.data.coords)
                         child.data.lengths = p2.lengths
@@ -440,7 +455,7 @@ function mode:update(dt)
                end
             end
 
-            ---------------------------------------------- EDN DUPLICATION
+            ---------------------------------------------- END DUPLICATION
          end
 
       else
