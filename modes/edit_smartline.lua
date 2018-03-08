@@ -142,6 +142,11 @@ function mode:update(dt)
                   Signal.emit("switch-state", "edit-smartline", it)
                end
             end
+            local below = self.child.children[i].belowParent
+            if Hammer:labelbutton(below and "<" or ">" , 20, 20).released then
+               self.child.children[i].belowParent = not self.child.children[i].belowParent
+            end
+
             Hammer:ret()
          end
       end

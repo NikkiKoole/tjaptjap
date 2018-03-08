@@ -374,7 +374,9 @@ function mode:update()
                   Signal.emit("switch-state", "edit-smartline", it)
                end
             end
-            if Hammer:labelbutton("z", 20, 20).released then
+            local below = self.child.children[i].belowParent
+
+            if Hammer:labelbutton(below and "<" or ">" , 20, 20).released then
                self.child.children[i].belowParent = not self.child.children[i].belowParent
             end
 

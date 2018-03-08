@@ -445,9 +445,6 @@ end
 
 
 
-
-
-
 function drawSceneGraph(root)
    local simple_format = {
       {"VertexPosition", "float", 2}, -- The x,y position of each vertex.
@@ -455,16 +452,18 @@ function drawSceneGraph(root)
    }
    local triangle_count = 0
 
-   for i=1, #root.children do
-
-      if root.children[i].belowParent then
-         print(root.children[i].id.." should be drawn below its parent")
+   if root.children then
+      for i=1, #root.children do
+         if root.children[i].belowParent then
+            triangle_count = triangle_count + drawSceneGraph(root.children[i])
+         end
       end
+   end
 
+   if root.triangles then
 
-      if root.children[i].triangles  then
-         local color = root.children[i].color
-         for j=1, #root.children[i].triangles do
+         local color = root.color
+         for j=1, #root.triangles do
             if triangle_count % 3 == 0 then
                love.graphics.setColor(100, 175,55, 155)   --- hercules green monitor.
             elseif triangle_count % 3 == 1 then
@@ -477,14 +476,14 @@ function drawSceneGraph(root)
             local use_color = {0,255,0,255}
             if color then
                love.graphics.setColor(color[1], color[2],color[3], color[4] or 255)
-               if root.children[i].color_setting then
-                  if root.children[i].color_setting == 'triple' then
+               if root.color_setting then
+                  if root.color_setting == 'triple' then
                      use_color = {color[1], color[2],color[3], 255 - (triangle_count%3)*60}
                      --love.graphics.setColor(color[1], color[2],color[3], 255 - (triangle_count%3)*60)
                   end
                end
             end
-            local tc = root.children[i].data.triangle_colors
+            local tc = root.data.triangle_colors
             if tc then
                use_color = {tc[j][1], tc[j][2], tc[j][3], tc[j][4] or 255}
             end
@@ -495,36 +494,42 @@ function drawSceneGraph(root)
 
 
             local vertices = {};
-            if root.children[i].data.vertex_colors then
-               vertices = get_colored_vertices_for_vertex(root.children[i].triangles[j], root.children[i].data.vertex_colors[j])
+            if root.data.vertex_colors then
+               vertices = get_colored_vertices_for_vertex(root.triangles[j], root.data.vertex_colors[j])
 
             else
-               vertices = get_colored_vertices_for_triangle(root.children[i].triangles[j], use_color)
+               vertices = get_colored_vertices_for_triangle(root.triangles[j], use_color)
             end
 
 
             --love.graphics.polygon("fill", root.children[i].triangles[j])
             local mesh = love.graphics.newMesh(simple_format, vertices, "strip")
-            local parallax = {x= camera.x - ((root.children[i].pos.z+1) * camera.x),
-                              y= camera.y - ((root.children[i].pos.z+1) * camera.y) }
-            root.children[i].parallax = {x=-parallax.x, y=-parallax.y}
+            local parallax = {x= camera.x - ((root.pos.z+1) * camera.x),
+                              y= camera.y - ((root.pos.z+1) * camera.y) }
+            root.parallax = {x=-parallax.x, y=-parallax.y}
             --love.graphics.draw(mesh,  -parallax.x, -parallax.y)
 
             love.graphics.draw(mesh,  0, 0)
 
             triangle_count = triangle_count + 1
          end
-      end
 
-      -- TODO putting this logic here means children wil e drawn after the parent
-      -- move it up to first draw the children
-      if root.children[i].children then
-         triangle_count = triangle_count +  drawSceneGraph(root.children[i])
-      end
 
    end
+
+   if root.children then
+      for i=1, #root.children do
+         if not root.children[i].belowParent then
+            triangle_count = triangle_count + drawSceneGraph(root.children[i])
+         end
+      end
+   end
+
+
    return triangle_count
 end
+
+
 
 function get_colored_vertices_for_vertex(triangle, colors)
    -- colors = {color1, color2, color3}
@@ -621,6 +626,7 @@ end
 
 function love.draw()
    camera:attach()
+
    local triangle_count = drawSceneGraph(world)
    camera:detach()
 
