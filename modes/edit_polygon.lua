@@ -38,6 +38,7 @@ function mode:enter(from, data)
    self.setPivot = false
    self.color_panel_opened = false
    self.selected_triangle = nil
+   self.children_panel_opened = false
 end
 
 function mode:addVertex(x, y)
@@ -263,9 +264,6 @@ function mode:update()
 
 
 
-
-
-   -- TODO optimize, make bbox a prop on shapes, now we need to calculate it everyframe
    local shape = shapes.makeShape(child)
    local bbminx, bbminy, bbmaxx, bbmaxy= shapes.getShapeBBox(shape)
 
@@ -348,6 +346,43 @@ function mode:update()
       self.child.id = text_input.text
    end
    Hammer:ret()
+
+   --------- panel that shows direct children and has a generic parent button
+   if Hammer:labelbutton("children", 120, 40).released then
+      self.children_panel_opened = not self.children_panel_opened
+   end
+   Hammer:ret();
+   if self.children_panel_opened then
+      if self.child.parent.id ~= "world" then
+         if Hammer:labelbutton("parent ("..self.child.parent.id..")", 120, 40).released then
+            local it = self.child.parent
+            if it.type == "polygon" then
+               Signal.emit("switch-state", "edit-polygon", it)
+            elseif it.type == "smartline" then
+               Signal.emit("switch-state", "edit-smartline", it)
+            end
+         end
+         Hammer:ret()
+      end
+      if self.child.children then
+         for i=1, #self.child.children do
+            local it = self.child.children[i]
+            if Hammer:labelbutton(it.id, 120, 40).released then
+               if it.type == "polygon" then
+                  Signal.emit("switch-state", "edit-polygon", it)
+               elseif it.type == "smartline" then
+                  Signal.emit("switch-state", "edit-smartline", it)
+               end
+            end
+            if Hammer:labelbutton("z", 20, 20).released then
+               self.child.children[i].belowParent = not self.child.children[i].belowParent
+            end
+
+            Hammer:ret()
+         end
+      end
+   end
+   ---------
    Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
 
    local copy_to_clip = Hammer:labelbutton("copy", 120,20)

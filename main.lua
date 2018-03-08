@@ -451,11 +451,15 @@ end
 function drawSceneGraph(root)
    local simple_format = {
       {"VertexPosition", "float", 2}, -- The x,y position of each vertex.
-      {"VertexColor", "byte", 4} -- The r,g,b,a color of each vertex.
+      {"VertexColor"   , "byte",  4}      -- The r,g,b,a color of each vertex.
    }
    local triangle_count = 0
 
    for i=1, #root.children do
+
+      if root.children[i].belowParent then
+         print(root.children[i].id.." should be drawn below its parent")
+      end
 
 
       if root.children[i].triangles  then
@@ -517,6 +521,7 @@ function drawSceneGraph(root)
       if root.children[i].children then
          triangle_count = triangle_count +  drawSceneGraph(root.children[i])
       end
+
    end
    return triangle_count
 end
