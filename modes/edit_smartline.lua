@@ -116,9 +116,12 @@ function mode:update(dt)
 
 
    --------- panel that shows direct children and has a generic parent button
-   if Hammer:labelbutton("children", 120, 40).released then
-      self.children_panel_opened = not self.children_panel_opened
+   if self.child.children and #self.child.children > 0 then
+      if Hammer:labelbutton("children", 120, 40).released then
+         self.children_panel_opened = not self.children_panel_opened
+      end
    end
+
    Hammer:ret();
    if self.children_panel_opened then
       if self.child.parent.id ~= "world" then
