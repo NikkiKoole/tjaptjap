@@ -255,6 +255,11 @@ function mode:update(dt)
          self.inverseWorldRotations = not self.inverseWorldRotations
       end
    end
+   if self.lineOptions[self.lineOptionIndex] == "relative" then
+      if Hammer:labelbutton(self.inverseWorldRotations == false and "NRM" or "INV" , 40,40).released then
+         self.inverseWorldRotations = not self.inverseWorldRotations
+      end
+   end
 
 
 
@@ -401,41 +406,42 @@ function mode:update(dt)
                child.data.lengths = props.lengths
 
             elseif recipe == 'relative' then
-               if i > 1 then
-                  local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
-                  local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
-                  child.data.relative_rotations[-1 + (i+1)/2] =  angleToRelative(ap)
-                  local p2 = calculateAllPropsFromCoords(child.data.coords)
-                  child.data.lengths = p2.lengths
-                  local new_coords = utils.calculateCoordsFromRotationsAndLengths(true, child.data)
-                  child.data.coords = new_coords
-                  local props = calculateAllPropsFromCoords(child.data.coords)
-                  child.data.relative_rotations = props.relative_rotations
-                  child.data.world_rotations = props.world_rotations
+               if self.inverseWorldRotations == true then
+                  print("This does not work TODO")
+                  calculateAllPropsFromCoordsReverse(child.data.coords)
+               else
+                  if i > 1 then
+                     local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
+                     local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
+                     child.data.relative_rotations[-1 + (i+1)/2] =  angleToRelative(ap)
+                     local p2 = calculateAllPropsFromCoords(child.data.coords)
+                     child.data.lengths = p2.lengths
+                     local new_coords = utils.calculateCoordsFromRotationsAndLengths(true, child.data)
+                     child.data.coords = new_coords
+                     local props = calculateAllPropsFromCoords(child.data.coords)
+                     child.data.relative_rotations = props.relative_rotations
+                     child.data.world_rotations = props.world_rotations
+                  end
                end
-
             elseif recipe == "world" then
                if self.inverseWorldRotations == true then
                   print("This does not work TODO")
                   calculateAllPropsFromCoordsReverse(child.data.coords)
-
                else
-
-               if i > 1 then
-                  local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
-                  local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
-                  print(((i+1)/2)-2)
-                  local startAngle = mode:getNestedRotation(((i+1)/2)-2)
-                  child.data.world_rotations[-1+(i+1)/2] = angleToWorld(ap) - startAngle
-                  local p2 = calculateAllPropsFromCoords(child.data.coords)
-                  child.data.lengths = p2.lengths
-                  local new_coords = utils.calculateCoordsFromRotationsAndLengths(false, child.data)
-                  child.data.coords = new_coords
-                  local props = calculateAllPropsFromCoords(child.data.coords)
-                  child.data.relative_rotations = props.relative_rotations
-                  child.data.world_rotations = props.world_rotations
-               end
-
+                  if i > 1 then
+                     local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
+                     local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
+                     print(((i+1)/2)-2)
+                     local startAngle = mode:getNestedRotation(((i+1)/2)-2)
+                     child.data.world_rotations[-1+(i+1)/2] = angleToWorld(ap) - startAngle
+                     local p2 = calculateAllPropsFromCoords(child.data.coords)
+                     child.data.lengths = p2.lengths
+                     local new_coords = utils.calculateCoordsFromRotationsAndLengths(false, child.data)
+                     child.data.coords = new_coords
+                     local props = calculateAllPropsFromCoords(child.data.coords)
+                     child.data.relative_rotations = props.relative_rotations
+                     child.data.world_rotations = props.world_rotations
+                  end
                end
 
             end

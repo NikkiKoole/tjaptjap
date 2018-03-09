@@ -4,7 +4,7 @@ TODO
 
 - maybe just for now use solid colors only
 - improve (make smaller) ui
-- some ui that shows nested parent-child relations
+
 
 
 
