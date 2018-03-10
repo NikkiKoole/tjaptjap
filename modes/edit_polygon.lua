@@ -368,15 +368,19 @@ function mode:update()
       end
       if self.child.children then
          for i=1, #self.child.children do
+
+
             local it = self.child.children[i]
             if Hammer:labelbutton(it.id, 120, 40).released then
                if it.type == "polygon" then
                   Signal.emit("switch-state", "edit-polygon", it)
+                  break
                elseif it.type == "smartline" then
                   Signal.emit("switch-state", "edit-smartline", it)
+                  break
                end
             end
-            local below = self.child.children[i].belowParent
+            local below = it.belowParent
             if Hammer:labelbutton(below and "<" or ">" , 20, 20).released then
                self.child.children[i].belowParent = not self.child.children[i].belowParent
             end

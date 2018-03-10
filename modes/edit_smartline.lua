@@ -141,8 +141,10 @@ function mode:update(dt)
             if Hammer:labelbutton(it.id, 120, 40).released then
                if it.type == "polygon" then
                   Signal.emit("switch-state", "edit-polygon", it)
+                  break
                elseif it.type == "smartline" then
                   Signal.emit("switch-state", "edit-smartline", it)
+                  break
                end
             end
             local below = self.child.children[i].belowParent
