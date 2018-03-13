@@ -257,10 +257,11 @@ end
 
 function mode:update()
    local child = self.child
-   if self.selected_triangle ~= nil then
-      mode:selected_triangle_ui()
-      return
-   end
+
+   -- if self.selected_triangle ~= nil then
+   --    mode:selected_triangle_ui()
+   --    return
+   -- end
 
 
 
@@ -347,6 +348,18 @@ function mode:update()
    end
    Hammer:ret()
 
+   if self.child.parent.id ~= "world" then
+      if Hammer:labelbutton("parent ("..self.child.parent.id..")", 120, 40).released then
+         local it = self.child.parent
+         if it.type == "polygon" then
+            Signal.emit("switch-state", "edit-polygon", it)
+         elseif it.type == "smartline" then
+            Signal.emit("switch-state", "edit-smartline", it)
+         end
+      end
+         Hammer:ret()
+   end
+
    --------- panel that shows direct children and has a generic parent button
    if self.child.children and #self.child.children > 0 then
       if Hammer:labelbutton("children", 120, 40).released then
@@ -354,18 +367,8 @@ function mode:update()
       end
    end
    Hammer:ret();
+
    if self.children_panel_opened then
-      if self.child.parent.id ~= "world" then
-         if Hammer:labelbutton("parent ("..self.child.parent.id..")", 120, 40).released then
-            local it = self.child.parent
-            if it.type == "polygon" then
-               Signal.emit("switch-state", "edit-polygon", it)
-            elseif it.type == "smartline" then
-               Signal.emit("switch-state", "edit-smartline", it)
-            end
-         end
-         Hammer:ret()
-      end
       if self.child.children then
          for i=1, #self.child.children do
 
@@ -429,26 +432,40 @@ function mode:update()
    Hammer:ret()
    Hammer:ret()
 
-    -- palette
-   local set_color = Hammer:labelbutton("color", 80,40)
-   local picked_color = Hammer:rectangle("picked_color", 40,40, {color=self.child.color or {255,255,255}})
+   --  -- palette
+   -- local set_color = Hammer:labelbutton("color", 80,40)
+   -- local picked_color = Hammer:rectangle("picked_color", 40,40, {color=self.child.color or {255,255,255}})
 
-   if set_color.released or picked_color.released then
-      self.color_panel_opened =  not self.color_panel_opened
-   end
-   Hammer.x = Hammer.x + 20
-   if self.color_panel_opened then
-       local colors = {{255,0,0},{0,255,0},{0,0,255}, {0,255,255}, {255,0,255},{255,255,0}}
-       for i=1, #colors do
-          local colorbutton = Hammer:rectangle("color"..tostring(i), 40, 40, {color=colors[i]})
-          if colorbutton.released then
-             self.child.color = colors[i]
-             self.child.color_setting = "triple"
-          end
-       end
-   end
-   Hammer:ret()
-   Hammer:ret()
+   -- if set_color.released or picked_color.released then
+   --    self.color_panel_opened =  not self.color_panel_opened
+   -- end
+   -- Hammer.x = Hammer.x + 20
+   -- if self.color_panel_opened then
+   --    local colors = {
+   --       {241, 255, 240},
+   --       {116, 100, 75},
+   --       {241, 185, 146},
+   --       {190, 122, 95},
+   --       {164, 56, 56},
+   --       {75,158,249},
+   --       {69,218,214},
+   --       {89,241,147},
+   --       {106, 218,69},
+   --       {242,249,12}
+
+   --    }
+
+   --     --local colors = {{255,0,0},{0,255,0},{0,0,255}, {0,255,255}, {255,0,255},{255,255,0}}
+   --     for i=1, #colors do
+   --        local colorbutton = Hammer:rectangle("color"..tostring(i), 40, 40, {color=colors[i]})
+   --        if colorbutton.released then
+   --           self.child.color = colors[i]
+   --           self.child.color_setting = "triple"
+   --        end
+   --     end
+   -- end
+   -- Hammer:ret()
+   -- Hammer:ret()
 
 
 
@@ -541,7 +558,27 @@ function mode:update()
    Hammer:ret()
    Hammer:pos(10,love.graphics.getHeight()- 50)
 
-   local colors = {{255,0,0},{255,0,255},{0,255,0}, {0,0,255},{0,255,255},{255,255,0},{0,0,0},{125,125,125},{255,255,255}}
+   local colors = {
+         {241, 255, 240},
+         {116, 100, 75},
+         {241, 185, 146},
+         {190, 122, 95},
+         {164, 56, 56},
+         {75,158,249},
+         {69,218,214},
+         {89,241,147},
+         {106, 218,69},
+         {242,249,12},
+         {174, 22, 73},
+         {210, 51, 89},
+         {231, 91, 134},
+         {0, 38, 37},
+         {244, 62, 56}
+
+
+   }
+
+   --local colors = {{255,0,0},{255,0,255},{0,255,0}, {0,0,255},{0,255,255},{255,255,0},{0,0,0},{125,125,125},{255,255,255}}
 
    for i=1, #colors do
       local colorbutton = Hammer:rectangle("color_dragger_"..tostring(i), 40, 40, {color=colors[i]})
@@ -588,7 +625,7 @@ function mode:update()
          end
       end
 
-      if not isDirty then
+      --if not isDirty then
          if self.child.children then
             for i=1,#self.child.children do
                local hit = pointInPoly({x=wx,y=wy}, self.child.children[i].triangles)
@@ -598,7 +635,7 @@ function mode:update()
                end
             end
          end
-      end
+      --end
 
       if not isDirty then
          Signal.emit("switch-state", "stage")

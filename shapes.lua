@@ -317,7 +317,7 @@ function makeShape(meta)
    elseif meta.type == "star" then
       result = makeStarPolygon(meta.pos.x, meta.pos.y, meta.data.sides, meta.data.r1, meta.data.r2, meta.data.a1, meta.data.a2)
    elseif meta.type == "polygon" then
-      result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points, meta.data.steps)
+      result = makeCustomPolygon(meta.pos.x, meta.pos.y, meta.data.points, 2 or meta.data.steps)
    elseif meta.type == "smartline" then
       result = makeSmartLine(meta.pos.x, meta.pos.y, meta.data, meta)
    elseif meta.type == "mesh3d" then

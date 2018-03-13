@@ -590,9 +590,9 @@ function get_colored_vertices_for_triangle(triangle, color)
       table.insert(nested, triangle[i + 0])
       table.insert(nested, triangle[i + 1])
       table.insert(nested, colora[1])
-      table.insert(nested, colora[2] - i*20) -- - (i*20))
+      table.insert(nested, math.max(colora[2] - 5*i, 0)) -- - (i*20))
       table.insert(nested, colora[3])
-      table.insert(nested, colora[4] -i*30) -- - (i*30))
+      table.insert(nested, math.max(colora[4] -7*i,0)) -- - (i*30))
 
       table.insert(result, nested)
    end
@@ -624,7 +624,10 @@ function love.update(dt)
    updateSceneGraph(false, world, dt)
 end
 
+
 function love.draw()
+
+
    camera:attach()
 
    local triangle_count = drawSceneGraph(world)
@@ -639,6 +642,12 @@ function love.draw()
       love.graphics.setColor(255,255,155)
       love.graphics.print(love.report or "Please wait...", 150, 150)
    end
+
+
+   -- for i=1, #palette do
+   --    love.graphics.setColor(palette[i][1], palette[i][2], palette[i][3])
+   --    love.graphics.rectangle("fill", i*50, 50, 50,50)
+   -- end
 
 end
 
