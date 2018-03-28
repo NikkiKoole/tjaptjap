@@ -71,14 +71,11 @@ function updateGraph(root, dt)
          local c = root.parent.data.coords
          local x,y = c[#c-1], c[#c]
          local T = a.trans(x+root.pos.x, y+root.pos.y)
-         --root.pos.x = x
-         --root.pos.y = y
 
          local P
          if root.pivot then
             P = a.trans(-root.pivot.x or 0, -root.pivot.y or 0)
          end
-
 
          local R = a.rotate(root.rotation or 0)
          local S = a.scale(root.scale and root.scale.x or 1, root.scale and root.scale.y or 1)
@@ -87,15 +84,11 @@ function updateGraph(root, dt)
          if root.pivot then
             root.local_trans = root.local_trans * P
          end
-
-
       end
 
+
       root.world_trans = root.parent.world_trans * root.local_trans
-
       root.inverse = a.inverse(root.world_trans)
-
-
       root.world_pos.rot = (root.rotation or 0) + root.parent.world_pos.rot
 
 
@@ -261,7 +254,7 @@ function love.load()
          {
             type = "polygon",
             id="slimthing",
-            pos = {x=500, y=0, z=0.3},
+            pos = {x=500, y=0, z=0},
             data = {
                steps=3,
                points={{x=100,y=50}, {x=200,y=0}, {x=200, y=200}, {x=0, y=250}},
@@ -375,6 +368,11 @@ function love.load()
          Gamestate.switch(State, data)
       end
    )
+
+   load_myfile("leg")
+   Signal.emit("switch-state", "interactive-movie", {})
+
+
 end
 
 

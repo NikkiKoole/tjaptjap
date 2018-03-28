@@ -2,7 +2,11 @@ local mode = {}
 local thickness_value = {min=1, max=100, value=50}
 
 function angleToRelative(a)
-   return (math.pi * 2) - (a + math.pi/2)
+   local result = ((math.pi * 2) - (a + math.pi/2))
+   if result > 0 then result = result % (math.pi*2) end
+   if result < 0 then result = result % (-math.pi*2) end
+
+   return result
 end
 
 function angleToWorld(a)
@@ -36,7 +40,7 @@ function calculateAllPropsFromCoordsReverse(coords)
    local world_rotation = 0
    local counter = 1
 
-   print(inspect(coords))
+   --print(inspect(coords))
    for i=#coords,1 ,-2 do
       print(coords[i-1],  coords[i])
    end
@@ -52,10 +56,11 @@ function calculateAllPropsFromCoords(coords)
       local a = utils.angle(  coords[i+2],  coords[i+3], coords[i+0],  coords[i+1])
       local d = utils.distance( coords[i+0],  coords[i+1], coords[i+2],  coords[i+3])
       local wa = angleToWorld(a)
+
       table.insert(result.relative_rotations, angleToRelative(a)  )
       if counter > 1 then
          local diff = (result.relative_rotations[counter] - result.relative_rotations[counter-1] )
-         table.insert(result.world_rotations, diff  )
+         table.insert(result.world_rotations, diff % (math.pi*2)  )
       else
          table.insert(result.world_rotations, result.relative_rotations[1])
       end
@@ -449,7 +454,7 @@ function mode:update(dt)
                   if i > 1 then
                      local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
                      local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
-                     print(((i+1)/2)-2)
+                     --print(((i+1)/2)-2)
                      local startAngle = mode:getNestedRotation(((i+1)/2)-2)
                      child.data.world_rotations[-1+(i+1)/2] = angleToWorld(ap) - startAngle
                      local p2 = calculateAllPropsFromCoords(child.data.coords)

@@ -17,6 +17,50 @@ local mode = {}
 
 local duration_value = {min=0, max=10.0, value=1.0}
 
+function shortestRadianArray(from, to)
+   --print(inspect(from), inspect(to))
+   local result = {}
+
+   --assert(#from == #to)
+
+   --(math.pi/180)
+   print()
+   for i=1, #from do
+
+      local diff = from[i] - to[i]
+      local shouldflip = false
+      if diff > math.pi or diff < -math.pi then
+         shouldflip = true
+      else
+      end
+      print(i,shouldflip, from[i], to[i])
+
+      --print("diff: ", from[i] - to[i])
+      --print("modulos: ", from[i] % (math.pi*2), to[i] % (math.pi*2))
+
+
+
+
+      result[i] = from[i]
+      if shouldflip then
+         if to[i] < math.pi then
+            result[i] = from[i] - (2*math.pi)
+         else
+            result[i] = from[i] + (2*math.pi)
+         end
+
+         --result[i] = from[i]
+      end
+
+      -- check if moving CCW or CW gives the shortest difference.
+      --print(to[i], to[i] % math.pi)
+
+   end
+
+   return result
+end
+
+
 function saveFrame()
    for i,child in pairs(world.children) do
       child.animationStartFrame = {x=child.pos.x, y=child.pos.y}
@@ -263,7 +307,10 @@ function mode:update(dt)
          if frameButton.released then
             local it = self.selectedItems[1].item
 
-            if self.selectedItems[1].item.tween then self.selectedItems[1].item.tween:stop() end
+            if self.selectedItems[1].item.tween then
+               print(inspect(self.selectedItems[1].item.tween))
+               self.selectedItems[1].item.tween:stop()
+            end
 
             if it.type == "polygon" then
                for j=1, #it.data.points do
@@ -305,6 +352,17 @@ function mode:update(dt)
                elseif style == "world" then
                   local f = self.frameDictionary[i].world_rotations
                   local c =  self.selectedItems[1].item.data.world_rotations
+
+                  --print(inspect(c), "-->", inspect(f))
+
+                  --math.pi/180
+
+                  local patched = shortestRadianArray(c, f)
+                  self.selectedItems[1].item.data.world_rotations = patched
+                  c = self.selectedItems[1].item.data.world_rotations
+
+
+
 
                   self.selectedItems[1].item.tween = flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
                   :onupdate(
@@ -439,7 +497,7 @@ function mode:update(dt)
                         local ap = utils.angle( wx, wy, child.data.coords[i-2], child.data.coords[i+1-2])
                         local dp = utils.distance(child.data.coords[i-2], child.data.coords[i+1-2], wx, wy)
                         local startAngle = getNestedRotation(child, ((i+1)/2)-2)
-                        print(inspect(child.data.world_rotations), -1+(i+1)/2)
+                        --print(inspect(child.data.world_rotations), -1+(i+1)/2)
                         child.data.world_rotations[-1+(i+1)/2] = angleToWorld(ap) - startAngle
                         local p2 = calculateAllPropsFromCoords(child.data.coords)
                         child.data.lengths = p2.lengths

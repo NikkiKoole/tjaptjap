@@ -16,6 +16,24 @@ function show_scene_graph()
    end
 end
 
+function load_myfile(name)
+
+   local data = love.filesystem.newFileData(name..".hat.txt")
+   world = loadstring("return "..data:getString())()
+   --world.camera = nil
+
+   if (world.camera) then
+      camera = Camera(world.camera.x , world.camera.y)
+      camera:zoom(world.camera.scale)
+   else
+      camera = Camera(0,0)
+   end
+
+
+   initWorld(world)
+   updateSceneGraph(true, world, 0)
+end
+
 
 function mode:update(dt)
    function dragger(ui)
@@ -112,21 +130,7 @@ function mode:update(dt)
          local button = Hammer:labelbutton(name, 200,40)
 
          if button.released then
-            local data = love.filesystem.newFileData(name..".hat.txt")
-            world = loadstring("return "..data:getString())()
-            --world.camera = nil
-
-               if (world.camera) then
-                  camera = Camera(world.camera.x , world.camera.y)
-                  camera:zoom(world.camera.scale)
-               else
-                  camera = Camera(0,0)
-               end
-
-
-            initWorld(world)
-            updateSceneGraph(true, world, 0)
-
+            load_myfile(name)
             self.loadable_files_panel = false
          end
       end

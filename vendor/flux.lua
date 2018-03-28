@@ -175,6 +175,8 @@ function flux:update(deltatime)
 end
 
 
+
+
 function flux:clear(obj, vars)
   for t in pairs(self[obj]) do
     if t.inited then
@@ -182,6 +184,7 @@ function flux:clear(obj, vars)
     end
   end
 end
+
 
 
 function flux:add(tween)
