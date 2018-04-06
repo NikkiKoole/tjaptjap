@@ -18,15 +18,10 @@ local mode = {}
 local duration_value = {min=0, max=10.0, value=1.0}
 
 function shortestRadianArray(from, to)
-   --print(inspect(from), inspect(to))
    local result = {}
-
-   --assert(#from == #to)
-
-   --(math.pi/180)
    print()
-   for i=1, #from do
 
+   for i=1, #from do
       local diff = from[i] - to[i]
       local shouldflip = false
       if diff > math.pi or diff < -math.pi then
@@ -34,13 +29,6 @@ function shortestRadianArray(from, to)
       else
       end
       print(i,shouldflip, from[i], to[i])
-
-      --print("diff: ", from[i] - to[i])
-      --print("modulos: ", from[i] % (math.pi*2), to[i] % (math.pi*2))
-
-
-
-
       result[i] = from[i]
       if shouldflip then
          if to[i] < math.pi then
@@ -48,13 +36,7 @@ function shortestRadianArray(from, to)
          else
             result[i] = from[i] + (2*math.pi)
          end
-
-         --result[i] = from[i]
       end
-
-      -- check if moving CCW or CW gives the shortest difference.
-      --print(to[i], to[i] % math.pi)
-
    end
 
    return result
@@ -116,11 +98,9 @@ function mode:enter(from, data)
 
    self.frameDictionary = {}
    self.tweenOptionIndex = 1
-   self.lineStyles = {"coords", "world", "relative"}
+   self.lineStyles = { "world", "coords", "relative"}
    self.lineStyleIndex = 1
 end
-
-
 
 function getNestedRotation(child, index)
    local result = 0
@@ -131,8 +111,6 @@ function getNestedRotation(child, index)
    end
    return result
 end
-
-
 
 
 function secondsToClock(seconds)
@@ -247,40 +225,26 @@ function mode:update(dt)
 
 
    if #self.selectedItems == 1 then
-      --if self.selectedItems[1].item.type == "polygon" then
-
       local save_data_points_for_tweening = Hammer:labelbutton("save frame", 130, 40)
       if save_data_points_for_tweening.released then
          if #self.selectedItems == 1 then
-
             for i=1, #self.selectedItems do
-
                local it = self.selectedItems[i].item
-
                if it.type == "polygon" then
                   table.insert(self.frameDictionary, table_copy(it.data.points))
                elseif it.type == "smartline" then
                   table.insert(self.frameDictionary, table_copy(it.data))
-
                else
-                  print("unknwn type for saving")
+                  print("unknown type for saving")
                end
-
-
             end
          else
             print("not yet handling multiple in selection, only the one.")
          end
       end
-
-
-
    end
 
-
-
    Hammer:ret()
-
 
    if #self.selectedItems == 1 then
       if self.selectedItems[1].item.type == "smartline" then
@@ -291,12 +255,8 @@ function mode:update(dt)
                self.lineStyleIndex = 1
             end
          end
-
-
          Hammer:ret()
-
       end
-
 
       for i=1, #self.frameDictionary do
          local frameButton = Hammer:labelbutton(self.selectedItems[1].item.id.."  #"..i, 130,40)
@@ -308,7 +268,6 @@ function mode:update(dt)
             local it = self.selectedItems[1].item
 
             if self.selectedItems[1].item.tween then
-               print(inspect(self.selectedItems[1].item.tween))
                self.selectedItems[1].item.tween:stop()
             end
 
@@ -317,24 +276,24 @@ function mode:update(dt)
                   local c =  self.selectedItems[1].item.data.points[j]
                   local f = self.frameDictionary[i][j]
                   if (f.x and f.y) then
-                     self.selectedItems[1].item.tween = flux.to(c, duration_value.value or 1, {x=f.x, y=f.y}):ease(tween_options[self.tweenOptionIndex])
-                        :onupdate(
-                           function()
-                              self.selectedItems[1].item.data.points[j] = c
-                              self.selectedItems[1].item.dirty = true
-                           end
-                                 )
+                     self.selectedItems[1].item.tween = flux.to(c,duration_value.value or 1, {x=f.x, y=f.y})
+                     :ease(tween_options[self.tweenOptionIndex])
+                     :onupdate(
+                        function()
+                           self.selectedItems[1].item.data.points[j] = c
+                           self.selectedItems[1].item.dirty = true
+                        end
+                              )
                   elseif (f.cx and f.cy) then
-                     self.selectedItems[1].item.tween =flux.to(c, duration_value.value or 1, {cx=f.cx, cy=f.cy}):ease(tween_options[self.tweenOptionIndex])
-                        :onupdate(
-                           function()
-                              self.selectedItems[1].item.data.points[j] = c
-                              self.selectedItems[1].item.dirty = true
-                           end
-                                 )
+                     self.selectedItems[1].item.tween =flux.to(c, duration_value.value or 1, {cx=f.cx, cy=f.cy})
+                     :ease(tween_options[self.tweenOptionIndex])
+                     :onupdate(
+                        function()
+                           self.selectedItems[1].item.data.points[j] = c
+                           self.selectedItems[1].item.dirty = true
+                        end
+                              )
                   end
-
-
                end
             elseif it.type == "smartline" then
                local style = self.lineStyles[self.lineStyleIndex]
@@ -342,7 +301,8 @@ function mode:update(dt)
                   local f = self.frameDictionary[i].coords
                   local c =  self.selectedItems[1].item.data.coords
 
-                  self.selectedItems[1].item.tween = flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
+                  self.selectedItems[1].item.tween = flux.to(c, duration_value.value or 1, f)
+                  :ease(tween_options[self.tweenOptionIndex])
                   :onupdate(
                      function()
                         self.selectedItems[1].item.data.coords = c
@@ -353,18 +313,13 @@ function mode:update(dt)
                   local f = self.frameDictionary[i].world_rotations
                   local c =  self.selectedItems[1].item.data.world_rotations
 
-                  --print(inspect(c), "-->", inspect(f))
-
-                  --math.pi/180
-
                   local patched = shortestRadianArray(c, f)
                   self.selectedItems[1].item.data.world_rotations = patched
                   c = self.selectedItems[1].item.data.world_rotations
 
 
-
-
-                  self.selectedItems[1].item.tween = flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
+                  self.selectedItems[1].item.tween = flux.to(c, duration_value.value or 1, f)
+                  :ease(tween_options[self.tweenOptionIndex])
                   :onupdate(
                      function()
                         self.selectedItems[1].item.data.world_rotations = c
@@ -378,7 +333,8 @@ function mode:update(dt)
                   local f = self.frameDictionary[i].relative_rotations
                   local c =  self.selectedItems[1].item.data.relative_rotations
 
-                  self.selectedItems[1].item.tween = flux.to(c, duration_value.value or 1, f):ease(tween_options[self.tweenOptionIndex])
+                  self.selectedItems[1].item.tween = flux.to(c, duration_value.value or 1, f)
+                  :ease(tween_options[self.tweenOptionIndex])
                   :onupdate(
                      function()
                         self.selectedItems[1].item.data.relative_rotations = c
@@ -389,31 +345,15 @@ function mode:update(dt)
                            )
 
                end
-
-
             else
+
             end
-
-
-
          end
       end
-
    end
 
    Hammer:ret()
 
-
-   -- for i=#self.selectedItems, 1,-1 do
-   --    local it = self.selectedItems[i]
-   --    local b = Hammer:labelbutton(tostring(it.item.id), 130,40)
-   --    if b.released then
-   --       local foundIndex = getIndexOfItem(it.item, self.selectedItems)
-   --       if foundIndex > 0 then
-   --          table.remove(self.selectedItems, foundIndex)
-   --       end
-   --    end
-   -- end
    for j=1, #self.selectedItems do
       local child = self.selectedItems[j].item
 
@@ -462,7 +402,7 @@ function mode:update(dt)
                                              {x=cx2-15, y=cy2-15, color=color})
 
 
-            ------ DUPLICATION FROM edit_smartline
+------ DUPLICATION FROM edit_smartline
             if button.dragging then
                local p = getWithID(Hammer.pointers.moved, button.pointerID)
                local moved = Hammer.pointers.moved[p]
@@ -513,7 +453,7 @@ function mode:update(dt)
                end
             end
 
-            ---------------------------------------------- END DUPLICATION
+----END DUPLICATION
          end
 
       else

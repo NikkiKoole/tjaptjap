@@ -171,6 +171,11 @@ function mode:update(dt)
 
 
    Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
+   local copy_to_clip = Hammer:labelbutton("copy", 120,20)
+   if copy_to_clip.released then
+      Signal.emit("copy-to-clipboard", self.child)
+   end
+
    Hammer:ret()
 
    local add_shape = Hammer:labelbutton("child line", 120,40)
@@ -340,8 +345,7 @@ function mode:update(dt)
    Hammer:ret()
 
    Hammer:pos(10,love.graphics.getHeight()- 50)
-
-   --local colors = {{255,0,0},{255,0,255},{0,255,0}, {0,0,255},{0,255,255},{255,255,0}}
+   -- TODO make this palette global
       local colors = {
          {241, 255, 240},
          {116, 100, 75},
@@ -352,9 +356,14 @@ function mode:update(dt)
          {69,218,214},
          {89,241,147},
          {106, 218,69},
-         {242,249,12}
+         {242,249,12},
+         {174, 22, 73},
+         {210, 51, 89},
+         {231, 91, 134},
+         {0, 38, 37},
+         {244, 62, 56}
+   }
 
-      }
 
    for i=1, #colors do
       local colorbutton = Hammer:rectangle("color_dragger_"..tostring(i), 40, 40, {color=colors[i]})

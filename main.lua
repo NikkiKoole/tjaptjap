@@ -379,7 +379,7 @@ end
 
 
 function serializeRecursive(root)
-   local blacklist = {"dirty", "local_trans", "world_trans", "world_pos", "parent", "inverse", "triangles", "children"}
+   local blacklist = {"dirty", "tween", "local_trans", "world_trans", "world_pos", "parent", "inverse", "triangles", "children"}
 
 
    local result = {}

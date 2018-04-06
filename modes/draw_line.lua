@@ -10,6 +10,12 @@ function TableConcat(t1,t2)
 end
 
 
+function mode:leave()
+   print("Leaving draw_line. Validate the lines drawn.")
+
+end
+
+
 function mode:enter(from,data)
    self.coords = {}
    self.thicknesses = {}

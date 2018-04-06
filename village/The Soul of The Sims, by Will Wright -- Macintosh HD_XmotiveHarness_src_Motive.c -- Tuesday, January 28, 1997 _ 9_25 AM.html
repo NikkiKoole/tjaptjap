@@ -1,0 +1,123 @@
+
+<!-- saved from url=(0043)http://www.donhopkins.com/home/images/Sims/ -->
+<html><script>(function main() {
+    // Create enabled event
+    function fireEnabledEvent() {
+        // If gli exists, then we are already present and shouldn't do anything
+        if (!window.gli) {
+            setTimeout(function () {
+                var enabledEvent = document.createEvent("Event");
+                enabledEvent.initEvent("WebGLEnabledEvent", true, true);
+                document.dispatchEvent(enabledEvent);
+            }, 0);
+        } else {
+            //console.log("WebGL Inspector already embedded on the page - disabling extension");
+        }
+    };
+
+    // Grab the path root from the extension
+    document.addEventListener("WebGLInspectorReadyEvent", function (e) {
+        var pathElement = document.getElementById("__webglpathroot");
+        if (window["gliloader"]) {
+            gliloader.pathRoot = pathElement.innerText;
+        } else {
+            // TODO: more?
+            window.gliCssUrl = pathElement.innerText + "gli.all.css";
+        }
+    }, false);
+
+    // Rewrite getContext to snoop for webgl
+    var originalGetContext = HTMLCanvasElement.prototype.getContext;
+    if (!HTMLCanvasElement.prototype.getContextRaw) {
+        HTMLCanvasElement.prototype.getContextRaw = originalGetContext;
+    }
+    HTMLCanvasElement.prototype.getContext = function () {
+        var ignoreCanvas = this.internalInspectorSurface;
+        if (ignoreCanvas) {
+            return originalGetContext.apply(this, arguments);
+        }
+
+        var result = originalGetContext.apply(this, arguments);
+        if (result == null) {
+            return null;
+        }
+
+        var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
+        var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
+        if (requestingWebGL) {
+            // Page is requesting a WebGL context!
+            fireEnabledEvent(this);
+
+            // If we are injected, inspect this context
+            if (window.gli) {
+                if (gli.host.inspectContext) {
+                    // TODO: pull options from extension
+                    result = gli.host.inspectContext(this, result);
+                    // NOTE: execute in a timeout so that if the dom is not yet
+                    // loaded this won't error out.
+                    window.setTimeout(function() {
+                        var hostUI = new gli.host.HostUI(result);
+                        result.hostUI = hostUI; // just so we can access it later for debugging
+                    }, 0);
+                }
+            }
+        }
+
+        return result;
+    };
+})();</script><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <title>
+      The Soul of The Sims, by Will Wright -- 
+      Macintosh HD:XmotiveHarness:src/Motive.c --
+      Tuesday, January 28, 1997 / 9:25 AM
+    </title>
+  </head>
+  <body cz-shortcut-listen="true">
+    <h1>
+      The Soul of The Sims, by Will Wright
+      <br>
+      Macintosh HD:XmotiveHarness:src/Motive.c
+      <br>
+      Tuesday, January 28, 1997 / 9:25 AM
+    </h1>
+    <p>
+      This is the prototype for the soul of The Sims, which Will Wright
+      wrote on January 23, 1997.
+    </p>
+    <p>
+      I had just started working at the Maxis Core Technology Group on
+      "Project X" aka "Dollhouse", and Will Wright brought this code
+      in one morning, to demonstrate his design for the motives,
+      feedback loop and failure conditions of the simulated people.
+      While going through old papers, I ran across this print-out that
+      I had saved, so I scanned it and cleaned the images up, and got
+      permission from Will to publish it.
+    </p>
+    <p>
+      This code is a interesting example of game design, programming
+      and prototyping techniques. The Sims code has certainly changed
+      a lot since Will wrote this original prototype code. For
+      example, there is no longer any "stress" motive.  And the game
+      doesn't store motives in global variables, of course. 
+    </p>
+    <p>
+      My hope is that this code will give you a glimpse of how Will
+      Wright designs games, and what was going on in his head at the
+      time!
+    </p>
+    <p>
+      <a href="http://www.donhopkins.com/">-Don Hopkins</a>
+    </p>
+    <img src="./The Soul of The Sims, by Will Wright -- Macintosh HD_XmotiveHarness_src_Motive.c -- Tuesday, January 28, 1997 _ 9_25 AM_files/MotivePage1.png" border="0">
+    <br>
+    <img src="./The Soul of The Sims, by Will Wright -- Macintosh HD_XmotiveHarness_src_Motive.c -- Tuesday, January 28, 1997 _ 9_25 AM_files/MotivePage2.png" border="0">
+    <br>
+    <img src="./The Soul of The Sims, by Will Wright -- Macintosh HD_XmotiveHarness_src_Motive.c -- Tuesday, January 28, 1997 _ 9_25 AM_files/MotivePage3.png" border="0">
+    <br>
+    <img src="./The Soul of The Sims, by Will Wright -- Macintosh HD_XmotiveHarness_src_Motive.c -- Tuesday, January 28, 1997 _ 9_25 AM_files/MotivePage4.png" border="0">
+    <br>
+    <img src="./The Soul of The Sims, by Will Wright -- Macintosh HD_XmotiveHarness_src_Motive.c -- Tuesday, January 28, 1997 _ 9_25 AM_files/MotivePage5.png" border="0">
+    <br>
+  
+
+</body></html>
