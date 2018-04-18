@@ -253,6 +253,32 @@ function mode:selected_triangle_ui()
    end
 end
 
+function getBBoxForTriangles(triangles)
+   local minX = nil
+   local minY = nil
+   local maxX = nil
+   local maxY = nil
+
+   for ti=1, #triangles do
+      local tri = triangles[ti]
+      for i=1, 6, 2 do
+         if minX == nil or minX > tri[i] then
+            minX = tri[i]
+         end
+         if maxX == nil or maxX < tri[i] then
+            maxX = tri[i]
+         end
+         --
+         if minY == nil or minY > tri[i+1] then
+            minY = tri[i+1]
+         end
+         if maxY == nil or maxY < tri[i+1] then
+            maxY = tri[i+1]
+         end
+      end
+   end
+   return {minX=minX, minY=minY, maxX=maxX, maxY=maxY}
+end
 
 
 function mode:update()
@@ -393,6 +419,12 @@ function mode:update()
       end
    end
    ---------
+   local bbox = getBBoxForTriangles(self.child.triangles)
+   Hammer:label("bbox", "W, H: "..math.floor(bbox.maxX - bbox.minX)..", "..math.floor(bbox.maxY - bbox.minY), 140, 20)
+   Hammer:ret()
+
+--   Hammer:label("bboxw", math.floor(bbox.maxY - bbox.minY).."px H", 100, 20)
+
    Hammer:label("triscount", "#tris:"..#(self.child.triangles), 100, 20)
 
    local copy_to_clip = Hammer:labelbutton("copy", 120,20)

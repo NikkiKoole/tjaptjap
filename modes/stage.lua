@@ -118,7 +118,7 @@ function mode:update(dt)
 
    Hammer:pos(10, 100)
 
-   show_scene_graph()
+   --show_scene_graph()
 
 
    if (self.loadable_files_panel ~= false) then

@@ -370,7 +370,7 @@ function love.load()
    )
 
    load_myfile("leg")
-   Signal.emit("switch-state", "interactive-movie", {})
+   --Signal.emit("switch-state", "interactive-movie", {})
 
 
 end
